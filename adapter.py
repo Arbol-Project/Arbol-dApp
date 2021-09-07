@@ -1,8 +1,5 @@
-#Adapter that clones dClimate client functionality for grid cell history retrieval
-
-# from bridge import Bridge
-from program_catalog_stub.fake_program_catalog.programs.cambodia_rainfall import Contract, CambodiaRainfall
-from tools import CONFIGS
+#Adapter that clones dClimate client functionality for cambodia rainfall contract interfacing
+import program_catalog_stub.fake_program_catalog.programs.cambodia_rainfall as catalog
 
 class Adapter:
 
@@ -11,9 +8,6 @@ class Adapter:
         self.request_data = input.get('data')
         if self.validate_request_data():
             self.execute_request()
-            # self.bridge = Bridge()
-            # self.set_params()
-            # self.create_request()
         else:
             self.result_error('No data provided')
 
@@ -25,47 +19,26 @@ class Adapter:
         return True
 
     def execute_request(self):
+        program_name = self.request_data.get('program')
+        program = getattr(catalog, [program_name])
+        task_name = self.request_data.get('task')
+        task_method = getattr(program, task_name)
+        loader = getattr(program, 'loader')
+        task_params = self.request_data.get('task_params')
+        loader_params = self.request_data.get('loader_params')
         try:
-            task = self.request_data.get('task')
-            getter = CONFIGS[task]['getter']
-            data = getter(self.request_data)
-            result = do_something(data)
-            self.result_success(data)
+            data = loader(**loader_params)
+            self.result = task_method(data, **task_params)
+            self.result_success(data, program_name, task_name)
         except Exception as e:
             self.result_error(e)
-        finally:
-            self.bridge.close()
 
-    # def set_params(self):
-    #     for param in self.from_params:
-    #         self.from_param = self.request_data.get(param)
-    #         if self.from_param is not None:
-    #             break
-    #     for param in self.to_params:
-    #         self.to_param = self.request_data.get(param)
-    #         if self.to_param is not None:
-    #             break
-    #
-    # def create_request(self):
-    #     try:
-    #         params = {
-    #             'fsym': self.from_param,
-    #             'tsyms': self.to_param,
-    #         }
-    #         response = self.bridge.request(self.base_url, params)
-    #         data = response.json()
-    #         self.result = data[self.to_param]
-    #         data['result'] = self.result
-    #         self.result_success(data)
-    #     except Exception as e:
-    #         self.result_error(e)
-    #     finally:
-    #         self.bridge.close()
-
-    def result_success(self, data):
+    def result_success(self, data, program, task):
         self.result = {
             'jobRunID': self.id,
             'data': data,
+            'program': program,
+            'task': task,
             'result': self.result,
             'statusCode': 200,
         }
@@ -77,3 +50,5 @@ class Adapter:
             'error': f'There was an error: {error}',
             'statusCode': 500,
         }
+
+#curl -X POST -H "content-type:application/json" "http://0.0.0.0:8080/" --data '{ "id": 0, "data": {"program": "CambodiaRainfall", "task": "serve_contract", loader_params": {"dataset": "prismc-precip-daily", "lat": 100.0, "lon": -95.0}, "task_params": {"start": "2021-08-01", "end": "2021-08-31", "strike": 0.5, "exhaust": 0.25, "limit": 1000, "option_type": "PUT"} } }'

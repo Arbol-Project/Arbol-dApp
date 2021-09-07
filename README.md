@@ -1,2 +1,2 @@
 # dClimate-CL-EA
-Chainlink External Adapter for dWeather data retrieval and smart contract evaluation
+Chainlink External Adapter for dClimate data retrieval and smart contract evaluation

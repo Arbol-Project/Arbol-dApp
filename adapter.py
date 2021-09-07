@@ -1,5 +1,4 @@
-#Adapter that clones dClimate client functionality for cambodia rainfall contract interfacing
-import program_catalog_stub.fake_program_catalog.programs.cambodia_rainfall as catalog
+import program_catalog_stub.fake_program_catalog.programs as catalog
 
 class Adapter:
 
@@ -20,23 +19,20 @@ class Adapter:
 
     def execute_request(self):
         program_name = self.request_data.get('program')
-        program = getattr(catalog, [program_name])
         task_name = self.request_data.get('task')
-        task_method = getattr(program, task_name)
-        loader = getattr(program, 'loader')
-        task_params = self.request_data.get('task_params')
-        loader_params = self.request_data.get('loader_params')
+        params = self.request_data.get('params')
         try:
-            data = loader(**loader_params)
-            self.result = task_method(data, **task_params)
-            self.result_success(data, program_name, task_name)
+            # get class pointer from program file in catalog
+            program = getattr(catalog, [program_name]).get_program()
+            task = getattr(program, task_name)
+            self.result = task(**params)
+            self.result_success(program_name, task_name)
         except Exception as e:
             self.result_error(e)
 
     def result_success(self, data, program, task):
         self.result = {
             'jobRunID': self.id,
-            'data': data,
             'program': program,
             'task': task,
             'result': self.result,
@@ -51,4 +47,32 @@ class Adapter:
             'statusCode': 500,
         }
 
-#curl -X POST -H "content-type:application/json" "http://0.0.0.0:8080/" --data '{ "id": 0, "data": {"program": "CambodiaRainfall", "task": "serve_contract", loader_params": {"dataset": "prismc-precip-daily", "lat": 100.0, "lon": -95.0}, "task_params": {"start": "2021-08-01", "end": "2021-08-31", "strike": 0.5, "exhaust": 0.25, "limit": 1000, "option_type": "PUT"} } }'
+# example data format for serve_contract request
+# {
+#     "id": 0,
+#     "data":
+#     {
+#         "program": "cambodia_rainfall",                   #this is a file name
+#         "task": "serve_contract",                         #this is a method name
+#         "params":
+#         {
+#             "dataset": "chirpsc_final_05-daily",
+#             "lat": 100.0,
+#             "lon": -95.0,
+#             "optional_params":                            #optional parameters for getting data from IPFS
+#             {
+#                 "also_return_snapped_coordinates": True
+#             },
+#             "task_params":                                #additional serve_contract parameters
+#             {
+#                 "start": "2021-08-01",
+#                 "end": "2021-08-31",
+#                 "strike": 0.5,
+#                 "exhaust": 0.25,
+#                 "limit": 1000,
+#                 "option_type": "PUT"
+#             }
+#         }
+#     }
+# }
+#curl -X POST -H "content-type:application/json" "http://0.0.0.0:8080/" --data '{ "id": 0, "data": {"program": "cambodia_rainfall", "task": "serve_contract", "params": {"dataset": "chirpsc_final_05-daily", "lat": 100.0, "lon": -95.0, "optional_params": {"also_return_snapped_coordinates": True}, "task_params": {"start": "2021-08-01", "end": "2021-08-31", "strike": 0.5, "exhaust": 0.25, "limit": 1000, "option_type": "PUT"} } } }'

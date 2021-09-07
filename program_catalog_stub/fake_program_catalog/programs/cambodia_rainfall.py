@@ -1,4 +1,5 @@
 import pandas as pd
+from dweather_loaders import GridcellLoader
 
 class Contract:
     ''' Stub contract class '''
@@ -16,14 +17,10 @@ class CambodiaRainfall:
     ''' Stub Rainfall program '''
 
     @classmethod
-    def loader(cls):
-        pass
-
-    @classmethod
-    def serve_contract(cls, start, end, lat, lon, strike, exhaust, limit, option_type):
+    def serve_contract(cls, lat, lon, dataset, optional_params, task_params):
+        loader = GridcellLoader(lat=lat, lon=lon, dataset=dataset, **optional_params)
         # these parameters have no effect on the fake contract class
-        return Contract(start=start, end=end, lat=lat, lon=lon, strike=strike,
-            exhaust=exhaust, limit=limit, opt_type=option_type)
+        return Contract(loader=loader, **task_params):
 
     @classmethod
     def serve_contract_from_sro(cls, sro):
@@ -41,3 +38,7 @@ class CambodiaRainfall:
             "contract_year": payout_idx,
             "payout": payout_val
         }
+
+
+def get_program():
+    return CambodiaRainfall

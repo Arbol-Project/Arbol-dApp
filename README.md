@@ -3,6 +3,7 @@ Chainlink External Adapter for dClimate data retrieval and smart contract evalua
 To test the adapter locally, clone the repo and install the dependencies:
 ```
 git clone https://github.com/dmp267/dClimate-CL-EA.git
+cd dClimate-CL-EA
 pipenv install
 ```
 then run the adapter and hit the local endpoint with a CURL request:

@@ -28,10 +28,12 @@ class CambodiaRainfall:
         return {'status': 'contract served', 'sro': sro}
 
     @classmethod
-    def serve_evaluation(cls, contract):
+    def serve_evaluation(cls, **kwargs):#, contract):
+        # parameters modified for testing while stubbed
         ''' For most programs, this does involved breakdowns of the contract index values.
         For this program, just return the evaluation year and payout '''
+        contract = Contract()
         series = contract.evaluate()
         payout_idx = series.index[-1]
         payout_val = series.iloc[-1]
-        return {"contract_year": payout_idx, "payout": payout_val}
+        return {"contract_year": int(payout_idx), "payout": payout_val}

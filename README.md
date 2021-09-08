@@ -9,6 +9,7 @@ pipenv install
 Then run the adapter and send a CURL request to the local endpoint:
 ```
 pipenv run python3 app.py
+# in another terminal
 curl -X POST -H "content-type:application/json" "http://0.0.0.0:8080/" --data '{ "id": 1, "data": { "program": "cambodia_rainfall", "task": "serve_evaluation", "params": { "these dont do anything": 0, "these dont do anything_": 1, "these dont do anything__": 2 } } }'
 ```
 Example structure for a ```serve_contract``` request:

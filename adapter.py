@@ -1,4 +1,7 @@
-import program_catalog_stub.fake_program_catalog.programs as catalog
+import sys, os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'dClimate/dweather_python_client'))
+
+from program_catalog_stub.fake_program_catalog.programs.directory import get_program
 
 class Adapter:
 
@@ -23,14 +26,14 @@ class Adapter:
         params = self.request_data.get('params')
         try:
             # get class pointer from program file in catalog
-            program = getattr(catalog, [program_name]).get_program()
+            program = get_program(program_name)
             task = getattr(program, task_name)
             self.result = task(**params)
             self.result_success(program_name, task_name)
         except Exception as e:
             self.result_error(e)
 
-    def result_success(self, data, program, task):
+    def result_success(self, program, task):
         self.result = {
             'jobRunID': self.id,
             'program': program,
@@ -75,4 +78,6 @@ class Adapter:
 #         }
 #     }
 # }
-# curl -X POST -H "content-type:application/json" "http://0.0.0.0:8080/" --data '{ "id": 0, "data": {"program": "cambodia_rainfall", "task": "serve_contract", "params": {"dataset": "chirpsc_final_05-daily", "lat": 100.0, "lon": -95.0, "optional_params": {"also_return_snapped_coordinates": True}, "task_params": {"start": "2021-08-01", "end": "2021-08-31", "strike": 0.5, "exhaust": 0.25, "limit": 1000, "option_type": "PUT"} } } }'
+# pipenv install
+# pipenv run python app.py
+# curl -X POST -H "content-type:application/json" "http://0.0.0.0:8080/" --data '{ "id": 0, "data": {"program": "cambodia_rainfall", "task": "serve_contract", "params": {"dataset": "chirpsc_final_05-daily", "lat": 100.0, "lon": -95.0, "optional_params": {"also_return_snapped_coordinates": "True"}, "task_params": {"start": "2021-08-01", "end": "2021-08-31", "strike": 0.5, "exhaust": 0.25, "limit": 1000, "option_type": "PUT"} } } }'

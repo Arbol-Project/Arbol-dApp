@@ -1,7 +1,7 @@
 class Serializable:
     pass
 
-class Serializable:
+class RiskContext:
     pass
 
 def box():

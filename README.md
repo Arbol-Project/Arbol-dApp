@@ -14,7 +14,6 @@ curl -X POST -H "content-type:application/json" "http://0.0.0.0:8080/" --data '{
 ```
 Example structure for a ```serve_contract``` request:
 ```
-example data format for serve_contract request
 {
     "id": 0,
     "data":

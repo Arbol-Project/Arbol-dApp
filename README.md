@@ -6,7 +6,7 @@ git clone https://github.com/dmp267/dClimate-CL-EA.git
 cd dClimate-CL-EA
 pipenv install
 ```
-then run the adapter and hit the local endpoint with a CURL request:
+Then run the adapter and hit the local endpoint with a CURL request:
 ```
 pipenv run python3 app.py
 curl -X POST -H "content-type:application/json" "http://0.0.0.0:8080/" --data '{ "id": 1, "data": { "program": "cambodia_rainfall", "task": "serve_evaluation", "params": { "these dont do anything": 0, "these dont do anything_": 1, "these dont do anything__": 2 } } }'

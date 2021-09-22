@@ -22,14 +22,14 @@ class Adapter:
 
     def execute_request(self):
         program_name = self.request_data.get('program')
-        task_name = self.request_data.get('task')
+        endpoint_name = self.request_data.get('endpoint')
         params = self.request_data.get('params')
         try:
             # get class pointer from program file in catalog
-            program = get_program(program_name)
-            task = getattr(program, task_name)
-            self.result = task(**params)
-            self.result_success(program_name, task_name)
+            program = get_program(program_name)             # e.g. 'cambodia_rainfall'
+            serve_endpoint = getattr(program, endpoint_name)      # e.g. 'serve_evaluation'
+            self.result = serve_endpoint(**params)
+            self.result_success(program_name, endpoint_name)
         except Exception as e:
             self.result_error(e)
 

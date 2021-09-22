@@ -27,4 +27,4 @@ Werkzeug = "==1.0.1"
 [dev-packages]
 
 [requires]
-python_version = "3.7"
+python_version = "*"

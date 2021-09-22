@@ -1,5 +1,12 @@
 import pandas as pd
-from program_catalog_stub.fake_program_catalog.programs.program_utils.dweather_loaders import GridcellLoader
+
+from program_catalog_stub.fake_program_catalog.program_utils.loader import CambodiaRainfallLoader
+
+
+def risk_eval(history, **contract_params):
+    ''' placeholder component '''
+    return '$$$', 'XXX'
+
 
 class Contract:
     ''' Stub contract class '''
@@ -13,23 +20,27 @@ class Contract:
         return ser
 
 
-class CambodiaRainfall:
+class Program:
+    ''' Stub Program Base Class '''
+    @classmethod
+    def serve_contract(cls, **kwargs):
+        pass
+
+    @classmethod
+    def serve_evaluation(cls, **kwargs):
+        pass
+
+
+class CambodiaRainfall(Program):
     ''' Stub Rainfall program '''
+    @classmethod
+    def serve_contract(cls, locations, dataset, contract_params):
+        history = CambodiaRainfallLoader(locations=locations, dataset_name=dataset)
+        payout, index = risk_eval(history, **contract_params)
+        return {'status': 'contract served', 'dataset': dataset, 'params': contract_params, 'payout': payout, 'index': index}
 
     @classmethod
-    def serve_contract(cls, lat, lon, dataset, optional_params, task_params):
-        loader = GridcellLoader(lat=lat, lon=lon, dataset_name=dataset, optional_params=optional_params)
-        # these parameters have no effect on the fake contract class
-        return {'status': 'contract served', 'lat': lat, 'lon': lon, 'dataset': dataset, 'params': task_params}
-
-    @classmethod
-    def serve_contract_from_sro(cls, sro):
-        # for stub just return contract
-        return {'status': 'contract served', 'sro': sro}
-
-    @classmethod
-    def serve_evaluation(cls, **kwargs):#, contract):
-        # parameters modified for testing while stubbed
+    def serve_evaluation(cls, **kwargs):
         ''' For most programs, this does involved breakdowns of the contract index values.
         For this program, just return the evaluation year and payout '''
         contract = Contract()

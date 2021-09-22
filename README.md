@@ -5,8 +5,8 @@ To test the adapter locally, first make sure you have Go-IPFS version 0.7.0 inst
 
 Then clone this repo and install the dependencies:
 ```
-git clone --recurse-submodules --remote-submodules https://github.com/dmp267/dClimate-CL-EA.git
-cd dClimate-CL-EA
+git clone --recurse-submodules --remote-submodules https://github.com/dmp267/Arbol-CL-EA.git
+cd Arbol-CL-EA
 pipenv install
 ```
 Next configure Go-IPFS and launcht the daemon:

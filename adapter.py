@@ -3,6 +3,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'dClimate/dweather_py
 
 from program_catalog_stub.fake_program_catalog.programs.directory import get_program
 
+
 class Adapter:
 
     def __init__(self, input):
@@ -26,7 +27,7 @@ class Adapter:
         params = self.request_data.get('params')
         try:
             # get class pointer from program file in catalog
-            program = get_program(program_name)             # e.g. 'cambodia_rainfall'
+            program = get_program(program_name)                   # e.g. 'cambodia_rainfall'
             serve_endpoint = getattr(program, endpoint_name)      # e.g. 'serve_evaluation'
             self.result = serve_endpoint(**params)
             self.result_success(program_name, endpoint_name)

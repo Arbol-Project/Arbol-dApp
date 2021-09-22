@@ -35,9 +35,10 @@ class CambodiaRainfall(Program):
     ''' Stub Rainfall program '''
     @classmethod
     def serve_contract(cls, locations, dataset, contract_params):
-        history = CambodiaRainfallLoader(locations=locations, dataset_name=dataset)
+        loader = CambodiaRainfallLoader(locations=locations, dataset_name=dataset)
+        history = loader.load()
         payout, index = risk_eval(history, **contract_params)
-        return {'status': 'contract served', 'dataset': dataset, 'params': contract_params, 'payout': payout, 'index': index}
+        return {'status': 'contract served', 'locations': locations, 'dataset': dataset, 'params': contract_params, 'payout': payout, 'index': index}
 
     @classmethod
     def serve_evaluation(cls, **kwargs):

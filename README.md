@@ -39,6 +39,5 @@ Example structure for a ```serve_contract``` request:
 }
 ```
 ```
-curl -X POST -H "content-type:application/json" "http://0.0.0.0:8080/" --data '{ "id": 0, "data": { "program": "cambodia_rainfall", "endpoint": "serve_contract", "params": { "dataset": "chirpsc_final_05-daily", "locations": [(100, -95.0), (101, -95.0)], "contract_params": { "start": "2021-08-01", "end": "2021-08-31", "strike": 0.5, "exhaust": 0.25, "limit": 1000, "option_type": "PUT" } } } }'
+curl -X POST -H "content-type:application/json" "http://0.0.0.0:8080/" --data '{ "id": 0, "data": { "program": "cambodia_rainfall", "endpoint": "serve_contract", "params": { "dataset": "chirpsc_final_05-daily", "locations": [[100, -95.0], [101, -94.0]], "contract_params": { "start": "2021-08-01", "end": "2021-08-31", "strike": 0.5, "exhaust": 0.25, "limit": 1000, "option_type": "PUT" } } } }'
 ```
-curl -X POST -H "content-type:application/json" "http://0.0.0.0:8080/" --data '{ "id": 0, "data": { "program": "cambodia_rainfall", "endpoint": "serve_contract", "params": { "dataset": "chirpsc_final_05-daily", "locations": [[100, -95.0]], "contract_params": { "start": "2021-08-01", "end": "2021-08-31", "strike": 0.5, "exhaust": 0.25, "limit": 1000, "option_type": "PUT" } } } }'

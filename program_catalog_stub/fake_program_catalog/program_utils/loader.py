@@ -22,13 +22,13 @@ class CambodiaRainfallLoader():
     def load(self):
         gridcell_histories = []
         for (lat, lon) in self._locations:
-            print('lat {} lon {}'.format(lat, lon))
+            # print('lat {} lon {}'.format(lat, lon))
             series = self._load_series(lat, lon, self._dataset_name, self._request_params).sort_index()
-            print('first 5: {}'.format(series[:5]))
+            # print('first 5: {}'.format(series[:5]))
             gridcell_histories.append(series)
         df = pd.concat(gridcell_histories, axis=1)
         result = pd.Series(df.mean(axis=1))
-        print('first 5 avg: {}'.format(result[:5]))
+        # print('first 5 avg: {}'.format(result[:5]))
         return result
 
     def _load_series(self, lat, lon, dataset_name, request_params):

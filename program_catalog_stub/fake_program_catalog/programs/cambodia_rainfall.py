@@ -36,8 +36,8 @@ class CambodiaRainfall(Program):
     @classmethod
     def serve_contract(cls, locations, dataset, contract_params):
         loader = CambodiaRainfallLoader(locations=locations, dataset_name=dataset)
-        history = loader.load()
-        payout, index = risk_eval(history, **contract_params)
+        avg_history = loader.load()
+        payout, index = risk_eval(avg_history, **contract_params)
         return {'status': 'contract served', 'locations': locations, 'dataset': dataset, 'params': contract_params, 'payout': payout, 'index': index}
 
     @classmethod

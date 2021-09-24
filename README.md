@@ -33,7 +33,7 @@ Example structure for a ```serve_contract``` request:
         "params":
         {
             "dataset": cpcc_precip_global-daily",
-            "locations": [[41.175, -75.125], [41.350, -75.250]],
+            "locations": [[41.125, -75.125], [40.875, -75.500], [41.500, -74.875], [41.250, -75.625]]
             "contract_params":                                #additional serve_contract parameters
             {
                 "start": "2021-08-01",
@@ -49,5 +49,5 @@ Example structure for a ```serve_contract``` request:
 ```
 CURL request for the above example (these will be moved into tests eventually)
 ```
-curl -X POST -H "content-type:application/json" "http://0.0.0.0:8000/" --data '{ "id": 0, "data": { "program": "cambodia_rainfall", "endpoint": "serve_contract", "params": { "dataset": "cpcc_precip_global-daily", "locations": [[41.175, -75.125], [41.350, -75.250]], "contract_params": { "start": "2021-08-01", "end": "2021-08-31", "strike": 0.5, "exhaust": 0.25, "limit": 1000, "option_type": "PUT" } } } }' } } }'
+curl -X POST -H "content-type:application/json" "http://0.0.0.0:8000/" --data '{ "id": 0, "data": { "program": "cambodia_rainfall", "endpoint": "serve_contract", "params": { "dataset": "cpcc_precip_global-daily", "locations": [[41.125, -75.125], [40.875, -75.500], [41.500, -74.875], [41.250, -75.625]], "contract_params": { "start": "2021-08-01", "end": "2021-08-31", "strike": 0.5, "exhaust": 0.25, "limit": 1000, "option_type": "PUT" } } } }'
 ```

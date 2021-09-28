@@ -29,16 +29,18 @@ class Adapter:
             # get class pointer from program file in catalog
             program = get_program(program_name)                   # e.g. 'cambodia_rainfall'
             serve_endpoint = getattr(program, endpoint_name)      # e.g. 'serve_evaluation'
-            self.result = serve_endpoint(**params)
-            self.result_success(program_name, endpoint_name)
+            data = serve_endpoint(**params)
+            self.result = {'status': data['status'], 'payout': data['payout']}
+            self.result_success(program_name, endpoint_name, data)
         except Exception as e:
             self.result_error(e)
 
-    def result_success(self, program, task):
+    def result_success(self, program, task, data):
         self.result = {
             'jobRunID': self.id,
             'program': program,
             'task': task,
+            'data': data,
             'result': self.result,
             'statusCode': 200,
         }
@@ -46,6 +48,7 @@ class Adapter:
     def result_error(self, error):
         self.result = {
             'jobRunID': self.id,
+            'data': self.request_data,
             'status': 'errored',
             'error': f'There was an error: {error}',
             'statusCode': 500,

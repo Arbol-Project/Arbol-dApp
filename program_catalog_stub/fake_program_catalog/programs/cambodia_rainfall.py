@@ -16,7 +16,7 @@ class Contract:
     def evaluate(self):
         ''' always return the same payout series '''
         ser = pd.Series([3032.00], index=[2021])
-        ser.index.name = "contract_year"
+        ser.index.name = 'contract_year'
         return ser
 
 
@@ -48,4 +48,4 @@ class CambodiaRainfall(Program):
         series = contract.evaluate()
         payout_idx = series.index[-1]
         payout_val = series.iloc[-1]
-        return {"contract_year": int(payout_idx), "payout": payout_val}
+        return {'status': 'contract evaluated', 'contract_year': int(payout_idx), 'payout': payout_val}

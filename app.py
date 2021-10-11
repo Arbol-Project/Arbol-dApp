@@ -1,8 +1,10 @@
 from flask import Flask, request, jsonify
+from redis import Redis
 
 from adapter import Adapter
 
 app = Flask(__name__)
+redis = Redis(host='redis', port=6379)
 
 
 @app.before_request

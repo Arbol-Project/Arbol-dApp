@@ -18,3 +18,4 @@ geopy
 zeep
 astropy
 timezonefinder
+redis

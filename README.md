@@ -9,7 +9,7 @@ git clone --recurse-submodules --remote-submodules https://github.com/dmp267/Arb
 cd Arbol-CL-EA
 pipenv install
 ```
-Next configure Go-IPFS and launcht the daemon:
+Next configure Go-IPFS and launch the daemon:
 ```
 ipfs bootstrap rm --all
 ipfs bootstrap add  "/ip4/198.211.104.50/tcp/4001/p2p/QmWsAFSDajELyneR7LkMsgfaRk2ib1y3SEU7nQuXSNPsQV"
@@ -28,13 +28,13 @@ Example structure for a ```serve_contract``` request:
     "id": 0,
     "data":
     {
-        "program": "cambodia_rainfall",                       #this is a file name
-        "endpoint": "serve_contract",                         #this is a method name
+        "program": "cambodia_rainfall",
+        "endpoint": "serve_contract",
         "params":
         {
             "dataset": cpcc_precip_global-daily",
             "locations": [[41.125, -75.125], [40.875, -75.500], [41.500, -74.875], [41.250, -75.625]]
-            "contract_params":                                #additional serve_contract parameters
+            "contract_params":                                
             {
                 "start": "2021-08-01",
                 "end": "2021-08-31",

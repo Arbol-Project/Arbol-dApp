@@ -3,9 +3,17 @@ import pandas as pd
 from program_catalog_stub.fake_program_catalog.program_utils.loader import CambodiaRainfallLoader
 
 
-def risk_eval(history, **contract_params):
-    ''' placeholder component '''
-    return '$$$', 'XXX'
+def generate_payouts(data, start, end, option_type, strike, exhaust, limit):
+    index_value = data.loc[start:end].sum()
+    option_type = option_type.lower()
+    option_type = 1 if option_type == 'call' else -1
+    tick = abs(limit / (strike - exhaust))
+    payout = (index_value - strike) * tick * option_type
+    if payout < 0:
+        payout = 0
+    if payout > limit:
+        payout = limit
+    return round(payout, 2), index_value
 
 
 class Contract:
@@ -37,8 +45,11 @@ class CambodiaRainfall(Program):
     def serve_contract(cls, locations, dataset, contract_params):
         loader = CambodiaRainfallLoader(locations=locations, dataset_name=dataset)
         avg_history = loader.load()
-        payout, index = risk_eval(avg_history, **contract_params)
+        payout, index = generate_payouts(avg_history, **contract_params)
         return {'status': 'contract served', 'locations': locations, 'dataset': dataset, 'params': contract_params, 'payout': payout, 'index': index}
+
+
+    # only need serve evaluation, so slim down the whole code
 
     @classmethod
     def serve_evaluation(cls, **kwargs):

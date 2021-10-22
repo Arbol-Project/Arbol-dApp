@@ -1,53 +1,55 @@
 # Arbol-CL-EA
 Chainlink External Adapter for dClimate data retrieval and Arbol contract evaluation.
-# Source
+
 To test the adapter locally, first make sure you have Go-IPFS version 0.7.0 installed: https://github.com/ipfs/go-ipfs/releases/tag/v0.7.0, http://docs.ipfs.io.ipns.localhost:8080/install/command-line/#system-requirements.
 
-Then clone this repo and install the dependencies:
-```
-git clone --recurse-submodules --remote-submodules https://github.com/dmp267/Arbol-CL-EA.git
-cd Arbol-CL-EA
-pipenv install
-```
-Next configure Go-IPFS and launch the daemon:
+Then configure IPFS and launch the daemon:
 ```
 ipfs bootstrap rm --all
 ipfs bootstrap add  "/ip4/198.211.104.50/tcp/4001/p2p/QmWsAFSDajELyneR7LkMsgfaRk2ib1y3SEU7nQuXSNPsQV"
 ipfs daemon
 ```
-The run the adapter and send a CURL request to the local endpoint:
+
+# Local
+Clone this repo and install the dependencies:
+```
+git clone --recurse-submodules --remote-submodules https://github.com/dmp267/Arbol-CL-EA.git
+cd Arbol-CL-EA
+pipenv install
+```
+
+Then run the adapter app and send a cURL request to the local endpoint:
 ```
 # in a second terminal
 pipenv run python3 app.py
 # in a third terminal
-curl -X POST -H "content-type:application/json" "http://0.0.0.0:8000/" --data '{ "id": 1, "data": { "program": "cambodia_rainfall", "endpoint": "serve_evaluation", "params": { "these dont do anything": 0, "these dont do anything_": 1, "these dont do anything__": 2 } } }'
+curl -X POST -H "content-type:application/json" "http://0.0.0.0:8000/" --data '{ "id": 0, "data": { "program": "cambodia_rainfall", "params": { "dataset": "cpcc_precip_global-daily", "locations": [[41.125, -75.125], [40.875, -75.500], [41.500, -74.875], [41.250, -75.625]], "start": "2021-08-01", "end": "2021-08-31", "strike": 0.5, "exhaust": 0.25, "limit": 1000, "opt_type": "PUT" } } }'
 ```
-Example structure for a ```serve_contract``` request:
+Structure for data of the request above:
 ```
 {
     "id": 0,
     "data":
     {
         "program": "cambodia_rainfall",
-        "endpoint": "serve_contract",
         "params":
         {
-            "dataset": cpcc_precip_global-daily",
+            "dataset": "cpcc_precip_global-daily",
             "locations": [[41.125, -75.125], [40.875, -75.500], [41.500, -74.875], [41.250, -75.625]]
-            "contract_params":                                
-            {
-                "start": "2021-08-01",
-                "end": "2021-08-31",
-                "strike": 0.5,
-                "exhaust": 0.25,
-                "limit": 1000,
-                "option_type": "PUT"
-            }
+            "start": "2021-08-01",
+            "end": "2021-08-31",
+            "strike": 0.5,
+            "exhaust": 0.25,
+            "limit": 1000,
+            "opt_type": "PUT"
         }
     }
 }
 ```
-CURL request for the above example (these will be moved into tests eventually)
+
+# Docker
+In the Arbol-CL-EA directory build the docker image and run the container
 ```
-curl -X POST -H "content-type:application/json" "http://0.0.0.0:8000/" --data '{ "id": 0, "data": { "program": "cambodia_rainfall", "endpoint": "serve_contract", "params": { "dataset": "cpcc_precip_global-daily", "locations": [[41.125, -75.125], [40.875, -75.500], [41.500, -74.875], [41.250, -75.625]], "contract_params": { "start": "2021-08-01", "end": "2021-08-31", "strike": 0.5, "exhaust": 0.25, "limit": 1000, "option_type": "PUT" } } } }'
+docker build . -t arbol-cl-ea
+docker run -it -p 8000:8000 arbol-cl-ea
 ```

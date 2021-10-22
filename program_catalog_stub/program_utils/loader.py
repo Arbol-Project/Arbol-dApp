@@ -30,7 +30,6 @@ class ArbolLoader:
         '''
         gridcell_histories = []
         for (lat, lon) in self._locations:
-            print((lat, lon))
             series = self._load_series(lat, lon, self._dataset_name, self._request_params).sort_index()
             gridcell_histories.append(series)
         df = pd.concat(gridcell_histories, axis=1)

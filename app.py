@@ -1,24 +1,26 @@
 from flask import Flask, request, jsonify
-from redis import Redis
 
 from adapter import Adapter
 
+
 app = Flask(__name__)
-redis = Redis(host='redis', port=6379)
 
 
 @app.before_request
 def log_request_info():
+    ''' Write header and body info of request to logger '''
     app.logger.debug('Headers: %s', request.headers)
     app.logger.debug('Body: %s', request.get_data())
 
 
 @app.route('/', methods=['POST'])
 def call_adapter():
+    ''' Primary route for requests to the adapter '''
     data = request.get_json()
     if data == '':
         data = {}
     adapter = Adapter(data)
+    print(adapter.result)
     return jsonify(adapter.result)
 
 

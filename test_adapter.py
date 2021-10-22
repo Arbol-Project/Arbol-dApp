@@ -1,7 +1,11 @@
 import json
 import pytest
+
 import adapter
 
+
+# Set path to sro.json file here
+SROFILEPATH = './rainfall_basket_sro.json'
 
 def parse_contract_data(filepath):
     ''' Read contract data from json file and format requests
@@ -62,7 +66,7 @@ def adapter_setup(test_data):
     a = adapter.Adapter(test_data)
     return a.result
 
-@pytest.mark.parametrize('test_data', parse_contract_data('./rainfall_basket_sro.json'))
+@pytest.mark.parametrize('test_data', parse_contract_data(SROFILEPATH))
 def test_create_request_success(test_data):
     ''' Tests the adapter against all contracts in the rainfall basket
 

@@ -53,3 +53,9 @@ In the Arbol-CL-EA directory build the docker image and run the container
 docker build . -t arbol-cl-ea
 docker run -it -p 8000:8000 arbol-cl-ea
 ```
+
+# Test
+Test the adapter with a ```sro.json``` file with
+```
+pipenv run pytest
+```

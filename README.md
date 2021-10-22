@@ -55,7 +55,7 @@ docker run -it -p 8000:8000 arbol-cl-ea
 ```
 
 # Test
-Test the adapter with a ```sro.json``` file with
+Test the adapter with a ```sro.json``` file by setting the ```SROFILEPATH``` variable in ```test_adapter.py``` and run
 ```
 pipenv run pytest
 ```

@@ -1,7 +1,7 @@
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'dweather_python_client'))
 
-from program_catalog_stub.fake_program_catalog.programs.directory import get_program
+from program_catalog_stub.programs.directory import get_program
 
 
 class Adapter:

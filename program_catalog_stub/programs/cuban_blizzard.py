@@ -1,4 +1,4 @@
-from program_catalog_stub.fake_program_catalog.program_utils.loader import ArbolLoader
+from program_catalog_stub.program_utils.loader import ArbolLoader
 
 
 _REQUIRED_PARAMETERS = ['dataset', 'locations', 'start', 'end', 'strike', 'exhaust', 'limit', 'opt_type']
@@ -24,11 +24,11 @@ def _generate_payouts(data, start, end, opt_type, strike, exhaust, limit):
         payout = 0
     if payout > limit:
         payout = limit
-    return float(round(payout, 2))
+    return round(payout, 2)
 
 
-class CambodiaRainfall:
-    ''' Program class for Cambodia rainfall contracts. Validates requests,
+class CubanBlizzard:
+    ''' Program class for Cuban/Mavs blizzard contracts. Validates requests,
         retrieves weather data from IPFS, computes an average over the given
         locations, and evaluates whether a payout should be awarded
     '''

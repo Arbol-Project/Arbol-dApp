@@ -1,5 +1,5 @@
-from program_catalog_stub.programs.cambodia_rainfall import CambodiaRainfall
-from program_catalog_stub.programs.cuban_blizzard import CubanBlizzard
+from program_catalog.programs.cambodia_rainfall import CambodiaRainfall
+from program_catalog.programs.cuban_blizzard import CubanBlizzard
 
 
 _PROGRAM_DIRECTORY = {

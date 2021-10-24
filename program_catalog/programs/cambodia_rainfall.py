@@ -1,9 +1,9 @@
-from program_catalog_stub.program_utils.loader import ArbolLoader
+from program_catalog.program_utils.loader import ArbolLoader
 
 
-_REQUIRED_PARAMETERS = ['dataset', 'locations', 'start', 'end', 'strike', 'exhaust', 'limit', 'opt_type']
+_PROGRAM_PARAMETERS = ['dataset', 'locations', 'start', 'end', 'strike', 'limit', 'opt_type', 'tick']
 
-def _generate_payouts(data, start, end, opt_type, strike, exhaust, limit):
+def _generate_payouts(data, start, end, opt_type, strike, tick, limit):
     ''' Uses the provided contract parameters to calculate a payout and index
 
         Parameters: data (Pandas Series), weather data averaged over locations
@@ -11,24 +11,23 @@ def _generate_payouts(data, start, end, opt_type, strike, exhaust, limit):
                     end (date str), end date of coverage period
                     opt_type (str), type of option contract, either PUT or CALL
                     strike (number), strike value for the contract
-                    exhaust (number), exhaust value for the contract
+                    tick (number), tick value given in the sro
                     limit (number), limit value for the payout
         Returns: number, generated payout
     '''
     index_value = data.loc[start:end].sum()
     opt_type = opt_type.lower()
     direction = 1 if opt_type == 'call' else -1
-    tick = abs(limit / (strike - exhaust))
     payout = (index_value - strike) * tick * direction
     if payout < 0:
         payout = 0
     if payout > limit:
         payout = limit
-    return round(payout, 2)
+    return float(round(payout, 2))
 
 
-class CubanBlizzard:
-    ''' Program class for Cuban/Mavs blizzard contracts. Validates requests,
+class CambodiaRainfall:
+    ''' Program class for Cambodia rainfall contracts. Validates requests,
         retrieves weather data from IPFS, computes an average over the given
         locations, and evaluates whether a payout should be awarded
     '''
@@ -44,7 +43,7 @@ class CubanBlizzard:
         '''
         result = True
         result_msg = ''
-        for param in _REQUIRED_PARAMETERS:
+        for param in _PROGRAM_PARAMETERS:
             if not param in params:
                 result_msg += f'missing {param} parameter\n'
                 result = False
@@ -68,7 +67,7 @@ class CubanBlizzard:
                                     end=params['end'],
                                     opt_type=params['opt_type'],
                                     strike=params['strike'],
-                                    exhaust=params['exhaust'],
+                                    tick=params['tick'],
                                     limit=params['limit']
                                     )
         return payout

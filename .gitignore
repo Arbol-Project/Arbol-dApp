@@ -1,0 +1,6 @@
+tests/log.txt
+tests/payouts.csv
+tests/rainfall_basket_sro.json
+__pycache__
+.DS_Store
+.pytest_cache

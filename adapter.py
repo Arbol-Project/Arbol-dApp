@@ -1,5 +1,5 @@
 import sys, os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'dweather_python_client'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'dweather'))
 
 from program_catalog_stub.programs.directory import get_program
 
@@ -26,9 +26,8 @@ class Adapter:
             all necessary paramters. In the case of an illegal request error
             information is logged to the output
 
-            Returns: bool representing whether the request is valid
+            Returns: bool, whether the request is valid
         '''
-        required_params = ['dataset', 'locations', 'start', 'end', 'strike', 'exhaust', 'limit', 'opt_type']
         if self.request_data is None:
             self.request_error = 'request is None'
             return False
@@ -63,6 +62,8 @@ class Adapter:
     def result_success(self, result):
         ''' If the request reaches no errors log the outcome in the result field
             including the payout in the response
+
+            Parameters: result (float), the determined payout value
         '''
         self.result = {
             'jobRunID': self.id,
@@ -74,6 +75,8 @@ class Adapter:
     def result_error(self, error):
         ''' If the request terminates in an error then log the error details in
             the result field to be returned in the response
+
+            Parameters: error (str), associated error message
         '''
         self.result = {
             'jobRunID': self.id,

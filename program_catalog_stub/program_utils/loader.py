@@ -1,6 +1,7 @@
+import os
 import pandas as pd
 
-from dweather_python_client.dweather_client import client
+from dweather.dweather_client import client
 
 
 class ArbolLoader:
@@ -30,7 +31,7 @@ class ArbolLoader:
         '''
         gridcell_histories = []
         for (lat, lon) in self._locations:
-            series = self._load_series(lat, lon, self._dataset_name, self._request_params).sort_index()
+            series = self._load_series(lat, lon, self._dataset_name, self._request_params)
             gridcell_histories.append(series)
         df = pd.concat(gridcell_histories, axis=1)
         result = pd.Series(df.mean(axis=1))
@@ -48,6 +49,5 @@ class ArbolLoader:
             series = pd.Series(data)
         if series.empty:
             raise ValueError('No data returned for request')
-        series = pd.Series([series[i].value for i in range(len(series)) if series[i] is not None])
         series = series.set_axis(pd.to_datetime(series.index, utc=True)).sort_index()
         return series

@@ -9,7 +9,9 @@ _PROGRAM_DIRECTORY = {
 
 
 def get_program(program_name):
-    ''' Parameters: program name (str), name of the program
+    ''' Maps program names to Program classes
+
+        Parameters: program name (str), name of the program
         Returns: Program, class pointer for desired program
     '''
     return _PROGRAM_DIRECTORY[program_name]

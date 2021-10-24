@@ -13,8 +13,8 @@ ipfs daemon
 # Local
 Clone this repo and install the dependencies:
 ```
-git clone --recurse-submodules --remote-submodules https://github.com/dmp267/Arbol-CL-EA.git
-cd Arbol-CL-EA
+git clone --recurse-submodules --remote-submodules https://github.com/dmp267/Arbol-dApp.git
+cd Arbol-dApp
 pipenv install
 ```
 
@@ -48,14 +48,21 @@ Structure for data of the request above:
 ```
 
 # Docker
-In the Arbol-CL-EA directory build the docker image and run the container
+To build a Docker image and run the app inside a Docker container:
 ```
-docker build . -t arbol-cl-ea
-docker run -it -p 8000:8000 arbol-cl-ea
+docker build . -t arbol-dapp
+docker run -it -p 8000:8000 arbol-dapp
 ```
 
 # Test
-To test the adapter with a ```sro.json``` file, set the ```SROFILEPATH``` variable in ```test_adapter.py``` and run
+You can test the adapter with an SRO file and an associated CSV of payouts. To do
+so, set the ```SROFILEPATH``` and ```PAYOUTFILEPATH``` variables in
+```tests/test_adapter.py``` and run:
 ```
 pipenv run pytest
+# or
+pipenv run python3 tests/test_adapter.py
 ```
+This will test the adapter for any contracts in the SRO whose coverage periods are
+ended and whose official payouts are already known. The data pulled from IPFS for
+these contracts is logged in the tests folder.

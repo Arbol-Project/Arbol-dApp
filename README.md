@@ -1,4 +1,4 @@
-# Arbol-CL-EA
+# Arbol-dApp
 Chainlink External Adapter for dClimate data retrieval and Arbol contract evaluation.
 
 To test the adapter locally, first make sure you have Go-IPFS version 0.7.0 installed: https://github.com/ipfs/go-ipfs/releases/tag/v0.7.0, http://docs.ipfs.io.ipns.localhost:8080/install/command-line/#system-requirements.

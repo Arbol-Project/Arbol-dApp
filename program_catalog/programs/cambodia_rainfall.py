@@ -1,9 +1,10 @@
 from program_catalog.program_utils.loader import ArbolLoader
 
 
-_PROGRAM_PARAMETERS = ['dataset', 'locations', 'start', 'end', 'strike', 'limit', 'opt_type', 'tick']
+_PROGRAM_PARAMETERS = ['dataset', 'locations', 'start', 'end', 'strike', 'limit', 'opt_type']
+_PROGRAM_OPTIONS = ['exhaust', 'tick']
 
-def _generate_payouts(data, start, end, opt_type, strike, tick, limit):
+def _generate_payouts(data, start, end, opt_type, strike, limit, exhaust, tick):
     ''' Uses the provided contract parameters to calculate a payout and index
 
         Parameters: data (Pandas Series), weather data averaged over locations
@@ -11,13 +12,16 @@ def _generate_payouts(data, start, end, opt_type, strike, tick, limit):
                     end (date str), end date of coverage period
                     opt_type (str), type of option contract, either PUT or CALL
                     strike (number), strike value for the contract
-                    tick (number), tick value given in the sro
                     limit (number), limit value for the payout
+                    exhaust (number), exhaust value for payout or None if tick is not None
+                    tick (number), tick value for payout or None if exhaust is not None
         Returns: number, generated payout
     '''
     index_value = data.loc[start:end].sum()
     opt_type = opt_type.lower()
     direction = 1 if opt_type == 'call' else -1
+    if tick is None:
+        tick = abs(limit / (strike - exhaust))
     payout = (index_value - strike) * tick * direction
     if payout < 0:
         payout = 0
@@ -34,7 +38,8 @@ class CambodiaRainfall:
     @classmethod
     def validate_request(cls, params):
         ''' Uses program-specific parameter requirements to validate a given
-            request
+            request. Guarantees that there will be a non-null exhaust or tick
+            value in the request parameters to generate the payout
 
             Parameters: params (dict), parameters to be checked against the
             requirements
@@ -47,6 +52,11 @@ class CambodiaRainfall:
             if not param in params:
                 result_msg += f'missing {param} parameter\n'
                 result = False
+        for param in _PROGRAM_OPTIONS:
+            if param in params and params.get(param, None) is not None:
+                return result, result_msg
+        result_msg += f'no non-null parameter in {_PROGRAM_OPTIONS} detected\n'
+        result = False
         return result, result_msg
 
     @classmethod
@@ -67,7 +77,8 @@ class CambodiaRainfall:
                                     end=params['end'],
                                     opt_type=params['opt_type'],
                                     strike=params['strike'],
-                                    tick=params['tick'],
-                                    limit=params['limit']
+                                    limit=params['limit'],
+                                    exhaust=params.get('exhaust', None),
+                                    tick=params.get('tick', None)
                                     )
         return payout

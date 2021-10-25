@@ -25,15 +25,15 @@ def parse_available_contract_data(sropath, paypath):
     '''
     if os.path.isfile('./tests/log.txt'):
         os.remove('./tests/log.txt')
-    finished_contracts = {}
+    contracts = {}
     with open(paypath) as f:
         data = csv.reader(f, delimiter=',')
         for row in data:
             name = row[0]
             payout = row[1]
             if payout == 'DATA UNAVAILABLE':
-                continue
-            finished_contracts[name] = payout
+                payout = None
+            contracts[name] = payout
         f.close()
     with open(sropath) as f:
         data = json.load(f)
@@ -42,9 +42,7 @@ def parse_available_contract_data(sropath, paypath):
     for contract in data['__config__']['contracts']:
         config = contract['__config__']
         name = config['id']
-        if not name in finished_contracts:
-            continue
-        payout = finished_contracts[name]
+        payout = contracts[name]
         payouts = config['payouts']['__config__']
         derivative = payouts['derivative']['__config__']
         index = payouts['index_distribution']['__config__']['index']['__config__']
@@ -52,7 +50,6 @@ def parse_available_contract_data(sropath, paypath):
         strike = derivative['strike']
         exhaust = derivative['exhaust']
         limit = derivative['limit']
-        tick = derivative['tick']
         opt_type = derivative['opt_type']
         start = index['start']
         end = index['end']
@@ -65,9 +62,8 @@ def parse_available_contract_data(sropath, paypath):
         request_params = {
             'name': name,
             'strike': strike,
-            'exhaust': exhaust if exhaust is not None else 0.0,
+            'exhaust': exhaust,
             'limit': limit,
-            'tick': tick,
             'opt_type': opt_type,
             'start': start,
             'end': end,
@@ -110,12 +106,19 @@ def test_create_request_success(test_data):
     assert result['data'] is not None
     assert type(result['result']) is float
     assert type(result['data']['result']) is float
-    assert result['result'] == round(float(payout), 2)
-    msg = f'name: {name}, result payout: {result["result"]}, official payout: {payout}\n'
-    f = open('./tests/log.txt', 'a')
-    f.write(msg)
-    f.close()
-    print(msg)
+    if payout is not None:
+        assert result['result'] == round(float(payout), 2)
+        msg = f'name: {name}, result payout: {result["result"]}, official payout: {payout}\n'
+        f = open('./tests/log.txt', 'a')
+        f.write(msg)
+        f.close()
+        print(msg[:-2])
+    else:
+        msg = f'name: {name}, request status: success\n'
+        f = open('./tests/log.txt', 'a')
+        f.write(msg)
+        f.close()
+        print(msg[:-2])
 
 if __name__ == '__main__':
     _ = [test_create_request_success(test) for test in TEST_DATA]

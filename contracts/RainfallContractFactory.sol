@@ -69,14 +69,6 @@ contract InsuranceProvider {
     }
 
     /**
-     * @dev updates the contract for a given address
-     */
-    function updateContract(address payable _contract) external {
-        InsuranceContract i = InsuranceContract(_contract);
-        i.updateContract();
-    }
-
-    /**
      * @dev Get the insurer address for this insurance provider
      */
     function getInsurer() external view returns (address) {

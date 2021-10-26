@@ -18,14 +18,6 @@ contract InsuranceProvider is Ownable {
         insurer = msg.sender;
     }
 
-    /**
-     * @dev Prevents a function being run unless it's called by the Insurance Provider
-     */
-    // modifier onlyOwner() {
-    //     require(insurer == msg.sender, 'Only the Contract Issuer can do this');
-    //     _;
-    // }
-
    /**
     * @dev Event to log when a contract is created
     */
@@ -130,14 +122,6 @@ contract InsuranceContract is ChainlinkClient, Ownable  {
     uint256 contractPayout;
 
     /**
-     * @dev Prevents a function being run unless it's called by Insurance Provider
-     */
-    // modifier onlyOwner() override {
-    //     require(insurer == msg.sender,'Only Insurance provider can do this');
-    //     _;
-    // }
-
-    /**
      * @dev Prevents a function being run unless the Insurance Contract duration has been reached
      */
     modifier onContractEnded() {
@@ -188,6 +172,7 @@ contract InsuranceContract is ChainlinkClient, Ownable  {
         /* oracles[1] = 0xfc894b51F2D242B27D8e3EA99258120033563678; // dev node, no job created yet
         jobIds[2] = 'PLACEHOLDER';
         oracleJobs[oracles[1]] = 1; */
+        
         emit contractCreated(insurer, id, start, end, limit);
         }
 
@@ -349,42 +334,6 @@ contract InsuranceContract is ChainlinkClient, Ownable  {
     function getChainlinkToken() public view returns (address) {
         return chainlinkTokenAddress();
     }
-
-    /**
-     * @dev Helper function for converting a string to a bytes32 object
-     */
-    // function stringToBytes32(string memory source) private pure returns (bytes32 result) {
-    //     bytes memory tempEmptyStringTest = bytes(source);
-    //     if (tempEmptyStringTest.length == 0) {
-    //      return 0x0;
-    //     }
-
-    //     assembly { // solhint-disable-line no-inline-assembly
-    //     result := mload(add(source, 32))
-    //     }
-    // }
-
-    /**
-     * @dev Helper function for converting uint to a string
-     */
-    // function uintToString(uint _i) internal pure returns (string memory _uintAsString) {
-    //     if (_i == 0) {
-    //         return "0";
-    //     }
-    //     uint j = _i;
-    //     uint len;
-    //     while (j != 0) {
-    //         len++;
-    //         j /= 10;
-    //     }
-    //     bytes memory bstr = new bytes(len);
-    //     uint k = len - 1;
-    //     while (_i != 0) {
-    //         bstr[k--] = bytes(uint8(48 + _i % 10));
-    //         _i /= 10;
-    //     }
-    //     return string(bstr);
-    // }
 
     /**
      * @dev Fallback function so contract function can receive ether when required

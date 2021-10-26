@@ -14,12 +14,12 @@ import "@chainlink/contracts/src/v0.6/interfaces/AggregatorV3Interface.sol";
 contract InsuranceProvider {
 
     AggregatorV3Interface internal priceFeed;
-    uint256 constant private ORACLE_PAYMENT = 0.1 * 10**18; // 0.1 LINK
+    uint256 private constant ORACLE_PAYMENT = 0.1 * 10**18; // 0.1 LINK
     address public constant LINK_KOVAN = 0xa36085F69e2889c224210F603D836748e7dC0088 ; // LINK token address on Kovan
-    address payable public insurer = msg.sender;
+    address public payable insurer = msg.sender;
     mapping (address => InsuranceContract) contracts;
 
-    constructor()   public payable {
+    constructor() public payable {
         priceFeed = AggregatorV3Interface(0x9326BFA02ADD2366b30bacB125260Af641031331);
     }
 
@@ -27,7 +27,7 @@ contract InsuranceProvider {
      * @dev Prevents a function being run unless it's called by the Insurance Provider
      */
     modifier onlyOwner() {
-        require(insurer == msg.sender,'Only Insurance provider can do this');
+        require(insurer == msg.sender, 'Only the Contract Issuer can do this');
         _;
     }
 
@@ -39,7 +39,8 @@ contract InsuranceProvider {
     /**
      * @dev Create a new contract for client, automatically approved and deployed to the blockchain
      */
-    function newContract(address payable _client, uint _start, string _end, string[] _locations, string _dataset, uint _strike, uint _limit, uint _exhasut) public payable onlyOwner() returns(address) {
+    function newContract(string _client, uint _start, uint _end, string[] _locations, string _dataset, uint _strike,
+                        uint _limit, uint _exhasut, string _opt_type) public payable onlyOwner() returns(address) {
 
         // create contract, send payout amount so contract is fully funded plus a small buffer
         InsuranceContract i = (new InsuranceContract){value:(_limit * 1 ether).div(uint(getLatestPrice()))}(_client,
@@ -109,7 +110,8 @@ contract InsuranceProvider {
     }
 
     /**
-     * @dev Function to end provider contract, in case of bugs or needing to update logic etc, funds are returned to insurance provider, including any remaining LINK tokens
+     * @dev Function to end provider contract, in case of bugs or needing to update logic etc,
+     * funds are returned to insurance provider, including any remaining LINK tokens
      */
     function endContractProvider() external payable onlyOwner() {
         LinkTokenInterface link = LinkTokenInterface(LINK_KOVAN);

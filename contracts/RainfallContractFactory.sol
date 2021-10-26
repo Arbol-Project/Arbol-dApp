@@ -34,7 +34,7 @@ contract InsuranceProvider is Ownable {
     /**
      * @dev Create a new contract for client, automatically approved and deployed to the blockchain
      */
-    function newContract(string memory _id, string memory _dataset, string memory _opt_type, string[] memory _locations, 
+    function newContract(string memory _id, string memory _dataset, string memory _opt_type, string[] memory _locations,
                         uint _start, uint _end, uint _strike, uint _limit, uint _exhaust) public payable onlyOwner returns(address) {
 
         // create contract, send payout amount so contract is fully funded plus a small buffer
@@ -107,7 +107,7 @@ contract InsuranceProvider is Ownable {
 
 
 contract InsuranceContract is ChainlinkClient, Ownable  {
-    
+
     using Chainlink for Chainlink.Request;
     uint256 private oraclePaymentAmount;
     bytes32[] public jobIds;
@@ -182,11 +182,11 @@ contract InsuranceContract is ChainlinkClient, Ownable  {
         contractActive = true;
 
         oracles[0] = 0xe9d0d0332934c269132e53c03D3fD63EbA41aae0; // test node
-        jobIds[0] = 'PLACEHOLDER';
+        jobIds[0] = 'd5a3adb5-a86a-4b56-b1ab-16995cbab5fe';
         oracleJobs[oracles[0]] = 0;
-        
+
         /* oracles[1] = 0xfc894b51F2D242B27D8e3EA99258120033563678; // dev node, no job created yet
-        jobIds[2] = 'PLACEHOLDER'; 
+        jobIds[2] = 'PLACEHOLDER';
         oracleJobs[oracles[1]] = 1; */
         emit contractCreated(insurer, id, start, end, limit);
         }

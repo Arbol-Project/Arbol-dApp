@@ -182,7 +182,7 @@ contract InsuranceContract is ChainlinkClient, Ownable  {
         contractActive = true;
 
         oracles[0] = 0xe9d0d0332934c269132e53c03D3fD63EbA41aae0; // test node
-        jobIds[0] = 'd5a3adb5-a86a-4b56-b1ab-16995cbab5fe';
+        jobIds[0] = 'd5a3adb5a86a4b56b1ab16995cbab5fe';
         oracleJobs[oracles[0]] = 0;
 
         /* oracles[1] = 0xfc894b51F2D242B27D8e3EA99258120033563678; // dev node, no job created yet

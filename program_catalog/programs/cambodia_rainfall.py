@@ -12,11 +12,12 @@ def _generate_payouts(data, start, end, opt_type, strike, limit, exhaust, tick):
                     end (date str), end date of coverage period
                     opt_type (str), type of option contract, either PUT or CALL
                     strike (number), strike value for the contract
-                    limit (number), limit value for the payout
+                    limit (string), limit value for the payout, needs to be converted to a float
                     exhaust (number), exhaust value for payout or None if tick is not None
                     tick (number), tick value for payout or None if exhaust is not None
         Returns: number, generated payout
     '''
+    limit = float(limit)
     index_value = data.loc[start:end].sum()
     opt_type = opt_type.lower()
     direction = 1 if opt_type == 'call' else -1

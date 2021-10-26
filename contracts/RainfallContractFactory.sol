@@ -181,11 +181,11 @@ contract InsuranceContract is ChainlinkClient, Ownable  {
         exhaust = _exhaust;
         contractActive = true;
 
-        oracles[0] = 0xfc894b51F2D242B27D8e3EA99258120033563678; // dev node, placeholder
+        oracles[0] = 0xe9d0d0332934c269132e53c03D3fD63EbA41aae0; // test node
         jobIds[0] = 'PLACEHOLDER';
         oracleJobs[oracles[0]] = 0;
         
-        /* oracles[1] = 0xfc894b51F2D242B27D8e3EA99258120033563678; // test node, placeholder
+        /* oracles[1] = 0xfc894b51F2D242B27D8e3EA99258120033563678; // dev node, no job created yet
         jobIds[2] = 'PLACEHOLDER'; 
         oracleJobs[oracles[1]] = 1; */
         emit contractCreated(insurer, id, start, end, limit);
@@ -207,6 +207,8 @@ contract InsuranceContract is ChainlinkClient, Ownable  {
              req.add('dataset', dataset);
              req.add('opt_type', opt_type);
              req.addStringArray('locations', locations);
+             req.addUint('start', start);
+             req.addUint('end', end);
              req.addUint('strike', strike);
              req.addUint('limit', limit);
              req.addUint('exhaust', exhaust);

@@ -7,34 +7,35 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
 
 
-contract InsuranceProvider {
+contract InsuranceProvider is Ownable {
 
     uint256 private constant ORACLE_PAYMENT = 0.1 * 10**18; // 0.1 LINK
-    address public constant LINK_KOVAN = 0xa36085F69e2889c224210F603D836748e7dC0088 ; // LINK token address on Kovan
-    address public payable insurer = msg.sender;
+    address public constant LINK_KOVAN = 0xa36085F69e2889c224210F603D836748e7dC0088; // LINK token address on Kovan
+    address public insurer;
     mapping (address => InsuranceContract) contracts;
 
-    constructor() public payable {
+    constructor() {
+        insurer = msg.sender;
     }
 
     /**
      * @dev Prevents a function being run unless it's called by the Insurance Provider
      */
-    modifier onlyOwner() {
-        require(insurer == msg.sender, 'Only the Contract Issuer can do this');
-        _;
-    }
+    // modifier onlyOwner() {
+    //     require(insurer == msg.sender, 'Only the Contract Issuer can do this');
+    //     _;
+    // }
 
    /**
     * @dev Event to log when a contract is created
     */
-    event contractCreated(address _insuranceContract, uint _id);
+    event contractCreated(address _insuranceContract, string _id);
 
     /**
      * @dev Create a new contract for client, automatically approved and deployed to the blockchain
      */
-    function newContract(string _id, string _dataset, string _opt_type, uint _start, string[] _locations,
-                        uint _end, uint _strike, uint _limit, uint _exhasut) public payable onlyOwner() returns(address) {
+    function newContract(string memory _id, string memory _dataset, string memory _opt_type, string[] memory _locations, 
+                        uint _start, uint _end, uint _strike, uint _limit, uint _exhaust) public payable onlyOwner returns(address) {
 
         // create contract, send payout amount so contract is fully funded plus a small buffer
         InsuranceContract i = new InsuranceContract(_id,
@@ -94,7 +95,7 @@ contract InsuranceProvider {
     function endContractProvider() external payable onlyOwner() {
         LinkTokenInterface link = LinkTokenInterface(LINK_KOVAN);
         require(link.transfer(msg.sender, link.balanceOf(address(this))), "Unable to transfer");
-        selfdestruct(insurer);
+        selfdestruct(payable(insurer));
     }
 
     /**
@@ -106,12 +107,14 @@ contract InsuranceProvider {
 
 
 contract InsuranceContract is ChainlinkClient, Ownable  {
-
+    
+    using Chainlink for Chainlink.Request;
     uint256 private oraclePaymentAmount;
     bytes32[] public jobIds;
     address[] public oracles;
+    mapping (address => uint) oracleJobs;
 
-    address public payable insurer;
+    address public insurer;
     string id;
     string dataset;
     string opt_type;
@@ -129,16 +132,16 @@ contract InsuranceContract is ChainlinkClient, Ownable  {
     /**
      * @dev Prevents a function being run unless it's called by Insurance Provider
      */
-    modifier onlyOwner() override {
-        require(insurer == msg.sender,'Only Insurance provider can do this');
-        _;
-    }
+    // modifier onlyOwner() override {
+    //     require(insurer == msg.sender,'Only Insurance provider can do this');
+    //     _;
+    // }
 
     /**
      * @dev Prevents a function being run unless the Insurance Contract duration has been reached
      */
     modifier onContractEnded() {
-        if (end < now) {
+        if (end < block.timestamp) {
           _;
         }
     }
@@ -154,14 +157,14 @@ contract InsuranceContract is ChainlinkClient, Ownable  {
     event contractCreated(address _insurer, string _id, uint _start, uint _end, uint _limit);
     event contractEnded(string _id, uint _time);
     event contractEvaluationInitiated(string _id, bytes32 _req, uint _time);
-    event contractEvaluated(string _id, bytes32 _req, uint _time, uint256 _payout);
+    event contractEvaluationCompleted(string _id, bytes32 _req, uint _time, uint256 _payout);
 
     /**
      * @dev Creates a new Insurance contract
      */
-    constructor(string _id, string _dataset, string _opt_type, string[] memory _locations,
-                uint _start, uint _end, uint _strike, uint _limit, uint _exhasut, uint256 _oraclePaymentAmount,
-                address _link,) payable Ownable() public {
+    constructor(string memory _id, string memory _dataset, string memory _opt_type, string[] memory _locations,
+                uint _start, uint _end, uint _strike, uint _limit, uint _exhaust, uint256 _oraclePaymentAmount,
+                address _link) payable Ownable() {
 
         setChainlinkToken(_link);
         oraclePaymentAmount = _oraclePaymentAmount;
@@ -180,8 +183,11 @@ contract InsuranceContract is ChainlinkClient, Ownable  {
 
         oracles[0] = 0xfc894b51F2D242B27D8e3EA99258120033563678; // dev node, placeholder
         jobIds[0] = 'PLACEHOLDER';
+        oracleJobs[oracles[0]] = 0;
+        
         /* oracles[1] = 0xfc894b51F2D242B27D8e3EA99258120033563678; // test node, placeholder
-        jobIds[2] = 'PLACEHOLDER'; */
+        jobIds[2] = 'PLACEHOLDER'; 
+        oracleJobs[oracles[1]] = 1; */
         emit contractCreated(insurer, id, start, end, limit);
         }
 
@@ -194,18 +200,18 @@ contract InsuranceContract is ChainlinkClient, Ownable  {
          // mark contract as ended, so no future state changes can occur on the contract
          if (contractActive) {
              contractActive = false;
-             emit contractEnded(id, now);
+             emit contractEnded(id, block.timestamp);
 
              // build request to external adapter to determine contract payout
              Chainlink.Request memory req = buildChainlinkRequest(jobIds[0], address(this), this.evaluateContractCallBack.selector);
              req.add('dataset', dataset);
              req.add('opt_type', opt_type);
-             req.add('locations', locations);
-             req.add('strike', strike);
-             req.add('limit', limit);
-             req.add('exhaust', exhaust);
+             req.addStringArray('locations', locations);
+             req.addUint('strike', strike);
+             req.addUint('limit', limit);
+             req.addUint('exhaust', exhaust);
              requestId = sendChainlinkRequestTo(oracles[0], req, oraclePaymentAmount);
-             emit contractEvaluationInitiated(id, requestId, now)
+             emit contractEvaluationInitiated(id, requestId, block.timestamp);
          }
      }
 
@@ -215,11 +221,12 @@ contract InsuranceContract is ChainlinkClient, Ownable  {
      */
     function evaluateContractCallBack(bytes32 _requestId, uint256 _payout) public recordChainlinkFulfillment(_requestId) onContractEnded() {
 
+        contractEvaluated = true;
         contractPayout = _payout;
-        emit contractEvaluated(id, _requestId, now, contractPayout);
+        emit contractEvaluationCompleted(id, _requestId, block.timestamp, contractPayout);
 
         // Return any remaining ETH and LINK held by this contract back to the factory contract
-        insurer.transfer(address(this).balance)
+        payable(insurer).transfer(address(this).balance);
         LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
         require(link.transfer(insurer, link.balanceOf(address(this))), "Unable to transfer remaining LINK tokens");
     }
@@ -227,7 +234,7 @@ contract InsuranceContract is ChainlinkClient, Ownable  {
     /**
      * @dev add a new node and associated job ID to the contract evaluator set
      */
-    function addOracleJob(address oracle, bytes32 jobId) external payable onlyOwner() {
+    function addOracleJob(address oracle, bytes32 jobId) external payable onlyOwner {
         oracles.push(oracle);
         jobIds.push(jobId);
     }
@@ -235,8 +242,8 @@ contract InsuranceContract is ChainlinkClient, Ownable  {
     /**
      * @dev remove a node and associated job ID from the contract evaluator set
      */
-    function removeOracleJob(address oracle) external payable onlyOwner() {
-        index = oracleJobs[oracle];
+    function removeOracleJob(address oracle) external payable onlyOwner {
+        uint index = oracleJobs[oracle];
         oracles[index] = oracles[oracles.length-1];
         oracles.pop();
         jobIds[index] = jobIds[jobIds.length-1];
@@ -330,8 +337,8 @@ contract InsuranceContract is ChainlinkClient, Ownable  {
     /**
      * @dev Get the current date/time according to the blockchain
      */
-    function getNow() external view returns (uint) {
-        return now;
+    function getBlockTimeStamp() external view returns (uint) {
+        return block.timestamp;
     }
 
     /**
@@ -344,38 +351,38 @@ contract InsuranceContract is ChainlinkClient, Ownable  {
     /**
      * @dev Helper function for converting a string to a bytes32 object
      */
-    function stringToBytes32(string memory source) private pure returns (bytes32 result) {
-        bytes memory tempEmptyStringTest = bytes(source);
-        if (tempEmptyStringTest.length == 0) {
-         return 0x0;
-        }
+    // function stringToBytes32(string memory source) private pure returns (bytes32 result) {
+    //     bytes memory tempEmptyStringTest = bytes(source);
+    //     if (tempEmptyStringTest.length == 0) {
+    //      return 0x0;
+    //     }
 
-        assembly { // solhint-disable-line no-inline-assembly
-        result := mload(add(source, 32))
-        }
-    }
+    //     assembly { // solhint-disable-line no-inline-assembly
+    //     result := mload(add(source, 32))
+    //     }
+    // }
 
     /**
      * @dev Helper function for converting uint to a string
      */
-    function uintToString(uint _i) internal pure returns (string memory _uintAsString) {
-        if (_i == 0) {
-            return "0";
-        }
-        uint j = _i;
-        uint len;
-        while (j != 0) {
-            len++;
-            j /= 10;
-        }
-        bytes memory bstr = new bytes(len);
-        uint k = len - 1;
-        while (_i != 0) {
-            bstr[k--] = byte(uint8(48 + _i % 10));
-            _i /= 10;
-        }
-        return string(bstr);
-    }
+    // function uintToString(uint _i) internal pure returns (string memory _uintAsString) {
+    //     if (_i == 0) {
+    //         return "0";
+    //     }
+    //     uint j = _i;
+    //     uint len;
+    //     while (j != 0) {
+    //         len++;
+    //         j /= 10;
+    //     }
+    //     bytes memory bstr = new bytes(len);
+    //     uint k = len - 1;
+    //     while (_i != 0) {
+    //         bstr[k--] = bytes(uint8(48 + _i % 10));
+    //         _i /= 10;
+    //     }
+    //     return string(bstr);
+    // }
 
     /**
      * @dev Fallback function so contract function can receive ether when required

@@ -27,7 +27,7 @@ contract InsuranceProvider is Ownable {
      * @dev Create a new contract for client, automatically approved and deployed to the blockchain
      */
     function newContract(string memory _id, string memory _dataset, string memory _opt_type, string[] memory _locations,
-                        uint _start, uint _end, uint _strike, uint _limit, uint _exhaust) public payable onlyOwner returns(address) {
+                        uint _start, uint _end, uint _strike, string memory _limit, uint _exhaust) public payable onlyOwner returns(address) {
 
         // create contract, send payout amount so contract is fully funded plus a small buffer
         InsuranceContract i = new InsuranceContract(_id,
@@ -40,14 +40,14 @@ contract InsuranceProvider is Ownable {
                                                     _limit,
                                                     _exhaust,
                                                     ORACLE_PAYMENT,
-                                                    LINK_KOVAN
-                                                    );
+                                                    LINK_KOVAN);
         contracts[address(i)] = i;
         emit contractCreated(address(i), _id);
 
         // fund the contract with enough LINK tokens to make at least 1 Oracle request, with a buffer
-        LinkTokenInterface link = LinkTokenInterface(i.getChainlinkToken());
-        link.transfer(address(i), ORACLE_PAYMENT * 2);
+        // LinkTokenInterface link = LinkTokenInterface(i.getChainlinkToken());
+        // link.transfer(address(i), ORACLE_PAYMENT * 2);
+        // this may be broken in v0.8, may either need to go back to v0.6 or fund with LINK manually
         return address(i);
     }
 
@@ -114,7 +114,7 @@ contract InsuranceContract is ChainlinkClient, Ownable  {
     uint start;
     uint end;
     uint strike;
-    uint limit;
+    string limit;
     uint exhaust;
 
     bool contractActive;
@@ -138,7 +138,7 @@ contract InsuranceContract is ChainlinkClient, Ownable  {
         _;
     }
 
-    event contractCreated(address _insurer, string _id, uint _start, uint _end, uint _limit);
+    event contractCreated(address _insurer, string _id, uint _start, uint _end, string _limit);
     event contractEnded(string _id, uint _time);
     event contractEvaluationInitiated(string _id, bytes32 _req, uint _time);
     event contractEvaluationCompleted(string _id, bytes32 _req, uint _time, uint256 _payout);
@@ -147,7 +147,7 @@ contract InsuranceContract is ChainlinkClient, Ownable  {
      * @dev Creates a new Insurance contract
      */
     constructor(string memory _id, string memory _dataset, string memory _opt_type, string[] memory _locations,
-                uint _start, uint _end, uint _strike, uint _limit, uint _exhaust, uint256 _oraclePaymentAmount,
+                uint _start, uint _end, uint _strike, string memory _limit, uint _exhaust, uint256 _oraclePaymentAmount,
                 address _link) payable Ownable() {
 
         setChainlinkToken(_link);
@@ -165,8 +165,8 @@ contract InsuranceContract is ChainlinkClient, Ownable  {
         exhaust = _exhaust;
         contractActive = true;
 
-        oracles[0] = 0xe9d0d0332934c269132e53c03D3fD63EbA41aae0; // test node
-        jobIds[0] = 'd5a3adb5a86a4b56b1ab16995cbab5fe';
+        oracles.push(0xe9d0d0332934c269132e53c03D3fD63EbA41aae0); // test node
+        jobIds.push('d5a3adb5a86a4b56b1ab16995cbab5fe');
         oracleJobs[oracles[0]] = 0;
 
         /* oracles[1] = 0xfc894b51F2D242B27D8e3EA99258120033563678; // dev node, no job created yet
@@ -195,7 +195,7 @@ contract InsuranceContract is ChainlinkClient, Ownable  {
              req.addUint('start', start);
              req.addUint('end', end);
              req.addUint('strike', strike);
-             req.addUint('limit', limit);
+             req.add('limit', limit);
              req.addUint('exhaust', exhaust);
              requestId = sendChainlinkRequestTo(oracles[0], req, oraclePaymentAmount);
              emit contractEvaluationInitiated(id, requestId, block.timestamp);
@@ -310,7 +310,7 @@ contract InsuranceContract is ChainlinkClient, Ownable  {
     /**
      * @dev Get the contract limit
      */
-    function getContractLimit() external view returns (uint) {
+    function getContractLimit() external view returns (string memory) {
         return limit;
     }
 

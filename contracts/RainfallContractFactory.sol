@@ -214,8 +214,8 @@ contract InsuranceContract is ChainlinkClient, Ownable  {
 
         // Return any remaining ETH and LINK held by this contract back to the factory contract
         payable(insurer).transfer(address(this).balance);
-        LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
-        require(link.transfer(insurer, link.balanceOf(address(this))), "Unable to transfer remaining LINK tokens");
+        // LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
+        // require(link.transfer(insurer, link.balanceOf(address(this))), "Unable to transfer remaining LINK tokens");
     }
 
     /**

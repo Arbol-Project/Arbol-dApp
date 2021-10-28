@@ -19,7 +19,7 @@ class ArbolLoader:
                         imperial_units (bool), whether to use imperial units
         '''
         self._dataset_name = dataset_name
-        self._locations = [as.literal_eval(location) for location in locations]
+        self._locations = [ast.literal_eval(location) for location in locations]
         self._request_params = {'use_imperial_units': imperial_units}
 
     def load(self):

@@ -11,17 +11,20 @@ def _generate_payouts(data, start, end, opt_type, strike, limit, exhaust, tick):
                     start (date str), start date of coverage period
                     end (date str), end date of coverage period
                     opt_type (str), type of option contract, either PUT or CALL
-                    strike (number), strike value for the contract
+                    strike (number), 100 times the strike value for the payout (no floats in solidity)
                     limit (int), 100 times the limit value for the payout (no floats in solidity)
-                    exhaust (number), exhaust value for payout or None if tick is not None
+                    exhaust (number), 100 times the exhaust value for the payout (no floats in solidity)
+        or None if tick is not None
                     tick (number), tick value for payout or None if exhaust is not None
         Returns: number, generated payout
     '''
+    strike /= 100
     limit /= 100
     index_value = data.loc[start:end].sum()
     opt_type = opt_type.lower()
     direction = 1 if opt_type == 'call' else -1
     if tick is None:
+        exhaust /= 100
         tick = abs(limit / (strike - exhaust))
     payout = (index_value - strike) * tick * direction
     if payout < 0:

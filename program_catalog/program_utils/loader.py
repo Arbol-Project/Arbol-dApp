@@ -1,4 +1,5 @@
 import os
+import ast
 import pandas as pd
 
 from dweather.dweather_client import client
@@ -13,12 +14,12 @@ class ArbolLoader:
         ''' On initialization each Loader instance sets the locations for which to
             get the historical weather data and the dataset to pull from
 
-            Parameters: locations (nested list), list of lat/lon coordinate pairs
+            Parameters: locations (list), list of lat/lon coordinate pairs as strings
                         dataset_name (str), the name of the dataset on IPFS
                         imperial_units (bool), whether to use imperial units
         '''
         self._dataset_name = dataset_name
-        self._locations = locations
+        self._locations = [as.literal_eval(location) for location in locations]
         self._request_params = {'use_imperial_units': imperial_units}
 
     def load(self):

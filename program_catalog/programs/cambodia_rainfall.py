@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from program_catalog.program_utils.loader import ArbolLoader
 
 
@@ -8,19 +10,21 @@ def _generate_payouts(data, start, end, opt_type, strike, limit, exhaust, tick):
     ''' Uses the provided contract parameters to calculate a payout and index
 
         Parameters: data (Pandas Series), weather data averaged over locations
-                    start (date str), start date of coverage period
-                    end (date str), end date of coverage period
+                    start (int), unix timestamp for start date of coverage period
+                    end (int), unix timestamp for end date of coverage period
                     opt_type (str), type of option contract, either PUT or CALL
-                    strike (number), 100 times the strike value for the payout (no floats in solidity)
+                    strike (int), 100 times the strike value for the payout (no floats in solidity)
                     limit (int), 100 times the limit value for the payout (no floats in solidity)
-                    exhaust (number), 100 times the exhaust value for the payout (no floats in solidity)
+                    exhaust (int), 100 times the exhaust value for the payout (no floats in solidity)
         or None if tick is not None
                     tick (number), tick value for payout or None if exhaust is not None
         Returns: number, generated payout
     '''
     strike /= 100
     limit /= 100
-    index_value = data.loc[start:end].sum()
+    start_date = datetime.utcfromstimestamp(start).strftime('%Y-%m-%d')
+    end_date = datetime.utcfromstimestamp(end).strftime('%Y-%m-%d')
+    index_value = data.loc[start_date:end_date].sum()
     opt_type = opt_type.lower()
     direction = 1 if opt_type == 'call' else -1
     if tick is None:

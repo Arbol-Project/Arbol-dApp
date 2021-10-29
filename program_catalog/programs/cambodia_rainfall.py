@@ -18,7 +18,7 @@ def _generate_payouts(data, start, end, opt_type, strike, limit, exhaust, tick):
                     exhaust (int), 100 times the exhaust value for the payout (no floats in solidity)
         or None if tick is not None
                     tick (number), tick value for payout or None if exhaust is not None
-        Returns: number, generated payout
+        Returns: int, generated payout times 100 (in order to report back to chain)
     '''
     strike /= 100
     limit /= 100
@@ -35,7 +35,7 @@ def _generate_payouts(data, start, end, opt_type, strike, limit, exhaust, tick):
         payout = 0
     if payout > limit:
         payout = limit
-    return float(round(payout, 2))
+    return int(float(round(payout, 2)) * 100)
 
 
 class CambodiaRainfall:

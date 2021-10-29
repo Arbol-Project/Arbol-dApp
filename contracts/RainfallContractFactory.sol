@@ -1,20 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
-pragma experimental ABIEncoderV2;
+// pragma experimental ABIEncoderV2;
 
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
+import "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
 
 
-contract InsuranceProvider is Ownable {
+contract InsuranceProvider is ChainlinkClient, ConfirmedOwner {
 
-    uint256 private constant ORACLE_PAYMENT = 0.1 * 10**18; // 0.1 LINK
-    address public constant LINK_KOVAN = 0xa36085F69e2889c224210F603D836748e7dC0088; // LINK token address on Kovan
+    // address public constant LINK_KOVAN = 0xa36085F69e2889c224210F603D836748e7dC0088; // LINK token address on Kovan
+    uint256 private constant ORACLE_PAYMENT = LINK_DIVISIBILITY / 10; // 0.1 LINK
     address public insurer;
     mapping (address => InsuranceContract) contracts;
 
-    constructor() {
+    constructor() ConfirmedOwner(msg.sender) {
+        setPublicChainlinkToken();
         insurer = msg.sender;
     }
 
@@ -27,9 +27,10 @@ contract InsuranceProvider is Ownable {
      * @dev Create a new contract for client, automatically approved and deployed to the blockchain
      */
     function newContract(string memory _id, string memory _dataset, string memory _opt_type, string[] memory _locations,
-                        uint _start, uint _end, uint _strike, string memory _limit, uint _exhaust) public payable onlyOwner returns(address) {
+                        uint _start, uint _end, uint _strike, uint _limit, uint _exhaust) 
+                        public payable onlyOwner {
 
-        // create contract, send payout amount so contract is fully funded plus a small buffer
+        // create contract
         InsuranceContract i = new InsuranceContract(_id,
                                                     _dataset,
                                                     _opt_type,
@@ -40,15 +41,13 @@ contract InsuranceProvider is Ownable {
                                                     _limit,
                                                     _exhaust,
                                                     ORACLE_PAYMENT,
-                                                    LINK_KOVAN);
+                                                    insurer);
         contracts[address(i)] = i;
         emit contractCreated(address(i), _id);
 
-        // fund the contract with enough LINK tokens to make at least 1 Oracle request, with a buffer
-        // LinkTokenInterface link = LinkTokenInterface(i.getChainlinkToken());
-        // link.transfer(address(i), ORACLE_PAYMENT * 2);
-        // this may be broken in v0.8, may either need to go back to v0.6 or fund with LINK manually
-        return address(i);
+        // manually fund the new contract with enough LINK tokens to make at least 1 Oracle request, with a buffer
+        LinkTokenInterface link = LinkTokenInterface(i.getChainlinkToken());
+        link.transfer(address(i), ORACLE_PAYMENT * 2);
     }
 
     /**
@@ -56,13 +55,6 @@ contract InsuranceProvider is Ownable {
      */
     function getContract(address _contract) external view returns (InsuranceContract) {
         return contracts[_contract];
-    }
-
-    /**
-     * @dev Get the insurer address for this insurance provider
-     */
-    function getInsurer() external view returns (address) {
-        return insurer;
     }
 
     /**
@@ -76,37 +68,40 @@ contract InsuranceProvider is Ownable {
     /**
      * @dev Return how much ether is in this master contract
      */
-    function getFactoryBalance() external view returns (uint) {
+    function getETHBalance() external view returns (uint) {
         return address(this).balance;
+    }
+    
+    /**
+     * @dev Return how much link is in this master contract
+     */
+    function getLINKBalance() external view returns (uint) {
+        LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
+        return link.balanceOf(address(this));
     }
 
     /**
      * @dev Function to end provider contract, in case of bugs or needing to update logic etc,
      * funds are returned to insurance provider, including any remaining LINK tokens
      */
-    function endContractProvider() external payable onlyOwner() {
-        LinkTokenInterface link = LinkTokenInterface(LINK_KOVAN);
-        require(link.transfer(msg.sender, link.balanceOf(address(this))), "Unable to transfer");
+    function endContractProvider() external payable onlyOwner {
+        LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
+        require(link.transfer(insurer, link.balanceOf(address(this))), "Unable to transfer");
         selfdestruct(payable(insurer));
     }
-
-    /**
-     * @dev fallback function, to receive ether
-     */
-    receive() external payable {  }
-    fallback() external payable {  }
 }
 
-
-contract InsuranceContract is ChainlinkClient, Ownable  {
+contract InsuranceContract is ChainlinkClient, ConfirmedOwner  {
 
     using Chainlink for Chainlink.Request;
     uint256 private oraclePaymentAmount;
+    mapping (address => uint) oracleJobs;
     bytes32[] public jobIds;
     address[] public oracles;
-    mapping (address => uint) oracleJobs;
-
     address public insurer;
+    
+    uint256 public currentPrice;
+    
     string id;
     string dataset;
     string opt_type;
@@ -114,13 +109,13 @@ contract InsuranceContract is ChainlinkClient, Ownable  {
     uint start;
     uint end;
     uint strike;
-    string limit;
+    uint limit;
     uint exhaust;
 
     bool contractActive;
     bool contractEvaluated = false;
     uint256 contractPayout;
-
+    
     /**
      * @dev Prevents a function being run unless the Insurance Contract duration has been reached
      */
@@ -138,22 +133,24 @@ contract InsuranceContract is ChainlinkClient, Ownable  {
         _;
     }
 
-    event contractCreated(address _insurer, string _id, uint _start, uint _end, string _limit);
+    event contractCreated(address _insurer, string _id, uint _start, uint _end, uint _limit);
     event contractEnded(string _id, uint _time);
     event contractEvaluationInitiated(string _id, bytes32 _req, uint _time);
     event contractEvaluationCompleted(string _id, bytes32 _req, uint _time, uint256 _payout);
+      
+    event RequestEthereumPriceFulfilled(bytes32 indexed requestId, uint256 indexed price);
 
     /**
      * @dev Creates a new Insurance contract
      */
     constructor(string memory _id, string memory _dataset, string memory _opt_type, string[] memory _locations,
-                uint _start, uint _end, uint _strike, string memory _limit, uint _exhaust, uint256 _oraclePaymentAmount,
-                address _link) payable Ownable() {
+                uint _start, uint _end, uint _strike, uint _limit, uint _exhaust, uint256 _oraclePaymentAmount, 
+                address _insurer) 
+                payable ConfirmedOwner(_insurer) {
 
-        setChainlinkToken(_link);
+        setPublicChainlinkToken();
         oraclePaymentAmount = _oraclePaymentAmount;
 
-        insurer = msg.sender;
         id = _id;
         dataset = _dataset;
         opt_type = _opt_type;
@@ -163,10 +160,12 @@ contract InsuranceContract is ChainlinkClient, Ownable  {
         strike = _strike;
         limit = _limit;
         exhaust = _exhaust;
+        insurer = _insurer;
         contractActive = true;
 
         oracles.push(0xe9d0d0332934c269132e53c03D3fD63EbA41aae0); // test node
-        jobIds.push('d5a3adb5a86a4b56b1ab16995cbab5fe');
+        // jobIds.push(stringToBytes32('244dfabf590c4328a732c5c0b9ee8672'));
+        jobIds.push(stringToBytes32('47fef299d4f84e228ebd75039de2ab25'));
         oracleJobs[oracles[0]] = 0;
 
         /* oracles[1] = 0xfc894b51F2D242B27D8e3EA99258120033563678; // dev node, no job created yet
@@ -174,31 +173,44 @@ contract InsuranceContract is ChainlinkClient, Ownable  {
         oracleJobs[oracles[1]] = 1; */
         
         emit contractCreated(insurer, id, start, end, limit);
-        }
+    }
+    
+    function requestEthereumPrice(address _oracle, string memory _jobId) public onlyOwner {
+        Chainlink.Request memory req = buildChainlinkRequest(stringToBytes32(_jobId), address(this), this.fulfillEthereumPrice.selector);
+        req.add("get", "https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD");
+        req.add("path", "USD");
+        req.addInt("times", 100);
+        sendChainlinkRequestTo(_oracle, req, oraclePaymentAmount);
+    }
+    
+    function fulfillEthereumPrice(bytes32 _requestId, uint256 _price) public recordChainlinkFulfillment(_requestId) {
+        emit RequestEthereumPriceFulfilled(_requestId, _price);
+        currentPrice = _price;
+    }
 
     /**
       * @dev Makes a request to the oracle hosting the Arbol dApp external adapter and associated job
       * to determine a contracts payout after the coverage period has ended
       */
-     function evaluateContract() public onContractEnded() returns (bytes32 requestId)   {
+    function evaluateContract() public onContractEnded() onlyOwner {
 
-         // mark contract as ended, so no future state changes can occur on the contract
-         if (contractActive) {
-             contractActive = false;
-             emit contractEnded(id, block.timestamp);
+        // mark contract as ended, so no future state changes can occur on the contract
+        if (contractActive) {
+            contractActive = false;
+            emit contractEnded(id, block.timestamp);
 
-             // build request to external adapter to determine contract payout
-             Chainlink.Request memory req = buildChainlinkRequest(jobIds[0], address(this), this.evaluateContractCallBack.selector);
-             req.add('dataset', dataset);
-             req.add('opt_type', opt_type);
-             req.addStringArray('locations', locations);
-             req.addUint('start', start);
-             req.addUint('end', end);
-             req.addUint('strike', strike);
-             req.add('limit', limit);
-             req.addUint('exhaust', exhaust);
-             requestId = sendChainlinkRequestTo(oracles[0], req, oraclePaymentAmount);
-             emit contractEvaluationInitiated(id, requestId, block.timestamp);
+            // build request to external adapter to determine contract payout
+            Chainlink.Request memory req = buildChainlinkRequest(jobIds[0], address(this), this.evaluateContractCallBack.selector);
+            req.add('dataset', dataset);
+            req.add('opt_type', opt_type);
+            req.addStringArray('locations', locations);
+            req.addUint('start', start);
+            req.addUint('end', end);
+            req.addUint('strike', strike);
+            req.addUint('limit', limit);
+            req.addUint('exhaust', exhaust);
+            bytes32 requestId = sendChainlinkRequestTo(oracles[0], req, oraclePaymentAmount);
+            emit contractEvaluationInitiated(id, requestId, block.timestamp);
          }
      }
 
@@ -210,12 +222,12 @@ contract InsuranceContract is ChainlinkClient, Ownable  {
 
         contractEvaluated = true;
         contractPayout = _payout;
-        emit contractEvaluationCompleted(id, _requestId, block.timestamp, contractPayout);
+        emit contractEvaluationCompleted(id, _requestId, block.timestamp, _payout);
 
         // Return any remaining ETH and LINK held by this contract back to the factory contract
         payable(insurer).transfer(address(this).balance);
-        // LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
-        // require(link.transfer(insurer, link.balanceOf(address(this))), "Unable to transfer remaining LINK tokens");
+        LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
+        require(link.transfer(insurer, link.balanceOf(address(this))), "Unable to transfer remaining LINK tokens");
     }
 
     /**
@@ -236,12 +248,20 @@ contract InsuranceContract is ChainlinkClient, Ownable  {
         jobIds[index] = jobIds[jobIds.length-1];
         jobIds.pop();
     }
-
+    
     /**
-     * @dev Get the balance of the contract
+     * @dev Get the eth balance of the contract
      */
-    function getContractBalance() external view returns (uint) {
+    function getETHBalance() external view returns (uint) {
         return address(this).balance;
+    }
+    
+    /**
+     * @dev Get the link balance of the contract
+     */
+    function getLINKBalance() external view returns (uint) {
+        LinkTokenInterface link = LinkTokenInterface(getChainlinkToken());
+        return link.balanceOf(address(this));
     }
 
     /**
@@ -310,7 +330,7 @@ contract InsuranceContract is ChainlinkClient, Ownable  {
     /**
      * @dev Get the contract limit
      */
-    function getContractLimit() external view returns (string memory) {
+    function getContractLimit() external view returns (uint) {
         return limit;
     }
 
@@ -335,9 +355,24 @@ contract InsuranceContract is ChainlinkClient, Ownable  {
         return chainlinkTokenAddress();
     }
 
+    function stringToBytes32(string memory source) private pure returns (bytes32 result) {
+        bytes memory tempEmptyStringTest = bytes(source);
+        if (tempEmptyStringTest.length == 0) {
+            return 0x0;
+        }
+
+        assembly { // solhint-disable-line no-inline-assembly
+            result := mload(add(source, 32))
+        }
+    }
+    
     /**
-     * @dev Fallback function so contract function can receive ether when required
+     * @dev Function to end provider contract, in case of bugs or needing to update logic etc,
+     * funds are returned to insurance provider, including any remaining LINK tokens
      */
-    receive() external payable {  }
-    fallback() external payable {  }
+    function endContractInstance() external payable onlyOwner {
+        LinkTokenInterface link = LinkTokenInterface(getChainlinkToken());
+        require(link.transfer(insurer, link.balanceOf(address(this))), "Unable to transfer");
+        selfdestruct(payable(insurer));
+    }
 }

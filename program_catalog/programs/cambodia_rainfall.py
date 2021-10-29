@@ -22,8 +22,8 @@ def _generate_payouts(data, start, end, opt_type, strike, limit, exhaust, tick):
     '''
     strike /= 100
     limit /= 100
-    start_date = datetime.utcfromstimestamp(start).strftime('%Y-%m-%d')
-    end_date = datetime.utcfromstimestamp(end).strftime('%Y-%m-%d')
+    start_date = datetime.utcfromtimestamp(start).strftime('%Y-%m-%d')
+    end_date = datetime.utcfromtimestamp(end).strftime('%Y-%m-%d')
     index_value = data.loc[start_date:end_date].sum()
     opt_type = opt_type.lower()
     direction = 1 if opt_type == 'call' else -1

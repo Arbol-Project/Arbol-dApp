@@ -103,7 +103,7 @@ contract DerivtiveProvider is ChainlinkClient, ConfirmedOwner {
     
     /**
      * @dev Function to end provider contract, in case of bugs or needing to update logic etc,
-     * funds are returned to insurance provider, including any remaining LINK tokens
+     * funds are returned to the contract provider, including any remaining LINK tokens
      */
     function endContractInstance() external onlyOwner {
         LinkTokenInterface link = LinkTokenInterface(getChainlinkToken());
@@ -157,7 +157,7 @@ contract ClimateOption is ChainlinkClient, ConfirmedOwner {
     event contractEvaluationFulfilled(address _contract, bytes32 _req, uint _time, uint256 _payout);
 
     /**
-     * @dev Creates a new Insurance contract
+     * @dev Creates a new climate options contract
      */
     constructor(string memory _id, string memory _dataset, string memory _opt_type, string[] memory _locations,
                 uint _start, uint _end, uint _strike, uint _limit, uint _exhaust, uint _oraclePaymentAmount,

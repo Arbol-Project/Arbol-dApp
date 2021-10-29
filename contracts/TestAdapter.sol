@@ -47,7 +47,7 @@ contract ClimateOptionTest is ChainlinkClient, ConfirmedOwner {
     event contractEvaluationFulfilled(address _contract, bytes32 _req, uint _time, uint256 _payout);
 
     /**
-     * @dev Creates a new Insurance contract
+     * @dev Creates a new test contract
      */
     constructor(string memory _dataset, string memory _opt_type, string[] memory _locations,
                 uint _start, uint _end, uint _strike, uint _limit, uint _exhaust) 

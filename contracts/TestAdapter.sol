@@ -57,7 +57,7 @@ contract ClimateOptionTest is ChainlinkClient, ConfirmedOwner {
         jobIds.push(stringToBytes32('255b4810914f4237877c6cc1ea6e5f64'));
         
         provider = msg.sender;
-        dataset = 'Soutr Nikom CALL, limit: 534';
+        dataset = 'chirpsc_final_25-daily';
         opt_type = 'CALL';
         locations = ["[12.76727009, 104.01941681]", "[12.76727009, 104.26941681]", "[13.01727009, 104.01941681]", "[13.01727009, 104.26941681]", "[13.26727009, 104.01941681]", "[13.26727009, 104.26941681]", "[13.51727009, 104.01941681]", "[13.51727009, 104.26941681]"];
         start = 1627790400;

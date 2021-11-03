@@ -1,5 +1,5 @@
-from app import app as application
+from app import build_app
 
 
-app = application
+app = build_app()
     

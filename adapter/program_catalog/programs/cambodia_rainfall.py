@@ -4,7 +4,7 @@ from program_catalog.program_utils.loader import ArbolLoader
 
 
 _PROGRAM_PARAMETERS = ['dataset', 'locations', 'start', 'end', 'strike', 'limit', 'opt_type']
-_PROGRAM_OPTIONS = ['exhaust', 'tick']
+_PARAMETER_OPTIONS = ['exhaust', 'tick']
 
 def _generate_payouts(data, start, end, opt_type, strike, limit, exhaust, tick):
     ''' Uses the provided contract parameters to calculate a payout and index
@@ -60,10 +60,10 @@ class CambodiaRainfall:
             if not param in params:
                 result_msg += f'missing {param} parameter\n'
                 result = False
-        for param in _PROGRAM_OPTIONS:
+        for param in _PARAMETER_OPTIONS:
             if param in params and params.get(param, None) is not None:
                 return result, result_msg
-        result_msg += f'no non-null parameter in {_PROGRAM_OPTIONS} detected\n'
+        result_msg += f'no non-null parameter in {_PARAMETER_OPTIONS} detected\n'
         result = False
         return result, result_msg
 

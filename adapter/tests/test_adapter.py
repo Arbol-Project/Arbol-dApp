@@ -3,13 +3,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 import csv
 import json
 import pytest
+from datetime import datetime
 
 import adapter
-
-
-# Set path to sro.json and payouts.csv files for testing here
-SROFILEPATH = './tests/rainfall_basket_sro.json'
-PAYOUTFILEPATH = './tests/payouts.csv'
 
 
 def parse_available_contract_data(sropath, paypath):
@@ -33,6 +29,8 @@ def parse_available_contract_data(sropath, paypath):
             payout = row[1]
             if payout == 'DATA UNAVAILABLE':
                 payout = None
+            else:
+                payout = int(round(float(payout), 2) * 100)
             contracts[name] = payout
         f.close()
     with open(sropath) as f:
@@ -42,23 +40,27 @@ def parse_available_contract_data(sropath, paypath):
     for contract in data['__config__']['contracts']:
         config = contract['__config__']
         name = config['id']
-        payout = contracts[name]
         payouts = config['payouts']['__config__']
         derivative = payouts['derivative']['__config__']
+        opt_type = derivative['opt_type']
         index = payouts['index_distribution']['__config__']['index']['__config__']
         loader = index['loader']['__config__']
-        strike = derivative['strike']
-        exhaust = derivative['exhaust']
-        limit = derivative['limit']
-        opt_type = derivative['opt_type']
-        start = index['start']
-        end = index['end']
         dataset = loader['dataset_name']
+        payout = contracts[name]
+        
+        strike = int(derivative['strike'] * 100)
+        exhaust = int(derivative['exhaust'] * 100)
+        limit = int(derivative['limit'] * 100)
+
+        start = int(datetime.strptime(index['start'], '%Y-%m-%d').timestamp())
+        end = int(datetime.strptime(index['end'], '%Y-%m-%d').timestamp())
+        
         locations = []
         for loader_config in loader['loaders']:
             lat = loader_config['__config__']['lat']
             lon = loader_config['__config__']['lon']
-            locations.append([lat, lon])
+            locations.append(str([lat, lon]))
+        
         request_params = {
             'name': name,
             'strike': strike,
@@ -81,7 +83,7 @@ def parse_available_contract_data(sropath, paypath):
         contract_requests.append(request_data)
     return contract_requests
 
-TEST_DATA = parse_available_contract_data(SROFILEPATH, PAYOUTFILEPATH)
+TEST_DATA = parse_available_contract_data(os.getenv('SRO_PATH'), os.getenv('PAYOUT_PATH'))
 
 def adapter_setup(test_data):
     ''' Runs the adapter for a single test request
@@ -99,26 +101,26 @@ def test_create_request_success(test_data):
         Parameters: test_data (dict), the request to test
     '''
     result = adapter_setup(test_data)
-    name = test_data["data"]["params"]["name"]
-    payout = test_data["data"]["payout"]
+    name = test_data['data']['params']['name']
+    payout = test_data['data']['payout']
     assert result['statusCode'] == 200
     assert result['jobRunID'] == '1'
     assert result['data'] is not None
-    assert type(result['result']) is float
-    assert type(result['data']['result']) is float
+    assert type(result['result']) is int
+    assert type(result['data']['result']) is int
     if payout is not None:
         assert result['result'] == round(float(payout), 2)
-        msg = f'name: {name}, result payout: {result["result"]}, official payout: {payout}\n'
+        msg = f'name: {name}, result payout: {result["result"]} (x100), official payout: {payout} (x100)\n'
         f = open('./tests/log.txt', 'a')
         f.write(msg)
         f.close()
-        print(msg[:-2])
+        print(msg)
     else:
         msg = f'name: {name}, request status: success\n'
         f = open('./tests/log.txt', 'a')
         f.write(msg)
         f.close()
-        print(msg[:-2])
+        print(msg)
 
 if __name__ == '__main__':
     _ = [test_create_request_success(test) for test in TEST_DATA]

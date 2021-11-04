@@ -41,6 +41,10 @@ class ArbolLoader:
     def _load_series(self, lat, lon, dataset_name, request_params):
         ''' Loads a Pandas Series from IPFS for a given lat/lon coordinate pair
 
+            Parameters: lat (float), latitude of location
+                        lon (float), longitude of location
+                        dataset_name (string), name of the dataset to use for building the index
+                        request_params (dict), additional dweather client paramters 
             Returns: Pandas Series, historical weather data for the given location
         '''
         data = client.get_gridcell_history(lat, lon, dataset_name, **request_params)

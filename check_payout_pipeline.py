@@ -51,8 +51,8 @@ def run_pipeline_test(test_data):
     contract_created = derivative_provider.events.contractCreated().processReceipt(tx_receipt)
     contract_address = contract_created[0]['args']['_contract']
     etherscan_abi_endpoint = f'https://api-kovan.etherscan.io/api?module=contract&action=getabi&address={contract_address}&apikey={ETHERSCAN_API_KEY}'
-    response = requests.get(url=etherscan_abi_endpoint)
-    print(response.json())
+    response = requests.get(url=etherscan_abi_endpoint).json()
+
     contract_abi = response['data']['result']
     options_contract = w3.eth.contract(abi=contract_abi, address=contract_address)
 

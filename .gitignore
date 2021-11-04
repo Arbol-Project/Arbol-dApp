@@ -1,12 +1,12 @@
 adapter/tests/log.txt
 adapter/tests/payouts.csv
 adapter/tests/rainfall_basket_sro.json
-chainlink/tls/server.crt
-chainlink/tls/server.key
+chainlink/tls/server.*
 chainlink/.env
 chainlink/backup.env
 chainlink/.api
 chainlink/.password
+secrets.*
 __pycache__
 .DS_Store
 .pytest_cache

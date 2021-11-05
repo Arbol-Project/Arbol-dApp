@@ -13,7 +13,7 @@ contracts/package-lock.json
 contracts/package.json
 contracts/node_modules
 
-secrets.*
+secrets
 __pycache__
 .DS_Store
 .pytest_cache

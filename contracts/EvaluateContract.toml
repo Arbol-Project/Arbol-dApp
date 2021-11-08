@@ -1,16 +1,15 @@
 type = "directrequest"
 schemaVersion = 1
-name = "Request Arbol-dApp Contract Payout"
+name = "Get Payout Evaluation"
 contractAddress = "0xe9d0d0332934c269132e53c03D3fD63EbA41aae0"
-externalJobID = "255b4810-914f-4237-877c-6cc1ea6e5f64"
-maxTaskDuration = "30s"
+maxTaskDuration = "0s"
 observationSource = """
     decode_log   [type=ethabidecodelog
                   abi="OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)"
                   data="$(jobRun.logData)"
                   topics="$(jobRun.logTopics)"]
     decode_cbor  [type=cborparse data="$(decode_log.data)"]
-    arbol_dapp   [type="bridge" name="arbol-dapp" timeout="300s" requestData="{\\"data\\":{\\"program\\": \\"cambodia_rainfall\\", \\"params\\":{\\"dataset\\": $(decode_cbor.dataset), \\"opt_type\\": $(decode_cbor.opt_type), \\"locations\\": $(decode_cbor.locations), \\"start\\": $(decode_cbor.start), \\"end\\": $(decode_cbor.end), \\"strike\\": $(decode_cbor.strike), \\"limit\\": $(decode_cbor.limit), \\"exhaust\\": $(decode_cbor.exhaust)}}}"]
+    arbol_dapp   [type="bridge" name="arbol-dapp" timeout="30s" requestData="{\\"data\\":{\\"program\\": \\"cambodia_rainfall\\", \\"params\\":{\\"dataset\\": $(decode_cbor.dataset), \\"opt_type\\": $(decode_cbor.opt_type), \\"locations\\": $(decode_cbor.locations), \\"start\\": $(decode_cbor.start), \\"end\\": $(decode_cbor.end), \\"strike\\": $(decode_cbor.strike), \\"limit\\": $(decode_cbor.limit), \\"exhaust\\": $(decode_cbor.exhaust)}}}"]
     parse        [type=jsonparse path="result" data="$(arbol_dapp)"]
     encode_data  [type=ethabiencode abi="(uint256 value)" data="{ \\"value\\": $(parse) }"]
     encode_tx    [type=ethabiencode
@@ -21,3 +20,4 @@ observationSource = """
 
     decode_log -> decode_cbor -> arbol_dapp -> parse -> encode_data -> encode_tx -> submit_tx
 """
+externalJobID = "7dba7fd6-9569-4197-8d4d-3c552ec41363"

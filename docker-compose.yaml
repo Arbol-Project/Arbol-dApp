@@ -1,14 +1,12 @@
 version: "3.8"
 
 services:
-
   chainlink-node-1:
     network_mode: "bridge"
     container_name: "primary-node"
     build: chainlink/
     env_file:
       - chainlink/.env
-    restart: on-failure
     ports:
       - 6689:6689
     volumes:
@@ -18,12 +16,6 @@ services:
     network_mode: "host"
     container_name: "ipfs-daemon"
     build: ipfs/
-    restart: on-failure
-    ports:
-      - 4001:4001
-      - 4001:4001/udp
-      - 127.0.0.1:5001:5001
-      - 127.0.0.1:8080:8080
     depends_on:
       - chainlink-node-1
 
@@ -31,9 +23,6 @@ services:
     network_mode: "host"
     container_name: "arbol-adapter"
     build: adapter/
-    restart: on-failure
-    ports:
-      - 0.0.0.0:8000:8000
     volumes:
       - adapter:/adapter
     depends_on:
@@ -41,5 +30,5 @@ services:
       - ipfs-daemon
 
 volumes:
-  chainlink: 
+  chainlink:
   adapter:

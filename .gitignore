@@ -14,6 +14,9 @@ contracts/package.json
 contracts/node_modules
 
 secrets
+logs
+*.pdf
+*.zip
 __pycache__
 .DS_Store
 .pytest_cache

@@ -2,13 +2,15 @@ version: "3.8"
 
 services:
   chainlink-node-1:
-    network_mode: "bridge"
+    # network_mode: "bridge"
+    network_mode: "host"
     container_name: "primary-node"
     build: chainlink/
+    # image: 080949671823.dkr.ecr.us-east-1.amazonaws.com/chainlink-node:latest
     env_file:
       - chainlink/.env
-    ports:
-      - 6689:6689
+    # ports:
+    #   - 6689:6689
     volumes:
       - chainlink:/chainlink
 
@@ -16,6 +18,7 @@ services:
     network_mode: "host"
     container_name: "ipfs-daemon"
     build: ipfs/
+    # image: 080949671823.dkr.ecr.us-east-1.amazonaws.com/ipfs-daemon:latest
     depends_on:
       - chainlink-node-1
 
@@ -23,6 +26,7 @@ services:
     network_mode: "host"
     container_name: "arbol-adapter"
     build: adapter/
+    # image: 080949671823.dkr.ecr.us-east-1.amazonaws.com/external-adapter:latest
     volumes:
       - adapter:/adapter
     depends_on:

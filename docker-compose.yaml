@@ -17,8 +17,8 @@ services:
   ipfs-daemon:
     network_mode: "host"
     container_name: "ipfs-daemon"
-    build: ipfs/
-    # image: 080949671823.dkr.ecr.us-east-1.amazonaws.com/ipfs-daemon:latest
+    # build: ipfs/
+    image: 080949671823.dkr.ecr.us-east-1.amazonaws.com/ipfs-daemon:latest
     depends_on:
       - chainlink-node-1
 

@@ -1,4 +1,5 @@
 FROM ipfs/go-ipfs:v0.7.0
+# FROM 080949671823.dkr.ecr.us-east-1.amazonaws.com/ipfs-daemon:latest
 
 RUN ipfs init
 RUN ipfs bootstrap rm --all

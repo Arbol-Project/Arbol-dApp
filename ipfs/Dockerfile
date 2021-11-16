@@ -7,10 +7,3 @@ RUN ipfs bootstrap add '/ip4/198.211.104.50/tcp/4001/p2p/QmWsAFSDajELyneR7LkMsgf
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT /entrypoint.sh
-
-
-# sudo curl -L https://github.com/docker/compose/releases/download/2.1.1/docker-compose-$(uname -s)-$(uname -m) -o $HOME/.docker/cli-plugins/docker-compose-$(uname -s)-$(uname -m)
-# chmod +x $HOME/.docker/cli-plugins/docker-compose-$(uname -s)-$(uname -m)
-
-
-# sudo curl -L https://github.com/docker/compose/releases/download/v2.1.1/docker-compose-$(uname -s)-$(uname -m) -o $HOME/.docker/cli-plugins/docker-compose

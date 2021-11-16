@@ -17,8 +17,8 @@ services:
   ipfs-daemon:
     network_mode: "host"
     container_name: "ipfs-daemon"
-    # build: ipfs/
-    image: 080949671823.dkr.ecr.us-east-1.amazonaws.com/ipfs-daemon:latest
+    build: ipfs/
+    # image: 080949671823.dkr.ecr.us-east-1.amazonaws.com/ipfs-daemon:latest
     depends_on:
       - chainlink-node-1
 
@@ -36,3 +36,5 @@ services:
 volumes:
   chainlink:
   adapter:
+# sudo curl -L https://github.com/docker/compose/releases/download/v2.1.1/docker-compose-$(uname -s)-$(uname -m) -o $HOME/.docker/cli-plugins/docker-compose
+# chmod +x $HOME/.docker/cli-plugins/docker-compose

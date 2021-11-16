@@ -1,17 +1,20 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.7;
+pragma solidity ^0.8.0;
 
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
 
 
-contract DerivtiveProvider is ChainlinkClient, ConfirmedOwner {
+contract DerivativeProvider is ChainlinkClient, ConfirmedOwner {
 
     uint256 private constant ORACLE_PAYMENT = 1 * LINK_DIVISIBILITY;
     address public provider;
     mapping (address => ClimateOption) contracts;
+    uint public echidna_owner_accesses = 0;
 
     constructor() ConfirmedOwner(msg.sender) {
+
+        echidna_owner_accesses += 1;
         setPublicChainlinkToken();
         provider = msg.sender;
     }
@@ -27,6 +30,8 @@ contract DerivtiveProvider is ChainlinkClient, ConfirmedOwner {
     function newContract(string memory _id, string memory _dataset, string memory _opt_type, string[] memory _locations,
                         uint _start, uint _end, uint _strike, uint _limit, uint _exhaust) 
                         public onlyOwner {
+
+        echidna_owner_accesses += 1;
 
         ClimateOption i = new ClimateOption(_id,
                                             _dataset,
@@ -44,7 +49,7 @@ contract DerivtiveProvider is ChainlinkClient, ConfirmedOwner {
 
         // manually fund the new contract with enough LINK tokens to make at least 1 Oracle request, with a buffer
         LinkTokenInterface link = LinkTokenInterface(getChainlinkToken());
-        link.transfer(address(i), ORACLE_PAYMENT * 2);
+        require(link.transfer(address(i), ORACLE_PAYMENT * 2), "Unable to fund deployed contract");
     }
 
     /**
@@ -57,7 +62,7 @@ contract DerivtiveProvider is ChainlinkClient, ConfirmedOwner {
     /**
      * @dev Request evaluation of a given contract
      */
-    function getContractPayout(address _contract) external view onlyOwner returns (uint256) {
+    function getContractPayout(address _contract) external view returns (uint256) {
         return contracts[_contract].getPayout();
     }
 
@@ -106,6 +111,7 @@ contract DerivtiveProvider is ChainlinkClient, ConfirmedOwner {
      * funds are returned to the contract provider, including any remaining LINK tokens
      */
     function endContractInstance() external onlyOwner {
+        echidna_owner_accesses += 1;
         LinkTokenInterface link = LinkTokenInterface(getChainlinkToken());
         require(link.transfer(provider, link.balanceOf(address(this))), "Unable to transfer");
         selfdestruct(payable(provider));
@@ -118,11 +124,13 @@ contract ClimateOption is ChainlinkClient, ConfirmedOwner {
 
     uint256 private oraclePaymentAmount;
     mapping (address => uint) public oracleMap;
-    address[] public oracles;
-    bytes32[] public jobIds;
+    // set oracles here before deploying
+    address[] public oracles = [0xe9d0d0332934c269132e53c03D3fD63EbA41aae0];
+    bytes32[] public jobIds = [stringToBytes32('255b4810914f4237877c6cc1ea6e5f64')];
     address public provider;
     bool public contractActive;
     bool public contractEvaluated;
+    uint private requestsPending;
     
     string private id;
     string private dataset;
@@ -134,6 +142,7 @@ contract ClimateOption is ChainlinkClient, ConfirmedOwner {
     uint private limit;
     uint private exhaust;
     uint256 private payout;
+    uint256 private agg_result;
     
     /**
      * @dev Prevents a function being run unless the end date has been passed
@@ -153,8 +162,8 @@ contract ClimateOption is ChainlinkClient, ConfirmedOwner {
     
     event contractCreated(address _contract, uint _start, uint _end, uint _limit);
     event contractEnded(address _contract, uint _end, uint _time);
-    event contractEvaluationRequested(address _contract, bytes32 _req, uint _time);
-    event contractEvaluationFulfilled(address _contract, bytes32 _req, uint _time, uint256 _payout);
+    event contractEvaluationRequested(address _contract, bytes32 _req, address _oracle, uint _time);
+    event contractEvaluationFulfilled(address _contract, uint _time, uint256 _payout);
 
     /**
      * @dev Creates a new climate options contract
@@ -166,10 +175,11 @@ contract ClimateOption is ChainlinkClient, ConfirmedOwner {
                     
         setPublicChainlinkToken();
         
-        oracles.push(0xe9d0d0332934c269132e53c03D3fD63EbA41aae0);
-        jobIds.push(stringToBytes32('255b4810914f4237877c6cc1ea6e5f64'));
-        oraclePaymentAmount = _oraclePaymentAmount;
+        for (uint i = 0; i != oracles.length; i += 1) {
+            oracleMap[oracles[i]] = i;
+        }
         
+        oraclePaymentAmount = _oraclePaymentAmount;
         provider = _provider;
         id = _id;
         dataset = _dataset;
@@ -182,6 +192,7 @@ contract ClimateOption is ChainlinkClient, ConfirmedOwner {
         exhaust = _exhaust;
         contractActive = true;
         contractEvaluated = false;
+        requestsPending = 0;
         emit contractCreated(address(this), _start, _end, _limit);
     }
     
@@ -193,27 +204,36 @@ contract ClimateOption is ChainlinkClient, ConfirmedOwner {
         if (contractActive) {
             contractActive = false;
             emit contractEnded(address(this), end, block.timestamp);
-            Chainlink.Request memory req = buildChainlinkRequest(jobIds[0], address(this), this.fulfillPayoutEvaluation.selector);
-            req.add('dataset', dataset);
-            req.add('opt_type', opt_type);
-            req.addStringArray('locations', locations);
-            req.addUint('start', start);
-            req.addUint('end', end);
-            req.addUint('strike', strike);
-            req.addUint('limit', limit);
-            req.addUint('exhaust', exhaust);
-            bytes32 requestId = sendChainlinkRequestTo(oracles[0], req, oraclePaymentAmount);
-            emit contractEvaluationRequested(address(this), requestId, block.timestamp);   
+
+            for (uint i = 0; i != oracles.length; i += 1) {
+                Chainlink.Request memory req = buildChainlinkRequest(jobIds[i], address(this), this.fulfillPayoutEvaluation.selector);
+                req.add('dataset', dataset);
+                req.add('opt_type', opt_type);
+                req.addStringArray('locations', locations);
+                req.addUint('start', start);
+                req.addUint('end', end);
+                req.addUint('strike', strike);
+                req.addUint('limit', limit);
+                req.addUint('exhaust', exhaust);
+                bytes32 requestId = sendChainlinkRequestTo(oracles[i], req, oraclePaymentAmount);
+                requestsPending += 1;
+                emit contractEvaluationRequested(address(this), requestId, oracles[i], block.timestamp);   
+            }
         }
     }
     
     function fulfillPayoutEvaluation(bytes32 _requestId, uint256 _result) public recordChainlinkFulfillment(_requestId) {
-        payout = _result;
-        contractEvaluated = true;
-        emit contractEvaluationFulfilled(address(this), _requestId, block.timestamp, _result);
-        
-        LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
-        require(link.transfer(provider, link.balanceOf(address(this))), "Unable to transfer remaining LINK tokens");
+        // payout = _result;
+        agg_result += _result;
+        requestsPending -= 1;
+        if (requestsPending == 0) {
+            payout = agg_result / oracles.length;
+            contractEvaluated = true;
+            emit contractEvaluationFulfilled(address(this), block.timestamp, payout);
+            
+            LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
+            require(link.transfer(provider, link.balanceOf(address(this))), "Unable to transfer remaining LINK tokens");
+        }
     }
     
     /**

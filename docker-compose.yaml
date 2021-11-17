@@ -28,3 +28,7 @@ services:
     depends_on:
       - chainlink-node-1
       - ipfs-daemon
+
+volumes:
+  adapter:
+  chainlink:

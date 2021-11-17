@@ -4,7 +4,7 @@ COPY . /adapter
 WORKDIR /adapter
 RUN pip3 install pipenv
 RUN pipenv install --system --deploy --ignore-pipfile
-RUN pipenv install gunicorn[gevent]
+RUN pip3 install gunicorn[gevent]
 COPY wsgi.py /wsgi.py
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh

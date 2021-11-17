@@ -1,10 +1,17 @@
 FROM python:3.8
 
 COPY . /adapter
-WORKDIR /adapter
-RUN pip3 install pipenv
+# WORKDIR /adapter
+
+# AWS setup specific commands
+RUN adduser -D ec2-user
+USER ec2-user
+WORKDIR /home/ec2-user/Arbol-dApp/adapter
+RUN pip install --upgrade pip
+
+RUN pip install --user pipenv
 RUN pipenv install --system --deploy --ignore-pipfile
-RUN pip install gunicorn[gevent]
+RUN pip install --user gunicorn[gevent]
 COPY wsgi.py /wsgi.py
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh

@@ -5,19 +5,21 @@ services:
     network_mode: "bridge"
     # network_mode: "host"
     container_name: "primary-node"
-    build: chainlink/
+    build: ./chainlink/
     # image: 080949671823.dkr.ecr.us-east-1.amazonaws.com/chainlink-node:latest
     env_file:
-      - chainlink/.env
+      - ./chainlink/.env
     ports:
       - 6689:6689
     volumes:
-      - chainlink:/chainlink
+      - ./chainlink:/chainlink
 
   ipfs-daemon:
     network_mode: "host"
     container_name: "ipfs-daemon"
-    build: ipfs/
+    build: ./ipfs/
+    # environment:
+    #   IPFS_PATH: "~/.ipfs"
     # image: 080949671823.dkr.ecr.us-east-1.amazonaws.com/ipfs-daemon:latest
     depends_on:
       - chainlink-node-1
@@ -25,16 +27,29 @@ services:
   external-adapter:
     network_mode: "host"
     container_name: "arbol-adapter"
-    build: adapter/
+    build: ./adapter/
     # image: 080949671823.dkr.ecr.us-east-1.amazonaws.com/external-adapter:latest
     volumes:
-      - adapter:/adapter
+      - ./adapter:/adapter
     depends_on:
       - chainlink-node-1
       - ipfs-daemon
 
-volumes:
-  chainlink:
-  adapter:
-# sudo curl -L https://github.com/docker/compose/releases/download/v2.1.1/docker-compose-$(uname -s)-$(uname -m) -o $HOME/.docker/cli-plugins/docker-compose
-# chmod +x $HOME/.docker/cli-plugins/docker-compose
+# volumes:
+#   chainlink:
+#   adapter:
+# sudo amazon-linux-extras install -y docker
+# sudo systemctl start docker
+# sudo gpasswd -a $USER docker
+# exit
+# sudo yum install git
+# mkdir -p ~/.docker/cli-plugins/
+# sudo curl -L https://github.com/docker/compose/releases/download/v2.1.1/docker-compose-$(uname -s)-$(uname -m) -o ~/.docker/cli-plugins/docker-compose
+# sudo chmod +x ~/.docker/cli-plugins/docker-compose
+# git clone --recurse-submodules --remote-submodules https://github.com/dmp267/Arbol-dApp.git
+# wget https://dist.ipfs.io/go-ipfs/v0.7.0/go-ipfs_v0.7.0_linux-amd64.tar.gz
+# tar -xvzf go-ipfs_v0.7.0_linux-amd64.tar.gz
+# cd go-ipfs
+# sudo bash install.sh
+# ipfs init
+# secrets file transfer

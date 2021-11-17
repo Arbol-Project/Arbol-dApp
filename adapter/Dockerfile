@@ -2,7 +2,7 @@ FROM python:3.8
 
 COPY . /adapter
 WORKDIR /adapter
-RUN pip install pipenv
+RUN pip3 install pipenv
 RUN pipenv install --system --deploy --ignore-pipfile
 RUN pipenv install gunicorn[gevent]
 COPY wsgi.py /wsgi.py

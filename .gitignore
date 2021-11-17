@@ -5,19 +5,12 @@ adapter/tests/rainfall_basket_sro.json
 chainlink/.env
 chainlink/.api
 chainlink/.password
-chainlink/backup.env
 chainlink/tls/server.*
 
 contracts/abi.json
-contracts/package-lock.json
-contracts/package.json
-contracts/node_modules
 
 secrets
 logs
-*.pdf
-*.zip
 __pycache__
 .DS_Store
 .pytest_cache
-.env

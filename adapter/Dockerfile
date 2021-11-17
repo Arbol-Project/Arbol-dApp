@@ -1,5 +1,4 @@
 FROM python:3.8
-# FROM 080949671823.dkr.ecr.us-east-1.amazonaws.com/external-adapter:latest
 
 COPY . /adapter
 WORKDIR /adapter

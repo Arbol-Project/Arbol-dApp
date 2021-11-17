@@ -1,5 +1,4 @@
 FROM smartcontract/chainlink:0.10.14
-# FROM 080949671823.dkr.ecr.us-east-1.amazonaws.com/chainlink-node:latest
 
 RUN mkdir /chainlink
 RUN mkdir /chainlink/tls

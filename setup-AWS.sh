@@ -1,6 +1,5 @@
 #!/bin/sh
 
-sudo yum install git
 sudo amazon-linux-extras install -y docker
 sudo systemctl start docker
 sudo gpasswd -a $USER docker

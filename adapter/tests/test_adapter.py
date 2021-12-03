@@ -7,6 +7,8 @@ from datetime import datetime
 
 import adapter
 
+SRO_PATH = './tests/rainfall_basket_sro.json'
+PAYOUT_PATH = './tests/payouts.csv'
 
 def parse_available_contract_data(sropath, paypath):
     ''' Read contract data from json file and format requests
@@ -76,14 +78,14 @@ def parse_available_contract_data(sropath, paypath):
             'id': '1',
             'data': {
                 'payout': payout,
-                'program': 'cambodia_rainfall',
+                'program': 'GRP' if opt_type == 'PUT' else 'XSR',
                 'params': request_params
             }
         }
         contract_requests.append(request_data)
     return contract_requests
 
-TEST_DATA = parse_available_contract_data(os.getenv('SRO_PATH'), os.getenv('PAYOUT_PATH'))
+TEST_DATA = parse_available_contract_data(SRO_PATH, PAYOUT_PATH)
 
 def adapter_setup(test_data):
     ''' Runs the adapter for a single test request

@@ -5,11 +5,13 @@ adapter/tests/rainfall_basket_sro.json
 chainlink/.env
 chainlink/.api
 chainlink/.password
+chainlink/secrets.zip
 chainlink/tls/server.*
 
 contracts/abi.json
 
-secrets
+extra
+
 logs
 __pycache__
 .DS_Store

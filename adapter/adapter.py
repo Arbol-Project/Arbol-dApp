@@ -28,23 +28,22 @@ class Adapter:
 
             Returns: bool, whether the request is valid
         '''
-        if self.request_data is None:
-            self.request_error = 'request is None'
-            return False
-        if self.request_data == {}:
+        if self.request_data is None or self.request_data == {}:
             self.request_error = 'request is empty'
             return False
-        program_name = self.request_data.get('program', None)
-        if program_name is None:
-            self.request_error = 'no program specified'
-            return False
-        else:
-            self.program = get_program(program_name)
         params = self.request_data.get('params', None)
         if params is None:
             self.request_error = 'no parameters specified'
             return False
         self.params = params
+        program_name = self.request_data.get('program', None)
+        if program_name is None:
+            self.request_error = 'no program specified'
+            return False
+        self.program = get_program(program_name)
+        if self.program is None:
+            self.request_error = 'invalid program specified'
+            return False
         valid, self.request_error = self.program.validate_request(params)
         return valid
 

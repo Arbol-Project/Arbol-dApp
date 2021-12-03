@@ -1,10 +1,16 @@
-from program_catalog.programs.cambodia_rainfall import CambodiaRainfall
-from program_catalog.programs.cuban_blizzard import CubanBlizzard
+from program_catalog.programs.cambodia_rainfall import RainfallDerivative
+from program_catalog.programs.cuban_blizzard import CriticalSnowfallDerivative
 
 
 _PROGRAM_DIRECTORY = {
-    'cambodia_rainfall': CambodiaRainfall,
-    'cuban_blizzard': CubanBlizzard
+    'rainfall_derivative': {
+        'names': ['GRP', 'XSR'],
+        'program': RainfallDerivative
+    },
+    'critical_snowfall_derivative': {
+        'names': ['CriticalSnowday'],
+        'program': CriticalSnowfallDerivative
+    }
 }
 
 
@@ -13,5 +19,9 @@ def get_program(program_name):
 
         Parameters: program name (str), name of the program
         Returns: Program, class pointer for desired program
+        or None if program name is improperly specified
     '''
-    return _PROGRAM_DIRECTORY[program_name]
+    for program in _PROGRAM_DIRECTORY:
+        if program_name in _PROGRAM_DIRECTORY[program]['names']:
+            return _PROGRAM_DIRECTORY[program]['program']
+    return None

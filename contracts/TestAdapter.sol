@@ -8,7 +8,6 @@ contract ClimateOptionTest is ChainlinkClient, ConfirmedOwner {
     using Chainlink for Chainlink.Request;
 
     uint256 private constant oraclePaymentAmount = 1 * LINK_DIVISIBILITY;
-    mapping(address => uint256) public oracleMap;
     address[] public oracles;
     bytes32[] public jobIds;
     address public provider;
@@ -72,8 +71,8 @@ contract ClimateOptionTest is ChainlinkClient, ConfirmedOwner {
     constructor() ConfirmedOwner(msg.sender) {
         setPublicChainlinkToken();
 
-        oracles.push(0xe9d0d0332934c269132e53c03D3fD63EbA41aae0);
-        jobIds.push(stringToBytes32("7dba7fd6956941978d4d3c552ec41363"));
+        oracles = [0xe9d0d0332934c269132e53c03D3fD63EbA41aae0];
+        jobIds = [stringToBytes32('6c5f2d44a1254ce79912749478dc734c')];
 
         provider = msg.sender;
         dataset = "chirpsc_final_25-daily";
@@ -174,25 +173,6 @@ contract ClimateOptionTest is ChainlinkClient, ConfirmedOwner {
     function getLINKBalance() external view returns (uint256) {
         LinkTokenInterface link = LinkTokenInterface(getChainlinkToken());
         return link.balanceOf(address(this));
-    }
-
-    /**
-     * @dev add a new node and associated job ID to the contract evaluator set
-     */
-    function addOracleJob(address oracle, bytes32 jobId) external onlyOwner {
-        oracles.push(oracle);
-        jobIds.push(jobId);
-    }
-
-    /**
-     * @dev remove a node and associated job ID from the contract evaluator set
-     */
-    function removeOracleJob(address oracle) external onlyOwner {
-        uint256 index = oracleMap[oracle];
-        oracles[index] = oracles[oracles.length - 1];
-        oracles.pop();
-        jobIds[index] = jobIds[jobIds.length - 1];
-        jobIds.pop();
     }
 
     /**

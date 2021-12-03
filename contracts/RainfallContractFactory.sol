@@ -7,14 +7,13 @@ import "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
 
 contract DerivativeProvider is ChainlinkClient, ConfirmedOwner {
 
-    uint256 private constant ORACLE_PAYMENT = 1 * LINK_DIVISIBILITY;
+    // uint256 private constant ORACLE_PAYMENT = 1 * LINK_DIVISIBILITY;
+    uint256 private constant ORACLE_PAYMENT = 1 * 10**17; // 0.1 LINK
     address public provider;
     mapping (address => ClimateOption) contracts;
-    uint public echidna_owner_accesses = 0;
 
     constructor() ConfirmedOwner(msg.sender) {
 
-        echidna_owner_accesses += 1;
         setPublicChainlinkToken();
         provider = msg.sender;
     }
@@ -30,8 +29,6 @@ contract DerivativeProvider is ChainlinkClient, ConfirmedOwner {
     function newContract(string memory _id, string memory _dataset, string memory _opt_type, string[] memory _locations,
                         uint _start, uint _end, uint _strike, uint _limit, uint _exhaust) 
                         public onlyOwner {
-
-        echidna_owner_accesses += 1;
 
         ClimateOption i = new ClimateOption(_id,
                                             _dataset,
@@ -111,7 +108,6 @@ contract DerivativeProvider is ChainlinkClient, ConfirmedOwner {
      * funds are returned to the contract provider, including any remaining LINK tokens
      */
     function endContractInstance() external onlyOwner {
-        echidna_owner_accesses += 1;
         LinkTokenInterface link = LinkTokenInterface(getChainlinkToken());
         require(link.transfer(provider, link.balanceOf(address(this))), "Unable to transfer");
         selfdestruct(payable(provider));
@@ -126,7 +122,7 @@ contract ClimateOption is ChainlinkClient, ConfirmedOwner {
     mapping (address => uint) public oracleMap;
     // set oracles here before deploying
     address[] public oracles = [0xe9d0d0332934c269132e53c03D3fD63EbA41aae0];
-    bytes32[] public jobIds = [stringToBytes32('255b4810914f4237877c6cc1ea6e5f64')];
+    bytes32[] public jobIds = [stringToBytes32('6c5f2d44a1254ce79912749478dc734c')];
     address public provider;
     bool public contractActive;
     bool public contractEvaluated;
@@ -264,6 +260,7 @@ contract ClimateOption is ChainlinkClient, ConfirmedOwner {
     function addOracleJob(address oracle, bytes32 jobId) external onlyOwner {
         oracles.push(oracle);
         jobIds.push(jobId);
+        oracleMap[oracle] = oracles.length-1;
     }
 
     /**
@@ -275,71 +272,72 @@ contract ClimateOption is ChainlinkClient, ConfirmedOwner {
         oracles.pop();
         jobIds[index] = jobIds[jobIds.length-1];
         jobIds.pop();
+        oracleMap[oracles[index]] = index;
     }
     
-    /**
-     * @dev Get the contract ID
-     */
-    function getID() external view returns (string memory) {
-        return id;
-    }
+    // /**
+    //  * @dev Get the contract ID
+    //  */
+    // function getID() external view returns (string memory) {
+    //     return id;
+    // }
     
-    /**
-     * @dev Get the dataset name
-     */
-    function getDataset() external view returns (string memory) {
-        return dataset;
-    }
+    // /**
+    //  * @dev Get the dataset name
+    //  */
+    // function getDataset() external view returns (string memory) {
+    //     return dataset;
+    // }
 
-    /**
-     * @dev Get the option type
-     */
-    function getOptionType() external view returns (string memory) {
-        return opt_type;
-    }
+    // /**
+    //  * @dev Get the option type
+    //  */
+    // function getOptionType() external view returns (string memory) {
+    //     return opt_type;
+    // }
     
-    /**
-     * @dev Get the crop locations
-     */
-    function getLocations() external view returns (string[] memory) {
-        return locations;
-    }
+    // /**
+    //  * @dev Get the crop locations
+    //  */
+    // function getLocations() external view returns (string[] memory) {
+    //     return locations;
+    // }
 
 
-    /**
-     * @dev Get the contract start date
-     */
-    function getStartDate() external view returns (uint) {
-        return start;
-    }
+    // /**
+    //  * @dev Get the contract start date
+    //  */
+    // function getStartDate() external view returns (uint) {
+    //     return start;
+    // }
 
-    /**
-     * @dev Get the contract end date
-     */
-    function getEndDate() external view returns (uint) {
-        return end;
-    }
+    // /**
+    //  * @dev Get the contract end date
+    //  */
+    // function getEndDate() external view returns (uint) {
+    //     return end;
+    // }
 
-    /**
-     * @dev Get the contract strike
-     */
-    function getStrike() external view returns (uint) {
-        return strike;
-    }
+    // /**
+    //  * @dev Get the contract strike
+    //  */
+    // function getStrike() external view returns (uint) {
+    //     return strike;
+    // }
 
-    /**
-     * @dev Get the contract limit
-     */
-    function getLimit() external view returns (uint) {
-        return limit;
-    }
+    // /**
+    //  * @dev Get the contract limit
+    //  */
+    // function getLimit() external view returns (uint) {
+    //     return limit;
+    // }
 
-    /**
-     * @dev Get the contract exhaust
-     */
-    function getExhaust() external view returns (uint) {
-        return exhaust;
-    }
+    // /**
+    //  * @dev Get the contract exhaust
+    //  */
+    // function getExhaust() external view returns (uint) {
+    //     return exhaust;
+    // }
 
     /**
      * @dev Get the current date/time according to the blockchain

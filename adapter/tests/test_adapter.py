@@ -73,12 +73,12 @@ def parse_available_contract_data(sropath, paypath):
             'end': end,
             'dataset': dataset,
             'locations': locations,
+            'program': 'GRP' if opt_type == 'PUT' else 'XSR',
         }
         request_data = {
             'id': '1',
             'data': {
                 'payout': payout,
-                'program': 'GRP' if opt_type == 'PUT' else 'XSR',
                 'params': request_params
             }
         }

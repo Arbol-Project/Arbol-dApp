@@ -1,0 +1,34 @@
+version: "3.8"
+
+services:
+  chainlink-node-1:
+    network_mode: "bridge"
+    container_name: "primary-node"
+    build: chainlink/
+    env_file:
+      - chainlink/.env
+    ports:
+      - 6689:6689
+    volumes:
+      - chainlink:/chainlink
+
+  ipfs-daemon:
+    network_mode: "host"
+    container_name: "ipfs-daemon"
+    build: ipfs/
+    depends_on:
+      - chainlink-node-1
+
+  external-adapter:
+    network_mode: "host"
+    container_name: "arbol-adapter"
+    build: adapter/
+    volumes:
+      - adapter:/adapter
+    depends_on:
+      - chainlink-node-1
+      - ipfs-daemon
+
+volumes:
+  adapter:
+  chainlink:

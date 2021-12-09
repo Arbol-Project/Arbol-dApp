@@ -1,3 +1,3 @@
-[submodule "adapter/dweather"]
-	path = adapter/dweather
+[submodule "chainlink_node/adapter/dweather"]
+	path = chainlink_node/adapter/dweather
 	url = https://github.com/dClimate/dWeather-Python-Client.git

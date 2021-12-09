@@ -1,0 +1,10 @@
+.coverage
+share
+dist
+*.egg-info
+*.whl
+bin
+lib
+__pycache__
+.DS_Store
+*.cfg

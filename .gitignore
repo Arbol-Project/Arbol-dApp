@@ -1,20 +1,20 @@
-adapter/tests/log.txt
-adapter/tests/payouts.csv
-adapter/tests/rainfall_basket_sro.json
+chainlink_node/adapter/tests/log.txt
+chainlink_node/adapter/tests/payouts.csv
+chainlink_node/adapter/tests/rainfall_basket_sro.json
 
-chainlink/.env
-chainlink/.api
-chainlink/.password
-chainlink/secrets*
-chainlink/tls/server.*
+chainlink_node/chainlink/.env
+chainlink_node/chainlink/.api
+chainlink_node/chainlink/.password
+chainlink_node/chainlink/secrets*
+chainlink_node/chainlink/tls/server.*
 
 smart_contracts/other
 smart_contracts/web3_deploy.py
 smart_contracts/hardhat/hardhat.config.js
-smart_contracts/hardhat/SROs
-smart_contracts/hardhat/cache
-smart_contracts/hardhat/artifacts
-smart_contracts/hardhat/node_modules
+smart_contracts/hardhat/SROs/*
+smart_contracts/hardhat/cache/*
+smart_contracts/hardhat/artifacts/*
+smart_contracts/hardhat/node_modules/*
 smart_contracts/brownie
 
 __pycache__

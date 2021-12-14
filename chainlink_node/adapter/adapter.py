@@ -36,11 +36,7 @@ class Adapter:
             self.request_error = 'no parameters specified'
             return False
         self.params = params
-        program_name = self.request_data.get('program', None)
-        if program_name is None:
-            self.request_error = 'no program specified'
-            return False
-        self.program = get_program(program_name)
+        self.program = get_program(self.params)
         if self.program is None:
             self.request_error = 'invalid program specified'
             return False

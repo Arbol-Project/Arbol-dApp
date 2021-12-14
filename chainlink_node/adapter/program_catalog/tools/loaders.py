@@ -5,6 +5,9 @@ import pandas as pd
 from dweather.dweather_client import client
 
 
+SOLIDITY_MULTIPLIER = 10**8
+
+
 class dAppLoader:
     ''' Base loader class for Arbol dApp weather contracts. Uses dWeather Python client
         to get historical weather data from IPFS and computes a single time series 

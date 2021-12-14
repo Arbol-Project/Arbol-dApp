@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from program_catalog.tools.loaders import GFDatasetLoader
+from program_catalog.tools.loaders import GFDatasetLoader, SOLIDITY_MULTIPLIER
+
 
 
 class RainfallDerivative:
@@ -67,26 +68,26 @@ class RainfallDerivative:
                         start (int), unix timestamp for start date of coverage period
                         end (int), unix timestamp for end date of coverage period
                         opt_type (str), type of option contract, either PUT or CALL
-                        strike (int), 100 times the strike value for the payout (no floats in solidity)
-                        limit (int), 100 times the limit value for the payout (no floats in solidity)
-                        exhaust (int), 100 times the exhaust value for the payout (no floats in solidity)
+                        strike (int), 10^8 times the strike value for the payout (no floats in solidity)
+                        limit (int), 10^8 times the limit value for the payout (no floats in solidity)
+                        exhaust (int), 10^8 times the exhaust value for the payout (no floats in solidity)
             or None if tick is not None
                         tick (number), tick value for payout or None if exhaust is not None
-            Returns: int, generated payout times 100 (in order to report back to chain)
+            Returns: int, generated payout times 10^8 (in order to report back to chain)
         '''
-        strike /= 100
-        limit /= 100
+        strike /= SOLIDITY_MULTIPLIER
+        limit /= SOLIDITY_MULTIPLIER
         start_date = datetime.utcfromtimestamp(int(start)).strftime('%Y-%m-%d')
         end_date = datetime.utcfromtimestamp(int(end)).strftime('%Y-%m-%d')
         index_value = data.loc[start_date:end_date].sum()
         opt_type = opt_type.lower()
         direction = 1 if opt_type == 'call' else -1
         if tick is None:
-            exhaust /= 100
+            exhaust /= SOLIDITY_MULTIPLIER
             tick = abs(limit / (strike - exhaust))
         payout = (index_value - strike) * tick * direction
         if payout < 0:
             payout = 0
         if payout > limit:
             payout = limit
-        return int(float(round(payout, 2)) * 100)
+        return int(float(round(payout, 2)) * SOLIDITY_MULTIPLIER)

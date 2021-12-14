@@ -2,24 +2,15 @@ from program_catalog.programs.rainfall_derivative import RainfallDerivative
 from program_catalog.programs.critical_snowfall_derivative import CriticalSnowfallDerivative
 
 
-def get_program(program_name):
+def get_program(params):
     ''' Maps program names to Program classes
 
-        Parameters: program_name (str), name of the program
+        Parameters: params (dict), parameters for adapter request
         Returns: Program, class pointer for desired program
-        or None if program_name is improperly specified
+        or None if params is improperly specified
     '''
-    program_directory = {
-    'rainfall_derivative': {
-        'names': ['GRP', 'XSR'],
-        'program': RainfallDerivative
-        },
-    'critical_snowfall_derivative': {
-        'names': ['CriticalSnowday'],
-        'program': CriticalSnowfallDerivative
-        }
-    }
-    for program_key in program_directory:
-        if program_name in program_directory[program_key]['names']:
-            return program_directory[program_key]['program']
+    if 'locations' in params:
+        return RainfallDerivative
+    elif 'station_id' in params:
+        return CriticalSnowfallDerivative
     return None

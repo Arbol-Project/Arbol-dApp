@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from program_catalog.tools.loaders import GFDatasetLoader
+from program_catalog.tools.loaders import GHCNDatasetLoader, SOLIDITY_MULTIPLIER
 
 
 class CriticalSnowfallDerivative:

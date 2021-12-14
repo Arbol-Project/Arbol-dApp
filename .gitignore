@@ -10,15 +10,20 @@ chainlink_node/chainlink/tls/server.*
 
 smart_contracts/other
 smart_contracts/web3_deploy.py
+
 smart_contracts/hardhat/hardhat.config.js
 smart_contracts/hardhat/SROs/*
 smart_contracts/hardhat/cache/*
 smart_contracts/hardhat/artifacts/*
 smart_contracts/hardhat/node_modules/*
+
 smart_contracts/brownie
+# smart_contracts/brownie/build/*
+# smart_contracts/brownie/SROs/*
+# smart_contracts/brownie/reports/*
 
 __pycache__
 .DS_Store
 .pytest_cache
-*.pdf
+
 

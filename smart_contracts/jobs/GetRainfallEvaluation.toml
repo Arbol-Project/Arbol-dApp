@@ -1,7 +1,7 @@
 type = "directrequest"
 schemaVersion = 1
 name = "Get Rainfall Evaluation"
-contractAddress = "ORACLE_CONTRACT_ADDRESS"
+contractAddress = "0x7bcfF26a5A05AF38f926715d433c576f9F82f5DC"
 maxTaskDuration = "0s"
 observationSource = """
     decode_log   [type=ethabidecodelog
@@ -9,13 +9,14 @@ observationSource = """
                   data="$(jobRun.logData)"
                   topics="$(jobRun.logTopics)"]
     decode_cbor  [type=cborparse data="$(decode_log.data)"]
-    arbol_dapp   [type="bridge" name="arbol-adapter" timeout="30s" requestData="{\\"data\\":{\\"program\\": $(decode_cbor. program), \\"params\\":{\\"dataset\\": $(decode_cbor.dataset), \\"opt_type\\": $(decode_cbor.opt_type), \\"locations\\": $(decode_cbor.locations), \\"start\\": $(decode_cbor.start), \\"end\\": $(decode_cbor.end), \\"strike\\": $(decode_cbor.strike), \\"limit\\": $(decode_cbor.limit), \\"exhaust\\": $(decode_cbor.exhaust)}}}"]
+    arbol_dapp   [type="bridge" name="arbol-adapter" timeout="30s" requestData="{\\"data\\":{\\"program\\": $(decode_cbor.program), \\"params\\":{\\"dataset\\": $(decode_cbor.dataset), \\"opt_type\\": $(decode_cbor.opt_type), \\"locations\\": $(decode_cbor.locations), \\"start\\": $(decode_cbor.start), \\"end\\": $(decode_cbor.end), \\"strike\\": $(decode_cbor.strike), \\"limit\\": $(decode_cbor.limit), \\"exhaust\\": $(decode_cbor.exhaust)}}}"]
     parse        [type=jsonparse path="result" data="$(arbol_dapp)"]
     encode_data  [type=ethabiencode abi="(uint256 value)" data="{ \\"value\\": $(parse) }"]
     encode_tx    [type=ethabiencode
                   abi="fulfillOracleRequest(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes32 data)"
                   data="{\\"requestId\\": $(decode_log.requestId), \\"payment\\": $(decode_log.payment), \\"callbackAddress\\": $(decode_log.callbackAddr), \\"callbackFunctionId\\": $(decode_log.callbackFunctionId), \\"expiration\\": $(decode_log.cancelExpiration), \\"data\\": $(encode_data)}"
                  ]
-    submit_tx    [type=ethtx to="ORACLE_CONTRACT_ADDRESS" data="$(encode_tx)"]
+    submit_tx    [type=ethtx to="0x7bcfF26a5A05AF38f926715d433c576f9F82f5DC" data="$(encode_tx)"]
     decode_log -> decode_cbor -> arbol_dapp -> parse -> encode_data -> encode_tx -> submit_tx
 """
+externalJobID = "6de976e9-2c29-4704-b7b2-e48358f43396"

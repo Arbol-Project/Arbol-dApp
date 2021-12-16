@@ -22,6 +22,7 @@ contract DerivativeProvider is ChainlinkClient, ConfirmedOwner {
      * @dev Create a new contract for client, automatically approved and deployed to the blockchain
      */
     function newContract(
+        string[] _locations,
         string memory _id,
         string memory _dataset,
         string memory _opt_type,
@@ -29,8 +30,7 @@ contract DerivativeProvider is ChainlinkClient, ConfirmedOwner {
         uint256 _end,            // unix timestamp
         uint256 _strike,         // values x 10^8
         uint256 _limit,          // values x 10^8
-        uint256 _exhaust,        // values x 10^8
-        uint256[] _locations     // values x 10^8
+        uint256 _exhaust         // values x 10^8
     ) 
         external 
         onlyOwner 
@@ -201,8 +201,9 @@ contract ClimateOption is ChainlinkClient, ConfirmedOwner {
     bool public contractEvaluated;
     uint256 private requestsPending;
 
-    bytes32 private dataset;
-    bytes32 private opt_type;
+    string private dataset;
+    string private opt_type;
+    string[] private locations;
     uint256 private start;
     uint256 private end;
     uint256 private strike;
@@ -210,7 +211,6 @@ contract ClimateOption is ChainlinkClient, ConfirmedOwner {
     uint256 private exhaust;
     uint256 private payout;
     uint256 private agg_result;
-    uint256[] private locations;
 
     /**
      * @dev Prevents a function being run unless the end date has been passed
@@ -236,26 +236,22 @@ contract ClimateOption is ChainlinkClient, ConfirmedOwner {
      * @dev Creates a new climate options contract
      */
     constructor(
-        bytes32 _dataset,
-        bytes32 _opt_type,
         uint256 _start,
         uint256 _end,
         uint256 _strike,
         uint256 _limit,
         uint256 _exhaust,
-        uint256 _oraclePaymentAmount,
+        uint256 _oraclePaymentAmount
     ) ConfirmedOwner(msg.sender) {
         setChainlinkToken(0x326C977E6efc84E512bB9C30f76E30c160eD06FB);
 
         oraclePaymentAmount = _oraclePaymentAmount;
-        dataset = _dataset;
-        opt_type = _opt_type;
         start = _start;
         end = _end;
         strike = _strike;
         limit = _limit;
         exhaust = _exhaust;
-        contractActive = true;
+        contractActive = false;
         contractEvaluated = false;
         requestsPending = 0;
     }
@@ -279,11 +275,7 @@ contract ClimateOption is ChainlinkClient, ConfirmedOwner {
                 req.addUint("strike", strike);
                 req.addUint("limit", limit);
                 req.addUint("exhaust", exhaust);
-                bytes32 requestId = sendChainlinkRequestTo(
-                    oracles[i],
-                    req,
-                    oraclePaymentAmount
-                );
+                bytes32 requestId = sendChainlinkRequestTo(oracles[i], req, oraclePaymentAmount);
                 requestsPending += 1;
                 emit contractEvaluationRequested(address(this), requestId, oracles[i], block.timestamp);
             }
@@ -314,6 +306,7 @@ contract ClimateOption is ChainlinkClient, ConfirmedOwner {
         locations = _locations;
         dataset = _dataset;
         opt_type = _opt_type;
+        contractActive = true;
     }
 
     /**

@@ -1,7 +1,6 @@
 from datetime import datetime
 
-from program_catalog.tools.loaders import GFDatasetLoader, SOLIDITY_MULTIPLIER
-
+from program_catalog.tools.loaders import GFDatasetLoader
 
 
 class RainfallDerivative:
@@ -11,6 +10,13 @@ class RainfallDerivative:
     '''
     _PROGRAM_PARAMETERS = ['dataset', 'locations', 'start', 'end', 'strike', 'limit', 'opt_type']
     _PARAMETER_OPTIONS = ['exhaust', 'tick']
+    _SOLIDITY_MULTIPLIERS = {
+        "strike" : 10**8,
+        "limit" : 10**8,
+        "exhaust" : 10**8,
+        "tick" : 10**8,
+        "payout": 10**8
+    }
 
     @classmethod
     def validate_request(cls, params):
@@ -32,7 +38,7 @@ class RainfallDerivative:
         for param in cls._PARAMETER_OPTIONS:
             if param in params and params.get(param, None) is not None:
                 return result, result_msg
-        result_msg += f'no non-null parameter in {_PARAMETER_OPTIONS} detected\n'
+        result_msg += f'no non-null parameter in {cls._PARAMETER_OPTIONS} detected\n'
         result = False
         return result, result_msg
 
@@ -46,7 +52,7 @@ class RainfallDerivative:
         '''
         loader = GFDatasetLoader(params['locations'],
                                 params['dataset'],
-                                imperial_units=params.get('imperial_units', False)
+                                imperial_units=params.get('imperial_units', True)
                                 )
         avg_history = loader.load()
         payout = cls._generate_payouts(data=avg_history,
@@ -75,19 +81,21 @@ class RainfallDerivative:
                         tick (number), tick value for payout or None if exhaust is not None
             Returns: int, generated payout times 10^8 (in order to report back to chain)
         '''
-        strike /= SOLIDITY_MULTIPLIER
-        limit /= SOLIDITY_MULTIPLIER
+        strike /= cls._SOLIDITY_MULTIPLIERS['strike']
+        limit /= cls._SOLIDITY_MULTIPLIERS['limit']
         start_date = datetime.utcfromtimestamp(int(start)).strftime('%Y-%m-%d')
         end_date = datetime.utcfromtimestamp(int(end)).strftime('%Y-%m-%d')
         index_value = data.loc[start_date:end_date].sum()
         opt_type = opt_type.lower()
         direction = 1 if opt_type == 'call' else -1
         if tick is None:
-            exhaust /= SOLIDITY_MULTIPLIER
+            exhaust /= cls._SOLIDITY_MULTIPLIERS['exhaust']
             tick = abs(limit / (strike - exhaust))
+        else:
+            tick /= cls._SOLIDITY_MULTIPLIERS['tick']
         payout = (index_value - strike) * tick * direction
         if payout < 0:
             payout = 0
         if payout > limit:
             payout = limit
-        return int(float(round(payout, 2)) * SOLIDITY_MULTIPLIER)
+        return int(float(round(payout, 2)) * cls._SOLIDITY_MULTIPLIERS['payout'])

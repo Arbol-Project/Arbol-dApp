@@ -19,7 +19,6 @@ contract DerivativeProvider is SimpleWriteAccessController {
     LinkTokenInterface public usdc;
 
     BlizzardOption[] private contracts;
-    mapping(address => uint256) unclaimedPayouts;
     bool[] private collateralDeposits;
     address private collateralProvider;
 
@@ -56,7 +55,6 @@ contract DerivativeProvider is SimpleWriteAccessController {
 
         collateralDeposits[collateralDeposits.length - 1] = true;
         collateralProvider = msg.sender;
-        unclaimedPayouts[msg.sender] = 0;
     }
 
     /**
@@ -64,7 +62,7 @@ contract DerivativeProvider is SimpleWriteAccessController {
      */
     function buyContract()
         external
-        onCollateralDeposited
+        checkAccess
     {
         require(usdc.balanceOf(msg.sender) >= PREMIUM, "buyer cannot cover premium");
         require(usdc.allowance(msg.sender, address(this)) >= PREMIUM, "buyer has not approved contract to deposit premium");
@@ -135,6 +133,7 @@ contract DerivativeProvider is SimpleWriteAccessController {
         uint256 payout = option.getPayout();
         unclaimedPayouts[option.getBuyer()] += payout;
         unclaimedPayouts[option.getProvider()] += option.getPremium() + option.getCollateral() - payout;
+        
     }
 
     /**
@@ -145,21 +144,21 @@ contract DerivativeProvider is SimpleWriteAccessController {
         view
         returns (uint256)
     {
-        return unclaimedPayouts[msg.sender];
+        return 
     }
 
 
-    /**
-     * @dev Transfer nonzero payout balance to sender
-     * 
-     */
-    function withdraw() 
-        public
-    {
-        uint256 payout = unclaimedPayouts[msg.sender];
-        unclaimedPayouts[msg.sender] = 0;
-        require(usdc.transfer(msg.sender, payout), "unable to pay out to sender");
-    }
+    // /**
+    //  * @dev Transfer nonzero payout balance to sender
+    //  * 
+    //  */
+    // function withdraw() 
+    //     public
+    // {
+    //     uint256 payout = unclaimedPayouts[msg.sender];
+    //     unclaimedPayouts[msg.sender] = 0;
+    //     require(usdc.transfer(msg.sender, payout), "unable to pay out to sender");
+    // }
 
     /**
      * @dev Get the ETH/matic/gas balance of the provider contract

@@ -8,8 +8,15 @@ class CriticalSnowfallDerivative:
         retrieves weather data from IPFS, computes an average over the given
         locations, and evaluates whether a payout should be awarded
     '''
-    _PROGRAM_PARAMETERS = ['station_id', 'start', 'end', 'threshold']
-    _PRESET_PARAMETERS = {'opt_type': 'CALL', 'weather_variable': 'SNOW', 'dataset': 'ghcnd'}
+    _PROGRAM_PARAMETERS = ['dates', 'station_id', 'weather_variable', 'dataset', 'strike', 'limit', 'opt_type']
+    _PARAMETER_OPTIONS = ['exhaust', 'tick']
+    _SOLIDITY_MULTIPLIERS = {
+        "strike" : 10**8,
+        "limit" : 10**8,
+        "exhaust" : 10**8,
+        "tick" : 10**8,
+        "payout": 10**8
+    }
 
     @classmethod
     def validate_request(cls, params):
@@ -28,10 +35,11 @@ class CriticalSnowfallDerivative:
             if not param in params:
                 result_msg += f'missing {param} parameter\n'
                 result = False
-        for param in cls._PRESET_PARAMETERS:
-            if not param in params or params[param] is not _PRESET_PARAMETERS[param]:
-                result_msg += f'missing or invalid {param} parameter\n'
-                result = False
+        for param in cls._PARAMETER_OPTIONS:
+            if param in params and params.get(param, None) is not None:
+                return result, result_msg
+        result_msg += f'no non-null parameter in {cls._PARAMETER_OPTIONS} detected\n'
+        result = False
         return result, result_msg
 
     @classmethod
@@ -42,48 +50,50 @@ class CriticalSnowfallDerivative:
             Parameters: params (dict), dictionary of required contract parameters
             Returns: number, the determined payout (0 if not awarded)
         '''
-        loader = GHCNDatasetLoader(params['station_id'],
+        loader = GHCNDatasetLoader(params['dates'],
+                                    params['station_id'],
                                     params['weather_variable'],
                                     dataset_name=params['dataset'],
-                                    imperial_units=params.get('imperial_units', False)
+                                    imperial_units=params.get('imperial_units', True)
                                     )
-        station_history = loader.load()
-        payout = cls._generate_payouts(data=station_history,
-                                        start=params['start'],
-                                        end=params['end'],
+        covered_history = loader.load()
+        payout = cls._generate_payouts(data=covered_history,
                                         opt_type=params['opt_type'],
-                                        threshold=params['threshold', None]
+                                        strike=params['strike'],
+                                        limit=params['limit'],
+                                        exhaust=params.get('exhaust', None),
+                                        tick=params.get('tick', None)
                                         )
         return payout
 
     @classmethod
-    def _generate_payouts(cls, data, start, end, opt_type, threshold):
+    def _generate_payouts(cls, data, opt_type, strike, limit, exhaust, tick):
         ''' Uses the provided contract parameters to calculate a payout and index
 
             Parameters: data (Pandas Series), weather data averaged over locations
                         start (int), unix timestamp for start date of coverage period
                         end (int), unix timestamp for end date of coverage period
                         opt_type (str), type of option contract, either PUT or CALL
-                        strike (int), 100 times the strike value for the payout (no floats in solidity)
-                        limit (int), 100 times the limit value for the payout (no floats in solidity)
-                        exhaust (int), 100 times the exhaust value for the payout (no floats in solidity)
+                        strike (int), 10^8 times the strike value for the payout (no floats in solidity)
+                        limit (int), 10^8 times the limit value for the payout (no floats in solidity)
+                        exhaust (int), 10^8 times the exhaust value for the payout (no floats in solidity)
             or None if tick is not None
                         tick (number), tick value for payout or None if exhaust is not None
-            Returns: int, generated payout times 100 (in order to report back to chain)
+            Returns: int, generated payout times 10^8 (in order to report back to chain)
         '''
-        strike /= 100
-        limit /= 100
-        start_date = datetime.utcfromtimestamp(int(start)).strftime('%Y-%m-%d')
-        end_date = datetime.utcfromtimestamp(int(end)).strftime('%Y-%m-%d')
-        index_value = data.loc[start_date:end_date].sum()
+        strike /= cls._SOLIDITY_MULTIPLIERS['strike']
+        limit /= cls._SOLIDITY_MULTIPLIERS['limit']
+        index_value = data.max()
         opt_type = opt_type.lower()
         direction = 1 if opt_type == 'call' else -1
         if tick is None:
-            exhaust /= 100
+            exhaust /= cls._SOLIDITY_MULTIPLIERS['exhaust']
             tick = abs(limit / (strike - exhaust))
+        else:
+            tick /= cls._SOLIDITY_MULTIPLIERS['tick']
         payout = (index_value - strike) * tick * direction
         if payout < 0:
             payout = 0
         if payout > limit:
             payout = limit
-        return int(float(round(payout, 2)) * 100)
+        return int(float(round(payout, 2)) * cls._SOLIDITY_MULTIPLIERS['payout'])

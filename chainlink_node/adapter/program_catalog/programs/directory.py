@@ -11,6 +11,6 @@ def get_program(params):
     '''
     if 'locations' in params:
         return RainfallDerivative
-    elif 'station_id' in params:
+    elif 'dates' in params:
         return CriticalSnowfallDerivative
     return None

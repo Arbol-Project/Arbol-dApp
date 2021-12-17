@@ -5,9 +5,6 @@ import pandas as pd
 from dweather.dweather_client import client
 
 
-SOLIDITY_MULTIPLIER = 10**8
-
-
 class dAppLoader:
     ''' Base loader class for Arbol dApp weather contracts. Uses dWeather Python client
         to get historical weather data from IPFS and computes a single time series 
@@ -84,29 +81,32 @@ class GHCNDatasetLoader(dAppLoader):
     ''' Loader class for GHCN station datasets. Uses dWeather Python client
         to get historical GHCN data from IPFS for specified weather station
     '''
-    def __init__(self, station_id, weather_variable, dataset_name='ghcnd', imperial_units=False, **kwargs):
+    def __init__(self, dates, station_id, weather_variable, dataset_name='ghcnd', imperial_units=False, **kwargs):
         ''' On initialization each Loader instance sets the locations for which to
             get the historical weather data and the dataset to pull from
 
-            Parameters: locations (list), list of lat/lon coordinate pairs as strings
-                        dataset_name (str), the name of the dataset on IPFS
+            Parameters: dates (list), list of covered dates for contract as strings
+                        station_id (str), id for weather station to get history from
+                        weather_variable (str), the id for the weather condition to get history for 
+                        dataset_name (str), name of dataset from which to get weather data
                         imperial_units (bool), whether to use imperial units
+                        kwargs (dict), additional request parameters
         '''
         super().__init__(dataset_name, imperial_units=imperial_units, **kwargs)
         self._station_id = station_id
         self._weather_variable = weather_variable
+        self._dates = dates
 
     def load(self):
         ''' Loads the dataset history from IPFS for the specified station ID
             and weather variable
 
-            Returns: Pandas Series, time series for station weather data
+            Returns: Pandas Series, time series for station weather data for covered dates
         '''
-        station_history = []
         data = client.get_station_history(self._station_id, self._weather_variable, **self._request_params)
         series = pd.Series(data)
         if series.empty:
             raise ValueError('No data returned for request')
         series = series.set_axis(pd.to_datetime(series.index)).sort_index()
-        print(series)
-        return series
+        covered_dates = series.loc(self._dates)
+        return covered_dates

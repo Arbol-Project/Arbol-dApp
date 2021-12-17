@@ -8,13 +8,10 @@ class CriticalSnowfallDerivative:
         retrieves weather data from IPFS, computes an average over the given
         locations, and evaluates whether a payout should be awarded
     '''
-    _PROGRAM_PARAMETERS = ['dates', 'station_id', 'weather_variable', 'dataset', 'strike', 'limit', 'opt_type']
+    _PROGRAM_PARAMETERS = ['dates', 'station_id', 'weather_variable', 'threshold', 'dataset', 'strike', 'limit', 'opt_type']
     _PARAMETER_OPTIONS = ['exhaust', 'tick']
     _SOLIDITY_MULTIPLIERS = {
-        "strike" : 10**8,
         "limit" : 10**8,
-        "exhaust" : 10**8,
-        "tick" : 10**8,
         "payout": 10**8
     }
 
@@ -58,6 +55,7 @@ class CriticalSnowfallDerivative:
                                     )
         covered_history = loader.load()
         payout = cls._generate_payouts(data=covered_history,
+                                        threshold=params['threshold'],
                                         opt_type=params['opt_type'],
                                         strike=params['strike'],
                                         limit=params['limit'],
@@ -67,7 +65,7 @@ class CriticalSnowfallDerivative:
         return payout
 
     @classmethod
-    def _generate_payouts(cls, data, opt_type, strike, limit, exhaust, tick):
+    def _generate_payouts(cls, data, threshold, limit):
         ''' Uses the provided contract parameters to calculate a payout and index
 
             Parameters: data (Pandas Series), weather data averaged over locations
@@ -81,19 +79,10 @@ class CriticalSnowfallDerivative:
                         tick (number), tick value for payout or None if exhaust is not None
             Returns: int, generated payout times 10^8 (in order to report back to chain)
         '''
-        strike /= cls._SOLIDITY_MULTIPLIERS['strike']
         limit /= cls._SOLIDITY_MULTIPLIERS['limit']
         index_value = data.max()
-        opt_type = opt_type.lower()
-        direction = 1 if opt_type == 'call' else -1
-        if tick is None:
-            exhaust /= cls._SOLIDITY_MULTIPLIERS['exhaust']
-            tick = abs(limit / (strike - exhaust))
-        else:
-            tick /= cls._SOLIDITY_MULTIPLIERS['tick']
-        payout = (index_value - strike) * tick * direction
-        if payout < 0:
-            payout = 0
-        if payout > limit:
+        if index_value > threshold:
             payout = limit
+        else:
+            payout = 0
         return int(float(round(payout, 2)) * cls._SOLIDITY_MULTIPLIERS['payout'])

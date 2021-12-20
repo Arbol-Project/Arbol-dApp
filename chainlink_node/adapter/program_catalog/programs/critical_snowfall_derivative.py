@@ -11,8 +11,8 @@ class CriticalSnowfallDerivative:
     _PROGRAM_PARAMETERS = ['dates', 'station_id', 'weather_variable', 'threshold', 'dataset', 'strike', 'limit', 'opt_type']
     _PARAMETER_OPTIONS = ['exhaust', 'tick']
     _SOLIDITY_MULTIPLIERS = {
-        "limit" : 10**8,
-        "payout": 10**8
+        "limit" : 10**0,
+        "payout": 10**6 # USDC decimals
     }
 
     @classmethod
@@ -85,4 +85,4 @@ class CriticalSnowfallDerivative:
             payout = limit
         else:
             payout = 0
-        return int(float(round(payout, 2)) * cls._SOLIDITY_MULTIPLIERS['payout'])
+        return int(payout * cls._SOLIDITY_MULTIPLIERS['payout'])

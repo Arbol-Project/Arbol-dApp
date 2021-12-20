@@ -5,28 +5,26 @@ import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@chainlink/contracts/src/v0.8/SimpleWriteAccessController.sol";
 
 
-contract DerivativeProvider is SimpleWriteAccessController {
+contract BlizzardDerivativeProvider is SimpleWriteAccessController {
     /**
-     * @dev DerivativeProvider contract for Dallas Snow Protection 21-22 Season
+     * @dev BlizzardDerivativeProvider contract for Dallas Snow Protection 21-22 Season
+     * Only enables a single purchase/creation of the contract instance
      */
-    uint256 private constant ORACLE_PAYMENT = 1 * 10**14;                                   // 0.0001 LINK
-    uint256 private constant COLLATERAL = 25 * 10**5 * 10**6;                               // 250,000 * 1 USDC
-    uint256 private constant PREMIUM = 10**5 * 10**6;                                       // 10,000 * 1 USDC
-    address public constant LINK_ADDRESS = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB;      // Link token address on Matic Mumbai
-    address public constant USDC_ADDRESS = 0x8677871C4F153eCc1f9089022f21A937B8483ed9;      // USDC token address on Matic Mumbai
-    address private constant BUYER_ADDRESS = 0xa679c6154b8d4619Af9F83f0bF9a13A680e01eCf;    // cuban's wallet
-    address private constant PROVIDER_ADDRESS = 0x0000000000000000000000000000000000000000;                                        // arbol collateral provider wallet
-    
-    LinkTokenInterface public link;
-    LinkTokenInterface public usdc;
+    uint256 private constant ORACLE_PAYMENT = 1 * 10**14;                                                       // 0.0001 LINK
+    uint256 private constant COLLATERAL_PAYMENT = 25 * 10**5 * 10**6;                                           // 250,000 * 1 USDC
+    uint256 private constant PREMIUM_PAYMENT = 10**5 * 10**6;                                                   // 10,000 * 1 USDC
+    address private constant COLLATERAL_ADDRESS = 0x3382d07e2736AC80f07D7288750F2442d187a7e3;                   // Arbol USDC wallet
+    address private constant PREMIUM_ADDRESS = 0xa679c6154b8d4619Af9F83f0bF9a13A680e01eCf;                      // Buyer's wallet
+    address public constant LINK_ADDRESS = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB;                          // Link token address on Matic Mumbai
+    address public constant USDC_ADDRESS = 0x8677871C4F153eCc1f9089022f21A937B8483ed9;                          // USDC token address on Matic Mumbai (ERC677 is backwards compatible to ERC20)
 
-    BlizzardOption[] private contracts;
-    bool[] private collateralDeposits;
+    BlizzardOption private blizzardContract;
+    bool private collateralDeposited;
+    bool private premiumDeposited;
 
     constructor() {
-        link = LinkTokenInterface(LINK_ADDRESS);
-        usdc = LinkTokenInterface(USDC_ADDRESS); // erc677 is backwards compatible to erc20
-        collateralDeposits.push(false);
+        collateralDeposited = false;
+        premiumDeposited = false;
     }
 
     /**
@@ -35,121 +33,120 @@ contract DerivativeProvider is SimpleWriteAccessController {
     event contractCreated(address _contract, string _id);
 
     /**
-     * @dev Prevents a contract from being created unless the collateral has been deposited
-     */
-    modifier onCollateralDeposited() {
-        require(collateralDeposits[collateralDeposits.length - 1], "unable to call until collateral has been deposited");
-        _;
-    }
-
-    /**
      * @dev Deposit collateral for Dallas snow protection contract
      */
     function depositCollateral()
         external
         checkAccess
     {
-        require(!collateralDeposits[collateralDeposits.length - 1], "collateral has already been deposited for next purchase");
-        require(usdc.balanceOf(msg.sender) >= COLLATERAL, "sender does not have enough collateral");
-        require(usdc.allowance(msg.sender, address(this)) >= COLLATERAL, "sender has not approved contract to deposit collateral");
-        require(usdc.transferFrom(msg.sender, address(this), COLLATERAL), "unable to deposit collateral");
-
-        collateralDeposits[collateralDeposits.length - 1] = true;
+        LinkTokenInterface usdc = LinkTokenInterface(USDC_ADDRESS);  
+        require(!premiumDeposited, "collateral cannot be deposited after premium");
+        require(!collateralDeposited, "collateral has already been deposited for next purchase");
+        require(usdc.balanceOf(msg.sender) >= COLLATERAL_PAYMENT, "sender has insufficient funds to cover collateral");
+        require(usdc.allowance(msg.sender, address(this)) >= COLLATERAL_PAYMENT, "sender has not approved contract to deposit collateral");
+        require(usdc.transferFrom(msg.sender, address(this), COLLATERAL_PAYMENT), "unable to deposit collateral");
+        collateralDeposited = true;
     }
 
     /**
      * @dev Deposit premium and buy new options contract
      */
-    function buyContract()
+    function depositPremium()
         external
         checkAccess
-        onCollateralDeposited
     {
-        require(usdc.balanceOf(msg.sender) >= PREMIUM, "buyer cannot cover premium");
-        require(usdc.allowance(msg.sender, address(this)) >= PREMIUM, "buyer has not approved contract to deposit premium");
-        require(usdc.transferFrom(msg.sender, address(this), PREMIUM), "unable to deposit premium");
-
-        BlizzardOption option = new BlizzardOption();
-        option.initialize(ORACLE_PAYMENT, COLLATERAL, PREMIUM, LINK_ADDRESS, PROVIDER_ADDRESS, BUYER_ADDRESS);
-        option.addOracleJob(0x7bcfF26a5A05AF38f926715d433c576f9F82f5DC, "6de976e92c294704b7b2e48358f43396");
-        contracts.push(option);
-        collateralDeposits.push(false);
-        // fund the new contract with enough LINK tokens to make at least 1 Oracle request, with a buffer
-        require(link.transfer(address(option), ORACLE_PAYMENT * 2), "nable to fund deployed contract");
-        emit contractCreated(address(option), "Mavs_Blizzard_21-22");
+        LinkTokenInterface usdc = LinkTokenInterface(USDC_ADDRESS);
+        require(collateralDeposited, "unable to call until collateral has been deposited");
+        require(!premiumDeposited, "premium has already been deposited for this purchase");
+        require(usdc.balanceOf(msg.sender) >= PREMIUM_PAYMENT, "sender has insufficient funds to cover premium");
+        require(usdc.allowance(msg.sender, address(this)) >= PREMIUM_PAYMENT, "sender has not approved contract to deposit premium");
+        require(usdc.transferFrom(msg.sender, address(this), PREMIUM_PAYMENT), "unable to deposit premium");
+        premiumDeposited = true;
+        buyContract();
     }
 
     /**
-     * @dev Returns indexed contract
+     * @dev Buy contract after premium and collateral have both been deposited
      */
-    function getContract(
-        uint _index
-    )
+    function buyContract() 
+        private
+    {
+        LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);
+        require(collateralDeposited, "unable to call until collateral has been deposited");
+        require(premiumDeposited, "unable to call until premium has been deposited");
+        collateralDeposited = false;                // setting to false prevents another round of collateral/premium/purchase from happening
+
+        blizzardContract = new BlizzardOption();
+        blizzardContract.initialize(ORACLE_PAYMENT, LINK_ADDRESS);
+        blizzardContract.addOracleJob(0x7bcfF26a5A05AF38f926715d433c576f9F82f5DC, "6de976e92c294704b7b2e48358f43396");
+        // fund the new contract with enough LINK tokens to make at least 1 Oracle request, with a buffer
+        require(link.transfer(address(blizzardContract), ORACLE_PAYMENT * 2), "unable to fund deployed contract");
+        emit contractCreated(address(blizzardContract), "Mavs_Blizzard_21-22");
+    }
+
+    /**
+     * @dev Returns the contract
+     */
+    function getContract()
         external
         view
         returns (BlizzardOption)
     {
-        return contracts[_index];
+        return blizzardContract;
     }
 
     /**
      * @dev Add a new node and associated job ID to the contract execution/evalution set
      */
     function addContractJob(
-        uint256 _index,
         address _oracle,
         string memory _jobId
     ) 
         external 
         checkAccess 
     {
-        contracts[_index].addOracleJob(_oracle, stringToBytes32(_jobId));
+        blizzardContract.addOracleJob(_oracle, stringToBytes32(_jobId));
     }
 
     /**
      * @dev Remove a job from the contract execution set
      */
     function removeContractJob(
-        uint256 _index,
         string memory _jobId
     )
         external
         checkAccess
     {
-        contracts[_index].removeOracleJob(stringToBytes32(_jobId));
+        blizzardContract.removeOracleJob(stringToBytes32(_jobId));
     }
 
     /**
-     * @dev Request payout evaluation for indexed contract
+     * @dev Request payout evaluation for contract
      */
-    function initiatePayoutEvaluation(
-        uint256 _index
-    ) 
+    function initiatePayoutEvaluation() 
         external 
         checkAccess 
     {
-        BlizzardOption option = contracts[_index];
-        option.requestPayoutEvaluation();
+        LinkTokenInterface usdc = LinkTokenInterface(USDC_ADDRESS);
+        blizzardContract.requestPayoutEvaluation();
 
-        uint256 payout = option.getPayout();
+        uint256 payout = blizzardContract.getPayout();
         if (payout > 0) {
-            require(usdc.transfer(BUYER_ADDRESS, payout), "unable to payout to buyer");
-            require(usdc.transfer(PROVIDER_ADDRESS, usdc.balanceOf(address(this)) - payout), "unable to return remaining balance to provider");
+            require(usdc.transfer(PREMIUM_ADDRESS, payout), "unable to payout to buyer");
+            require(usdc.transfer(COLLATERAL_ADDRESS, usdc.balanceOf(address(this)) - payout), "unable to return remaining balance to provider");
         }
-            require(usdc.transfer(PROVIDER_ADDRESS, usdc.balanceOf(address(this))), "unable to return balance to provider");
+            require(usdc.transfer(COLLATERAL_ADDRESS, usdc.balanceOf(address(this))), "unable to return balance to provider");
     }
 
     /**
      * @dev Request payout value for sender
      */
-    function getPayout(
-        uint _index
-    )
+    function getContractPayout()
         external
         view
         returns (uint256)
     {
-        return contracts[_index].getPayout();
+        return blizzardContract.getPayout();
     }
 
     /**
@@ -173,6 +170,7 @@ contract DerivativeProvider is SimpleWriteAccessController {
         onlyOwner
         returns (uint256) 
     {
+        LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);
         return link.balanceOf(address(this));
     }
 
@@ -182,9 +180,9 @@ contract DerivativeProvider is SimpleWriteAccessController {
     function getUSDCBalance() 
         external 
         view 
-        onlyOwner
         returns (uint256) 
     {
+        LinkTokenInterface usdc = LinkTokenInterface(USDC_ADDRESS);
         return usdc.balanceOf(address(this));
     }
 
@@ -218,21 +216,19 @@ contract DerivativeProvider is SimpleWriteAccessController {
         external 
         onlyOwner 
     {
-        for (uint256 i = 0; i != contracts.length; i += 1) {
+        LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);
+        LinkTokenInterface usdc = LinkTokenInterface(USDC_ADDRESS);
+        uint256 payout = blizzardContract.getPayout();
+        bool evaluated = blizzardContract.getStatus();
 
-            BlizzardOption option = contracts[i];
-            uint256 payout = option.getPayout();
-            uint256 premium = option.getPremium();
-
-            if (option.getStatus()) {
-                require(usdc.transfer(option.getBuyer(), payout), "unable to transfer payout to buyer");
-                require(usdc.transfer(option.getProvider(), premium + option.getCollateral() - payout), "unable to return remaining funds to provider");
-            } else {
-                require(usdc.transfer(option.getBuyer(), premium), "unable to return premium to buyer");
-                require(usdc.transfer(option.getProvider(), premium + option.getCollateral() - payout), "unable to return collateral to provider");
-            }
-            option.endContractInstance();
+        if (evaluated) {
+            require(usdc.transfer(PREMIUM_ADDRESS, payout), "unable to transfer payout to buyer");
+            require(usdc.transfer(COLLATERAL_ADDRESS, PREMIUM_PAYMENT + COLLATERAL_PAYMENT - payout), "unable to return remaining funds to provider");
+        } else {
+            require(usdc.transfer(PREMIUM_ADDRESS, PREMIUM_PAYMENT), "unable to return premium to buyer");
+            require(usdc.transfer(COLLATERAL_ADDRESS, PREMIUM_PAYMENT + COLLATERAL_PAYMENT - payout), "unable to return collateral to provider");
         }
+        blizzardContract.endContractInstance();
         // transfer any remaining tokens held by this account before destroying
         require(usdc.transfer(owner(), usdc.balanceOf(address(this))), "unable to transfer USDC");
         require(link.transfer(owner(), link.balanceOf(address(this))), "unable to transfer LINK");
@@ -244,8 +240,6 @@ contract DerivativeProvider is SimpleWriteAccessController {
 contract BlizzardOption is ChainlinkClient, ConfirmedOwner {
     using Chainlink for Chainlink.Request;
 
-    uint256 private constant END = 1649649600;
-
     uint256 private oraclePayment;
     mapping(bytes32 => uint256) public oracleMap;
     address[] public oracles;
@@ -255,22 +249,18 @@ contract BlizzardOption is ChainlinkClient, ConfirmedOwner {
     bool public contractEvaluated;
     uint256 private requestsPending;
 
-    string[] dates;
-    uint256 collateral;
-    uint256 premium;
-    uint256 payout;
-    address provider;
-    address buyer;
+    string[] public dates;
+    uint256 public payout;
 
     /**
      * @dev Prevents a function being run unless the end date has been passed
      */
     modifier onContractEnded() {
-        require(END < block.timestamp, "unable to call until coverage period has ended");
+        require(1649649600 < block.timestamp, "unable to call until coverage period has ended"); // 1649649600: unix timestamp of beginning of day after final home game of the season
         _;
     }
 
-    event contractEnded(address _contract, uint256 _end, uint256 _time);
+    event contractEnded(address _contract, uint256 _time);
     event evaluationRequestSent(address _contract, address _oracle, bytes32 _request, uint256 _time);
     event evaluationRequestFulfilled(address _contract, uint256 _payout, uint256 _time);
 
@@ -292,21 +282,13 @@ contract BlizzardOption is ChainlinkClient, ConfirmedOwner {
      */
     function initialize(
         uint256 _oracle_payment,
-        uint256 _collateral,
-        uint256 _premium,
-        address _link,
-        address _provider,
-        address _buyer
+        address _link
     ) 
         public
         onlyOwner
     {
         oraclePayment = _oracle_payment;
-        collateral = _collateral;
-        premium = _premium;
         setChainlinkToken(_link);
-        provider = _provider;
-        buyer = _buyer;
     }
 
     /**
@@ -323,50 +305,6 @@ contract BlizzardOption is ChainlinkClient, ConfirmedOwner {
     /**
      * @dev Get the payout value, may not be final
      */
-    function getCollateral() 
-        public 
-        view 
-        returns (uint256) 
-    {
-        return collateral;
-    }
-
-    /**
-     * @dev Get the payout value, may not be final
-     */
-    function getPremium() 
-        public 
-        view 
-        returns (uint256) 
-    {
-        return premium;
-    }
-
-    /**
-     * @dev Get the payout value, may not be final
-     */
-    function getProvider() 
-        public 
-        view 
-        returns (address) 
-    {
-        return provider;
-    }
-
-    /**
-     * @dev Get the payout value, may not be final
-     */
-    function getBuyer() 
-        public 
-        view 
-        returns (address) 
-    {
-        return buyer;
-    }
-
-    /**
-     * @dev Get the payout value, may not be final
-     */
     function getPayout() 
         public 
         view 
@@ -375,7 +313,7 @@ contract BlizzardOption is ChainlinkClient, ConfirmedOwner {
         if (contractEvaluated) {
             return payout;
         } else {
-            return payout / (oracles.length - requestsPending); // 0 if contract is active, "close" if contract is currently evaluating
+            return payout / (oracles.length - requestsPending); // 0 if contract is active, "close" if contract is currently evaluating, no effect if only one oracle job
         }
     }
 
@@ -422,7 +360,7 @@ contract BlizzardOption is ChainlinkClient, ConfirmedOwner {
     {
         if (contractActive) {
             contractActive = false;
-            emit contractEnded(address(this), END, block.timestamp);
+            emit contractEnded(address(this), block.timestamp);
 
             for (uint256 i = 0; i != oracles.length; i += 1) {
                 Chainlink.Request memory req = buildChainlinkRequest(jobIds[i], address(this), this.fulfillPayoutEvaluation.selector);

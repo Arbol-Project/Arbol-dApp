@@ -7,8 +7,8 @@ import "@chainlink/contracts/src/v0.8/SimpleWriteAccessController.sol";
 
 contract BlizzardDerivativeProvider is SimpleWriteAccessController {
     /**
-     * @dev BlizzardDerivativeProvider contract for Dallas Snow Protection 21-22 Season
-     * Only enables a single purchase/creation of the contract instance
+     * @notice BlizzardDerivativeProvider contract for Dallas Snow Protection 21-22 Season
+     * @dev Only enables a single purchase/creation of the contract instance
      */
     uint256 private constant ORACLE_PAYMENT = 1 * 10**14;                                                       // 0.0001 LINK
     uint256 private constant COLLATERAL_PAYMENT = 25 * 10**5 * 10**6;                                           // 250,000 * 1 USDC
@@ -21,71 +21,77 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
     BlizzardOption private blizzardContract;
     bool private collateralDeposited;
     bool private premiumDeposited;
-
-    constructor() {
-        collateralDeposited = false;
-        premiumDeposited = false;
-    }
+    bool public contractPaidOut;
 
     /**
      * @dev Event to log when a contract is created
      */
     event contractCreated(address _contract, string _id);
+    
+    constructor() {
+        collateralDeposited = false;
+        premiumDeposited = false;
+        contractPaidOut = false;
+    }
 
     /**
-     * @dev Deposit collateral for Dallas snow protection contract
+     * @notice Deposit collateral for Dallas snow protection contract (must first approve smart contract to move USDC!)
+     * @dev Neither collateral nor premium can already be deposited, sender must have access
      */
     function depositCollateral()
         external
         checkAccess
     {
-        LinkTokenInterface usdc = LinkTokenInterface(USDC_ADDRESS);  
-        require(!premiumDeposited, "collateral cannot be deposited after premium");
-        require(!collateralDeposited, "collateral has already been deposited for next purchase");
-        require(usdc.balanceOf(msg.sender) >= COLLATERAL_PAYMENT, "sender has insufficient funds to cover collateral");
-        require(usdc.allowance(msg.sender, address(this)) >= COLLATERAL_PAYMENT, "sender has not approved contract to deposit collateral");
-        require(usdc.transferFrom(msg.sender, address(this), COLLATERAL_PAYMENT), "unable to deposit collateral");
-        collateralDeposited = true;
+        if (!premiumDeposited && !collateralDeposited) {
+            LinkTokenInterface usdc = LinkTokenInterface(USDC_ADDRESS);  
+            // require(!premiumDeposited, "collateral cannot be deposited after premium");
+            // require(!collateralDeposited, "collateral has already been deposited for next purchase");
+            require(usdc.allowance(msg.sender, address(this)) >= COLLATERAL_PAYMENT, "sender has not approved contract to deposit collateral");
+            require(usdc.transferFrom(msg.sender, address(this), COLLATERAL_PAYMENT), "unable to deposit collateral");
+            collateralDeposited = true;
+        }
     }
 
     /**
-     * @dev Deposit premium and buy new options contract
+     * @notice Deposit premium and purchase new options contract (must first approve smart contract to move USDC!)
+     * @dev Collateral must already be deposited, premium must not already be deposited, sender must have access
      */
     function depositPremium()
         external
         checkAccess
     {
-        LinkTokenInterface usdc = LinkTokenInterface(USDC_ADDRESS);
-        require(collateralDeposited, "unable to call until collateral has been deposited");
-        require(!premiumDeposited, "premium has already been deposited for this purchase");
-        require(usdc.balanceOf(msg.sender) >= PREMIUM_PAYMENT, "sender has insufficient funds to cover premium");
-        require(usdc.allowance(msg.sender, address(this)) >= PREMIUM_PAYMENT, "sender has not approved contract to deposit premium");
-        require(usdc.transferFrom(msg.sender, address(this), PREMIUM_PAYMENT), "unable to deposit premium");
-        premiumDeposited = true;
-        buyContract();
+        if (!premiumDeposited && collateralDeposited) {
+            LinkTokenInterface usdc = LinkTokenInterface(USDC_ADDRESS);
+            // require(collateralDeposited, "unable to call until collateral has been deposited");
+            // require(!premiumDeposited, "premium has already been deposited for this purchase");
+            require(usdc.allowance(msg.sender, address(this)) >= PREMIUM_PAYMENT, "sender has not approved contract to deposit premium");
+            require(usdc.transferFrom(msg.sender, address(this), PREMIUM_PAYMENT), "unable to deposit premium");
+            premiumDeposited = true;
+            buyContract();
+        }
     }
 
     /**
-     * @dev Buy contract after premium and collateral have both been deposited
+     * @dev Private function to create a new options contract once collateral and premium have been deposited
      */
     function buyContract() 
         private
     {
-        LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);
-        require(collateralDeposited, "unable to call until collateral has been deposited");
-        require(premiumDeposited, "unable to call until premium has been deposited");
-        collateralDeposited = false;                // setting to false prevents another round of collateral/premium/purchase from happening
+        if (premiumDeposited && collateralDeposited) {
+            LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);
+            collateralDeposited = false;                // setting to false prevents another round of collateral/premium/purchase from happening
 
-        blizzardContract = new BlizzardOption();
-        blizzardContract.initialize(ORACLE_PAYMENT, LINK_ADDRESS);
-        blizzardContract.addOracleJob(0x7bcfF26a5A05AF38f926715d433c576f9F82f5DC, "6de976e92c294704b7b2e48358f43396");
-        // fund the new contract with enough LINK tokens to make at least 1 Oracle request, with a buffer
-        require(link.transfer(address(blizzardContract), ORACLE_PAYMENT * 2), "unable to fund deployed contract");
-        emit contractCreated(address(blizzardContract), "Mavs_Blizzard_21-22");
+            blizzardContract = new BlizzardOption();
+            blizzardContract.initialize(ORACLE_PAYMENT, LINK_ADDRESS);
+            blizzardContract.addOracleJob(0x7bcfF26a5A05AF38f926715d433c576f9F82f5DC, "6de976e92c294704b7b2e48358f43396");
+            // fund the new contract with enough LINK tokens to make at least 1 Oracle request, with a buffer
+            require(link.transfer(address(blizzardContract), ORACLE_PAYMENT * 2), "unable to fund deployed contract");
+            emit contractCreated(address(blizzardContract), "Mavs_Blizzard_21-22");
+        }
     }
 
     /**
-     * @dev Returns the contract
+     * @notice Returns the snow protection contract
      */
     function getContract()
         external
@@ -96,7 +102,8 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
     }
 
     /**
-     * @dev Add a new node and associated job ID to the contract execution/evalution set
+     * @notice Add a new node and associated job ID to the contract execution/evalution set
+     * @dev Sender must have access
      */
     function addContractJob(
         address _oracle,
@@ -109,7 +116,8 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
     }
 
     /**
-     * @dev Remove a job from the contract execution set
+     * @notice Remove a job from the contract execution/evaluation set
+     * @dev Sender must have access
      */
     function removeContractJob(
         string memory _jobId
@@ -121,7 +129,8 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
     }
 
     /**
-     * @dev Request payout evaluation for contract
+     * @notice Request payout evaluation for the snow protection contract
+     * @dev Sender must have access
      */
     function initiatePayoutEvaluation() 
         external 
@@ -133,13 +142,14 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
         uint256 payout = blizzardContract.getPayout();
         if (payout > 0) {
             require(usdc.transfer(PREMIUM_ADDRESS, payout), "unable to payout to buyer");
-            require(usdc.transfer(COLLATERAL_ADDRESS, usdc.balanceOf(address(this)) - payout), "unable to return remaining balance to provider");
+            require(usdc.transfer(COLLATERAL_ADDRESS, usdc.balanceOf(address(this))), "unable to return remaining balance to provider");
+
         }
             require(usdc.transfer(COLLATERAL_ADDRESS, usdc.balanceOf(address(this))), "unable to return balance to provider");
     }
 
     /**
-     * @dev Request payout value for sender
+     * @notice Request payout value for snow protection contract
      */
     function getContractPayout()
         external
@@ -150,7 +160,8 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
     }
 
     /**
-     * @dev Get the ETH/matic/gas balance of the provider contract
+     * @notice Get the ETH/matic/gas balance of the provider contract
+     * @dev Can only be called by the contract owner
      */
     function getETHBalance() 
         external 
@@ -162,7 +173,8 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
     }
 
     /**
-     * @dev Get the LINK balance of the provider contract
+     * @notice Get the LINK balance of the provider contract
+     * @dev Can only be called by the contract owner
      */
     function getLINKBalance() 
         external 
@@ -175,7 +187,7 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
     }
 
     /**
-     * @dev Get the USDC/stablecoin balance of the provider contract
+     * @notice Get the USDC/stablecoin balance of the provider contract
      */
     function getUSDCBalance() 
         external 
@@ -208,8 +220,9 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
     }
 
     /**
-     * @dev Function to end provider contract, in case of bugs or needing to update logic etc,
-     * funds are returned to the contract provider, including any remaining LINK tokens
+     * @notice Development function to end provider contract, in case of bugs or needing to update logic etc
+     * @dev Can only be called by the contract owner
+     *
      * REMOVE IN PRODUCTION
      */
     function endProviderContract() 
@@ -223,10 +236,10 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
 
         if (evaluated) {
             require(usdc.transfer(PREMIUM_ADDRESS, payout), "unable to transfer payout to buyer");
-            require(usdc.transfer(COLLATERAL_ADDRESS, PREMIUM_PAYMENT + COLLATERAL_PAYMENT - payout), "unable to return remaining funds to provider");
+            require(usdc.transfer(COLLATERAL_ADDRESS, usdc.balanceOf(address(this))), "unable to return remaining funds to provider");
         } else {
             require(usdc.transfer(PREMIUM_ADDRESS, PREMIUM_PAYMENT), "unable to return premium to buyer");
-            require(usdc.transfer(COLLATERAL_ADDRESS, PREMIUM_PAYMENT + COLLATERAL_PAYMENT - payout), "unable to return collateral to provider");
+            require(usdc.transfer(COLLATERAL_ADDRESS, COLLATERAL_PAYMENT), "unable to return collateral to provider");
         }
         blizzardContract.endContractInstance();
         // transfer any remaining tokens held by this account before destroying
@@ -238,6 +251,10 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
 
 
 contract BlizzardOption is ChainlinkClient, ConfirmedOwner {
+    /**
+     * @notice BlizzardOption contract for Dallas Snow Protection 21-22 Season
+     * @dev Hard coded with contract terms (see requestPayoutEvaluation)
+     */
     using Chainlink for Chainlink.Request;
 
     uint256 private oraclePayment;

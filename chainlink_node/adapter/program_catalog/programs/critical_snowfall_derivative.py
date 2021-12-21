@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from program_catalog.tools.loaders import GHCNDatasetLoader, SOLIDITY_MULTIPLIER
+from program_catalog.tools.loaders import GHCNDatasetLoader
 
 
 class CriticalSnowfallDerivative:
@@ -8,11 +8,11 @@ class CriticalSnowfallDerivative:
         retrieves weather data from IPFS, computes an average over the given
         locations, and evaluates whether a payout should be awarded
     '''
-    _PROGRAM_PARAMETERS = ['dates', 'station_id', 'weather_variable', 'threshold', 'dataset', 'strike', 'limit', 'opt_type']
-    _PARAMETER_OPTIONS = ['exhaust', 'tick']
+    _PROGRAM_PARAMETERS = ['dates', 'station_id', 'weather_variable', 'threshold', 'dataset', 'limit', 'opt_type']
+    _PARAMETER_OPTIONS = ['strike', 'exhaust', 'tick']
     _SOLIDITY_MULTIPLIERS = {
-        "limit" : 10**0,
-        "payout": 10**6 # USDC decimals
+        'limit' : 10**0,
+        'payout': 10**6 # USDC decimals
     }
 
     @classmethod
@@ -65,24 +65,25 @@ class CriticalSnowfallDerivative:
         return payout
 
     @classmethod
-    def _generate_payouts(cls, data, threshold, limit):
+    def _generate_payouts(cls, data, threshold, opt_type, limit):
         ''' Uses the provided contract parameters to calculate a payout and index
 
-            Parameters: data (Pandas Series), weather data averaged over locations
-                        start (int), unix timestamp for start date of coverage period
-                        end (int), unix timestamp for end date of coverage period
+            Parameters: data (Pandas Series), weather data for covered dates
+                        threshold (int), weather variable threshold in inches
                         opt_type (str), type of option contract, either PUT or CALL
-                        strike (int), 10^8 times the strike value for the payout (no floats in solidity)
-                        limit (int), 10^8 times the limit value for the payout (no floats in solidity)
-                        exhaust (int), 10^8 times the exhaust value for the payout (no floats in solidity)
-            or None if tick is not None
+                        strike (int), strike value for the payout
+                        limit (int), limit value for the payout
+                        exhaust (int), exhaust value for the payout or None if tick is not None
                         tick (number), tick value for payout or None if exhaust is not None
-            Returns: int, generated payout times 10^8 (in order to report back to chain)
+            Returns: int, generated payout times 10^6 (in order to report back to chain in value of USDC)
         '''
         limit /= cls._SOLIDITY_MULTIPLIERS['limit']
         index_value = data.max()
-        if index_value > threshold:
-            payout = limit
-        else:
+        opt_type = opt_type.lower()
+        direction = 1 if opt_type == 'call' else -1
+        payout = (index_value - threshold) * direction
+        if payout < 0:
             payout = 0
+        if payout > 0:
+            payout = limit
         return int(payout * cls._SOLIDITY_MULTIPLIERS['payout'])

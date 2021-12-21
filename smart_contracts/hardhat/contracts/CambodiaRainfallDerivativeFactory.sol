@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
 
-contract DerivativeProvider is ChainlinkClient, ConfirmedOwner {
+contract RainfallDerivativeProvider is ConfirmedOwner {
     uint256 private constant ORACLE_PAYMENT = 1 * 10**14; // 0.0001 LINK
     mapping(string => address) contracts_index;
     mapping(address => ClimateOption) contracts;
@@ -189,7 +189,7 @@ contract DerivativeProvider is ChainlinkClient, ConfirmedOwner {
 }
 
 
-contract ClimateOption is ChainlinkClient, ConfirmedOwner {
+contract RainfallOption is ChainlinkClient, ConfirmedOwner {
     using Chainlink for Chainlink.Request;
 
     uint256 private oraclePaymentAmount;

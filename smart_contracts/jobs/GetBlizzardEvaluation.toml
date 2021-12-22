@@ -1,6 +1,6 @@
 type = "directrequest"
 schemaVersion = 1
-name = "Get Rainfall Evaluation"
+name = "Get Blizzard Evaluation"
 contractAddress = "0x7bcfF26a5A05AF38f926715d433c576f9F82f5DC"
 maxTaskDuration = "0s"
 observationSource = """
@@ -9,7 +9,7 @@ observationSource = """
                   data="$(jobRun.logData)"
                   topics="$(jobRun.logTopics)"]
     decode_cbor  [type=cborparse data="$(decode_log.data)"]
-    arbol_dapp   [type="bridge" name="arbol-adapter" timeout="30s" requestData="{\\"data\\":{\\"params\\":{\\"dataset\\": $(decode_cbor.dataset), \\"opt_type\\": $(decode_cbor.opt_type), \\"locations\\": $(decode_cbor.locations), \\"start\\": $(decode_cbor.start), \\"end\\": $(decode_cbor.end), \\"strike\\": $(decode_cbor.strike), \\"limit\\": $(decode_cbor.limit), \\"tick\\": $(decode_cbor.tick)}}}"]
+    arbol_dapp   [type="bridge" name="arbol-adapter" timeout="30s" requestData="{\\"data\\":{\\"params\\":{\\"dataset\\": $(decode_cbor.dataset), \\"opt_type\\": $(decode_cbor.opt_type), \\"dates\\": $(decode_cbor.dates), \\"station_id\\": $(decode_cbor.station_id), \\"weather_variable\\": $(decode_cbor.weather_variable), \\"strike\\": $(decode_cbor.strike), \\"limit\\": $(decode_cbor.limit), \\"tick\\": $(decode_cbor.tick), \\"threshold\\": $(decode_cbor.threshold)}}}"]
     parse        [type=jsonparse path="result" data="$(arbol_dapp)"]
     encode_data  [type=ethabiencode abi="(uint256 value)" data="{ \\"value\\": $(parse) }"]
     encode_tx    [type=ethabiencode
@@ -19,4 +19,3 @@ observationSource = """
     submit_tx    [type=ethtx to="0x7bcfF26a5A05AF38f926715d433c576f9F82f5DC" data="$(encode_tx)"]
     decode_log -> decode_cbor -> arbol_dapp -> parse -> encode_data -> encode_tx -> submit_tx
 """
-externalJobID = "6de976e9-2c29-4704-b7b2-e48358f43396"

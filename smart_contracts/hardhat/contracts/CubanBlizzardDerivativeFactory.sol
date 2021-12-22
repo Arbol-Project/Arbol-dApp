@@ -10,17 +10,17 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
      * @notice BlizzardDerivativeProvider contract for Dallas Snow Protection 21-22 Season
      * @dev Only enables a single purchase/creation of the contract instance
      */
-    uint256 private constant ORACLE_PAYMENT = 1 * 10**14;                                                       // 0.0001 LINK
-    uint256 private constant COLLATERAL_PAYMENT = 25 * 10**5 * 10**6;                                           // 250,000 * 1 USDC
-    uint256 private constant PREMIUM_PAYMENT = 10**5 * 10**6;                                                   // 10,000 * 1 USDC
-    address private constant COLLATERAL_ADDRESS = 0x3382d07e2736AC80f07D7288750F2442d187a7e3;                   // Arbol USDC wallet
-    address private constant PREMIUM_ADDRESS = 0xa679c6154b8d4619Af9F83f0bF9a13A680e01eCf;                      // Buyer's wallet
+    uint256 public constant ORACLE_PAYMENT = 1 * 10**14;                                                       // 0.0001 LINK
+    uint256 public constant COLLATERAL_PAYMENT = 25 * 10**5 * 10**6;                                           // 250,000 * 1 USDC
+    uint256 public constant PREMIUM_PAYMENT = 10**5 * 10**6;                                                   // 10,000 * 1 USDC
+    address public constant COLLATERAL_ADDRESS = 0x3382d07e2736AC80f07D7288750F2442d187a7e3;                   // Arbol USDC wallet
+    address public constant PREMIUM_ADDRESS = 0xa679c6154b8d4619Af9F83f0bF9a13A680e01eCf;                      // Buyer's wallet
     address public constant LINK_ADDRESS = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB;                          // Link token address on Matic Mumbai
     address public constant USDC_ADDRESS = 0x8677871C4F153eCc1f9089022f21A937B8483ed9;                          // USDC token address on Matic Mumbai (ERC677 is backwards compatible to ERC20)
 
-    BlizzardOption private blizzardContract;
-    bool private collateralDeposited;
-    bool private premiumDeposited;
+    BlizzardOption public blizzardContract;
+    bool public collateralDeposited;
+    bool public premiumDeposited;
     bool public contractPaidOut;
 
     /**
@@ -44,8 +44,6 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
     {
         if (!premiumDeposited && !collateralDeposited) {
             LinkTokenInterface usdc = LinkTokenInterface(USDC_ADDRESS);  
-            // require(!premiumDeposited, "collateral cannot be deposited after premium");
-            // require(!collateralDeposited, "collateral has already been deposited for next purchase");
             require(usdc.allowance(msg.sender, address(this)) >= COLLATERAL_PAYMENT, "sender has not approved contract to deposit collateral");
             require(usdc.transferFrom(msg.sender, address(this), COLLATERAL_PAYMENT), "unable to deposit collateral");
             collateralDeposited = true;
@@ -62,8 +60,6 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
     {
         if (!premiumDeposited && collateralDeposited) {
             LinkTokenInterface usdc = LinkTokenInterface(USDC_ADDRESS);
-            // require(collateralDeposited, "unable to call until collateral has been deposited");
-            // require(!premiumDeposited, "premium has already been deposited for this purchase");
             require(usdc.allowance(msg.sender, address(this)) >= PREMIUM_PAYMENT, "sender has not approved contract to deposit premium");
             require(usdc.transferFrom(msg.sender, address(this), PREMIUM_PAYMENT), "unable to deposit premium");
             premiumDeposited = true;
@@ -81,8 +77,7 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
             LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);
             collateralDeposited = false;                // setting to false prevents another round of collateral/premium/purchase from happening
 
-            blizzardContract = new BlizzardOption();
-            blizzardContract.initialize(ORACLE_PAYMENT, LINK_ADDRESS);
+            blizzardContract = new BlizzardOption(ORACLE_PAYMENT, LINK_ADDRESS);
             blizzardContract.addOracleJob(0x7bcfF26a5A05AF38f926715d433c576f9F82f5DC, "6de976e92c294704b7b2e48358f43396");
             // fund the new contract with enough LINK tokens to make at least 1 Oracle request, with a buffer
             require(link.transfer(address(blizzardContract), ORACLE_PAYMENT * 2), "unable to fund deployed contract");
@@ -91,19 +86,10 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
     }
 
     /**
-     * @notice Returns the snow protection contract
-     */
-    function getContract()
-        external
-        view
-        returns (BlizzardOption)
-    {
-        return blizzardContract;
-    }
-
-    /**
      * @notice Add a new node and associated job ID to the contract execution/evalution set
      * @dev Sender must have access
+     * @param _oracle address of oracle contract for chainlink node
+     * @param _jobId string ID for associated oracle job
      */
     function addContractJob(
         address _oracle,
@@ -118,6 +104,7 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
     /**
      * @notice Remove a job from the contract execution/evaluation set
      * @dev Sender must have access
+     * @param _jobId string ID for associated oracle job
      */
     function removeContractJob(
         string memory _jobId
@@ -148,8 +135,21 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
             require(usdc.transfer(COLLATERAL_ADDRESS, usdc.balanceOf(address(this))), "unable to return balance to provider");
     }
 
+    // /**
+    //  * @notice Returns the snow protection contract
+    //  * @return BlizzardContract instance
+    //  */
+    // function getContract()
+    //     external
+    //     view
+    //     returns (BlizzardOption)
+    // {
+    //     return blizzardContract;
+    // }
+
     /**
      * @notice Request payout value for snow protection contract
+     * @return uint256 payout value
      */
     function getContractPayout()
         external
@@ -162,6 +162,7 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
     /**
      * @notice Get the ETH/matic/gas balance of the provider contract
      * @dev Can only be called by the contract owner
+     * @return uint256 ETH baalance
      */
     function getETHBalance() 
         external 
@@ -175,6 +176,7 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
     /**
      * @notice Get the LINK balance of the provider contract
      * @dev Can only be called by the contract owner
+     * @return uint256 LINK baalance
      */
     function getLINKBalance() 
         external 
@@ -188,6 +190,7 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
 
     /**
      * @notice Get the USDC/stablecoin balance of the provider contract
+     * @return uint256 USDC baalance
      */
     function getUSDCBalance() 
         external 
@@ -200,6 +203,8 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
 
     /**
      * @dev Write string to bytes32
+     * @param _source string to convert
+     * @return _result bytes32 converted string
      */
     function stringToBytes32(
         string memory _source
@@ -269,24 +274,24 @@ contract BlizzardOption is ChainlinkClient, ConfirmedOwner {
     string[] public dates;
     uint256 public payout;
 
-    /**
-     * @dev Prevents a function being run unless the end date has been passed
-     */
-    modifier onContractEnded() {
-        require(1649649600 < block.timestamp, "unable to call until coverage period has ended"); // 1649649600: unix timestamp of beginning of day after final home game of the season
-        _;
-    }
-
     event contractEnded(address _contract, uint256 _time);
     event evaluationRequestSent(address _contract, address _oracle, bytes32 _request, uint256 _time);
     event evaluationRequestFulfilled(address _contract, uint256 _payout, uint256 _time);
 
     /**
-     * @dev Creates a new blizzard options contract
+     * @notice Creates a new blizzard options contract
+     * @dev Assigns caller address as contract ownert
+     * @param _oracle_payment uint256 oracle payment amount
+     * @param _link address of LINK token on deployed network
      */
-    constructor() 
+    constructor(
+        uint256 _oracle_payment,
+        address _link
+    ) 
         ConfirmedOwner(msg.sender) 
     {
+        oraclePayment = _oracle_payment;
+        setChainlinkToken(_link);
         payout = 0;
         contractActive = true;
         contractEvaluated = false;
@@ -295,47 +300,10 @@ contract BlizzardOption is ChainlinkClient, ConfirmedOwner {
     }
 
     /**
-     * @dev Initializes a new blizzard options contract
-     */
-    function initialize(
-        uint256 _oracle_payment,
-        address _link
-    ) 
-        public
-        onlyOwner
-    {
-        oraclePayment = _oracle_payment;
-        setChainlinkToken(_link);
-    }
-
-    /**
-     * @dev Get the payout value, may not be final
-     */
-    function getStatus() 
-        public 
-        view 
-        returns (bool) 
-    {
-        return contractEvaluated;
-    }
-
-    /**
-     * @dev Get the payout value, may not be final
-     */
-    function getPayout() 
-        public 
-        view 
-        returns (uint256) 
-    {
-        if (contractEvaluated) {
-            return payout;
-        } else {
-            return payout / (oracles.length - requestsPending); // 0 if contract is active, "close" if contract is currently evaluating, no effect if only one oracle job
-        }
-    }
-
-    /**
-     * @dev Add a new node and associated job ID to the contract evaluator set
+     * @notice Add a new node and associated job ID to the contract evaluator set
+     * @dev Can only be called by the contract ownder
+     * @param _oracle address of oracle contract for chainlink node
+     * @param _jobId bytes32 ID for associated oracle job
      */
     function addOracleJob(
         address _oracle, 
@@ -350,7 +318,9 @@ contract BlizzardOption is ChainlinkClient, ConfirmedOwner {
     }
 
     /**
-     * @dev Remove a node and associated job ID from the contract evaluator set
+     * @notice Remove a node and associated job ID from the contract evaluator set
+     * @dev Can only be called by the contract ownder
+     * @param _jobId bytes32 ID of oracle job to remove
      */
     function removeOracleJob(
         bytes32 _jobId
@@ -367,21 +337,26 @@ contract BlizzardOption is ChainlinkClient, ConfirmedOwner {
     }
 
     /**
-     * @dev Makes a request to the oracles hosting the Arbol dApp external adapter and associated job
-     * to determine a contracts payout after the coverage period has ended
+     * @notice Makes a chainlink oracle request to compute a payout evaluation for this contract
+     * @dev Can only be called by the contract owner
      */
     function requestPayoutEvaluation() 
         public 
         onlyOwner 
-        onContractEnded 
     {
-        if (contractActive) {
-            contractActive = false;
+        // require(1649649600 < block.timestamp && contractActive, "unable to call until coverage period has ended");
+        if (contractActive && 1649649600 < block.timestamp) {
+            contractActive = false;                                 // prevents function from making more than one round of oracle requests
             emit contractEnded(address(this), block.timestamp);
 
-            for (uint256 i = 0; i != oracles.length; i += 1) {
-                Chainlink.Request memory req = buildChainlinkRequest(jobIds[i], address(this), this.fulfillPayoutEvaluation.selector);
-                req.addStringArray("dates", dates);
+            uint256 _oraclePayment = oraclePayment;                 // do all looped reads from memory instead of storage
+            string[] memory _dates = dates;
+            address[] memory _oracles = oracles;
+            bytes32[] memory _jobIds = jobIds;
+
+            for (uint256 i = 0; i != _oracles.length; i += 1) {
+                Chainlink.Request memory req = buildChainlinkRequest(_jobIds[i], address(this), this.fulfillPayoutEvaluation.selector);
+                req.addStringArray("dates", _dates);
                 req.add("station_id", "USW00003927");
                 req.add("weather_variable", "SNOW");
                 req.add("dataset", "ghcnd");
@@ -390,13 +365,16 @@ contract BlizzardOption is ChainlinkClient, ConfirmedOwner {
                 req.addUint("limit", 250000);
                 req.addUint("tick", 250000);
                 req.addUint("threshold", 6);
-                bytes32 requestId = sendChainlinkRequestTo(oracles[i], req, oraclePayment);
+                bytes32 requestId = sendChainlinkRequestTo(_oracles[i], req, _oraclePayment);
                 requestsPending += 1;
-                emit evaluationRequestSent(address(this), oracles[i], requestId, block.timestamp);
+                emit evaluationRequestSent(address(this), _oracles[i], requestId, block.timestamp);
             }
         }
     }
 
+    /**
+     * @dev Callback function for chainlink oracle requests, assigns payout
+     */
     function fulfillPayoutEvaluation(bytes32 _requestId, uint256 _result)
         public
         recordChainlinkFulfillment(_requestId)
@@ -415,8 +393,39 @@ contract BlizzardOption is ChainlinkClient, ConfirmedOwner {
     }
 
     /**
-     * @dev Function to end provider contract, in case of bugs or needing to update logic etc,
-     * funds are returned to the contract provider, including any remaining LINK tokens
+     * @notice Get the contract status
+     * @return bool contract evaluation status
+     */
+    function getStatus() 
+        public 
+        view 
+        returns (bool) 
+    {
+        return contractEvaluated;
+    }
+
+    /**
+     * @notice Get the contract payout value, which may not be final
+     * @dev Returns the final evaluation or 0 most of the time, and can possibly return an approximate value if currently evaluating on multuiple nodes
+     * @return uint256 evaluated payout
+     */
+    function getPayout() 
+        public 
+        view 
+        returns (uint256) 
+    {
+        if (contractEvaluated) {
+            return payout;
+        } else {
+            return payout / (oracles.length - requestsPending); // 0 if contract is active, "close" if contract is currently evaluating, no effect if only one oracle job
+        }
+    }
+
+    /**
+     * @notice Development function to end contract, in case of bugs or needing to update logic etc
+     * @dev Can only be called by the contract owner
+     *
+     * REMOVE IN PRODUCTION
      */
     function endContractInstance() 
         public 

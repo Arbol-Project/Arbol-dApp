@@ -44,7 +44,6 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
     {
         if (!premiumDeposited && !collateralDeposited) {
             LinkTokenInterface usdc = LinkTokenInterface(USDC_ADDRESS);  
-            require(usdc.allowance(msg.sender, address(this)) >= COLLATERAL_PAYMENT, "sender has not approved contract to deposit collateral");
             require(usdc.transferFrom(msg.sender, address(this), COLLATERAL_PAYMENT), "unable to deposit collateral");
             collateralDeposited = true;
         }
@@ -60,7 +59,6 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
     {
         if (!premiumDeposited && collateralDeposited) {
             LinkTokenInterface usdc = LinkTokenInterface(USDC_ADDRESS);
-            require(usdc.allowance(msg.sender, address(this)) >= PREMIUM_PAYMENT, "sender has not approved contract to deposit premium");
             require(usdc.transferFrom(msg.sender, address(this), PREMIUM_PAYMENT), "unable to deposit premium");
             premiumDeposited = true;
             buyContract();
@@ -135,17 +133,17 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
             require(usdc.transfer(COLLATERAL_ADDRESS, usdc.balanceOf(address(this))), "unable to return balance to provider");
     }
 
-    // /**
-    //  * @notice Returns the snow protection contract
-    //  * @return BlizzardContract instance
-    //  */
-    // function getContract()
-    //     external
-    //     view
-    //     returns (BlizzardOption)
-    // {
-    //     return blizzardContract;
-    // }
+    /**
+     * @notice Returns the snow protection contract
+     * @return BlizzardContract instance
+     */
+    function getContract()
+        external
+        view
+        returns (BlizzardOption)
+    {
+        return blizzardContract;
+    }
 
     /**
      * @notice Request payout value for snow protection contract
@@ -344,32 +342,30 @@ contract BlizzardOption is ChainlinkClient, ConfirmedOwner {
         public 
         onlyOwner 
     {
-        // require(1649649600 < block.timestamp && contractActive, "unable to call until coverage period has ended");
-        if (contractActive && 1649649600 < block.timestamp) {
-            contractActive = false;                                 // prevents function from making more than one round of oracle requests
-            emit contractEnded(address(this), block.timestamp);
+        require(1649649600 < block.timestamp && contractActive, "unable to call until coverage period has ended");
+        contractActive = false;                                 // prevents function from making more than one round of oracle requests
+        emit contractEnded(address(this), block.timestamp);
 
-            uint256 _oraclePayment = oraclePayment;                 // do all looped reads from memory instead of storage
-            string[] memory _dates = dates;
-            address[] memory _oracles = oracles;
-            bytes32[] memory _jobIds = jobIds;
+        uint256 _oraclePayment = oraclePayment;                 // do all looped reads from memory instead of storage
+        string[] memory _dates = dates;
+        address[] memory _oracles = oracles;
+        bytes32[] memory _jobIds = jobIds;
 
-            for (uint256 i = 0; i != _oracles.length; i += 1) {
-                Chainlink.Request memory req = buildChainlinkRequest(_jobIds[i], address(this), this.fulfillPayoutEvaluation.selector);
-                req.addStringArray("dates", _dates);
-                req.add("station_id", "USW00003927");
-                req.add("weather_variable", "SNOW");
-                req.add("dataset", "ghcnd");
-                req.add("opt_type", "CALL");
-                req.addUint("strike", 0);
-                req.addUint("limit", 250000);
-                req.addUint("tick", 250000);
-                req.addUint("threshold", 6);
-                bytes32 requestId = sendChainlinkRequestTo(_oracles[i], req, _oraclePayment);
-                requestsPending += 1;
-                emit evaluationRequestSent(address(this), _oracles[i], requestId, block.timestamp);
+        for (uint256 i = 0; i != _oracles.length; i += 1) {
+            Chainlink.Request memory req = buildChainlinkRequest(_jobIds[i], address(this), this.fulfillPayoutEvaluation.selector);
+            req.addStringArray("dates", _dates);
+            req.add("station_id", "USW00003927");
+            req.add("weather_variable", "SNOW");
+            req.add("dataset", "ghcnd");
+            req.add("opt_type", "CALL");
+            req.addUint("strike", 0);
+            req.addUint("limit", 250000);
+            req.addUint("tick", 250000);
+            req.addUint("threshold", 6);
+            bytes32 requestId = sendChainlinkRequestTo(_oracles[i], req, _oraclePayment);
+            requestsPending += 1;
+            emit evaluationRequestSent(address(this), _oracles[i], requestId, block.timestamp);
             }
-        }
     }
 
     /**
@@ -381,7 +377,6 @@ contract BlizzardOption is ChainlinkClient, ConfirmedOwner {
     {
         payout += _result;
         requestsPending -= 1;
-        // need to be careful here, if request fails and does not callback then requestsPending would sit at n > 0 and final payout would not be computed
         if (requestsPending == 0) {
             payout /= oracles.length;
             contractEvaluated = true;

@@ -78,12 +78,13 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
         if (premiumDeposited && collateralDeposited) {
             // prevents function from allowing more than one round of collateral/premium/purchases
             collateralDeposited = false;
-            blizzardContract = new CubanBlizzardOption(ORACLE_PAYMENT, LINK_ADDRESS);
+            blizzardContract = new CubanBlizzardOption();
+            blizzardContract.initialize(ORACLE_PAYMENT, LINK_ADDRESS);
             blizzardContract.addOracleJob(0x7bcfF26a5A05AF38f926715d433c576f9F82f5DC, "6de976e92c294704b7b2e48358f43396");
             // fund the new contract with enough LINK tokens to make at least 1 Oracle request, with a buffer
             LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);
             require(link.transfer(address(blizzardContract), ORACLE_PAYMENT * 2), "unable to fund deployed contract");
-            emit contractCreated(address(blizzardContract), "Mavs_Blizzard_21-22");
+            emit contractCreated(address(blizzardContract), "Dallas Mavs 2022-04-10 00:00:00");
         }
     }
 
@@ -126,6 +127,18 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
         returns (CubanBlizzardOption)
     {
         return blizzardContract;
+    }
+
+    /**
+     * @notice Returns the address of the contract for a given id
+     * @return address of deployed contract
+     */
+    function getContractAddress()
+        external
+        view
+        returns (address)
+    {
+        return address(blizzardContract);
     }
 
     /**
@@ -291,22 +304,32 @@ contract CubanBlizzardOption is ChainlinkClient, ConfirmedOwner {
     /**
      * @notice Creates a new blizzard option contract
      * @dev Assigns caller address as contract ownert
-     * @param _oraclePayment uint256 oracle payment amount
-     * @param _link address of LINK token on deployed network
      */
-    constructor(
-        uint256 _oraclePayment,
-        address _link
-    ) 
+    constructor() 
         ConfirmedOwner(msg.sender) 
     {
-        oraclePayment = _oraclePayment;
-        setChainlinkToken(_link);
         payout = 0;
         contractActive = true;
         contractEvaluated = false;
         // can't deserialize on node, have to give dates as input
         dates = ["2021-10-06", "2021-10-08", "2021-10-26", "2021-10-28", "2021-10-31", "2021-11-02", "2021-11-06", "2021-11-08", "2021-11-15", "2021-11-27", "2021-11-29", "2021-12-03", "2021-12-04", "2021-12-07", "2021-12-13", "2021-12-15", "2021-12-21", "2021-12-23", "2022-01-03", "2022-01-05", "2022-01-09", "2022-01-15", "2022-01-17", "2022-01-19", "2022-01-20", "2022-01-23", "2022-01-29", "2022-02-02", "2022-02-04", "2022-02-06", "2022-02-08", "2022-02-10", "2022-02-12", "2022-03-03", "2022-03-05", "2022-03-07", "2022-03-09", "2022-03-21", "2022-03-23", "2022-03-27", "2022-03-29", "2022-04-08", "2022-04-10"];
+    }
+
+    /**
+     * @notice Initializes blizzard contract terms
+     * @dev Can only be called by the contract owner
+     * @param _oraclePayment uint256 oracle payment amount
+     * @param _link address of LINK token on deployed network
+     */
+    function initialize(
+        uint256 _oraclePayment,
+        address _link
+    ) 
+        public 
+        onlyOwner 
+    {
+        oraclePayment = _oraclePayment;
+        setChainlinkToken(_link);
     }
  
     /**

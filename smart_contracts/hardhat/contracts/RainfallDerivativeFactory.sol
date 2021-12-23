@@ -50,8 +50,8 @@ contract RainfallDerivativeProvider is ConfirmedOwner {
         external 
         onlyOwner 
     {
-        RainfallOption rainfallContract = new RainfallOption(ORACLE_PAYMENT, LINK_ADDRESS);
-        rainfallContract.initialize(_locations, _parameters, _end);
+        RainfallOption rainfallContract = new RainfallOption();
+        rainfallContract.initialize(ORACLE_PAYMENT, LINK_ADDRESS, _locations, _parameters, _end);
         rainfallContract.addOracleJob(0x7bcfF26a5A05AF38f926715d433c576f9F82f5DC, stringToBytes32("6de976e92c294704b7b2e48358f43396"));
         contracts[_parameters[0]] = rainfallContract;
         // fund the new contract with enough LINK tokens to make at least 1 Oracle request, with a buffer
@@ -101,6 +101,21 @@ contract RainfallDerivativeProvider is ConfirmedOwner {
         returns (RainfallOption)
     {
         return contracts[_id];
+    }
+
+    /**
+     * @notice Returns the address of the contract for a given id
+     * @param _id string contract ID
+     * @return address of deployed contract
+     */
+    function getContractAddress(
+        string memory _id
+    )
+        external
+        view
+        returns (address)
+    {
+        return address(contracts[_id]);
     }
 
     /**
@@ -264,17 +279,10 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
     /**
      * @notice Creates a new rainfall option contract
      * @dev Assigns caller address as contract ownert
-     * @param _oraclePayment uint256 oracle payment amount
-     * @param _link address of LINK token on deployed network
      */
-    constructor(
-        uint256 _oraclePayment,
-        address _link
-    ) 
+    constructor() 
         ConfirmedOwner(msg.sender) 
     {
-        oraclePayment = _oraclePayment;
-        setChainlinkToken(_link);
         payout = 0;
         contractActive = false;
         contractEvaluated = false;
@@ -284,10 +292,15 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
     /**
      * @notice Initializes rainfall contract terms
      * @dev Can only be called by the contract owner
+     * @param _oraclePayment uint256 oracle payment amount
+     * @param _link address of LINK token on deployed network
      * @param _locations string array of lat-lon coordinate pairs (see examples below)
      * @param _parameters string array of all other contract parameters: [id, dataset, optType, start, end, strike, limit, tick]
+     * @param _end uint256 unix timestamp of contract end date
      */
     function initialize(
+        uint256 _oraclePayment,
+        address _link,
         string[] memory _locations, 
         string[] memory _parameters,
         uint256 _end
@@ -295,6 +308,8 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
         public 
         onlyOwner 
     {
+        oraclePayment = _oraclePayment;
+        setChainlinkToken(_link);
         locations = _locations;
         parameters = _parameters;
         end = _end;

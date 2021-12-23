@@ -1,15 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+// need to set LINK_ADDRESS depending on network
+// mappings for variables and stringed inputs to not deal with floats, maybe bytes32
+// dont loop storage writes
+
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
 
 contract RainfallDerivativeProvider is ConfirmedOwner {
     /**
-     * @notice RainfallDerivativeProvider contract for general rainfall option contracts
+     * @dev RainfallDerivativeProvider contract for general rainfall option contracts
      */
-    uint256 private constant ORACLE_PAYMENT = 1 * 10**14;                                                        // 0.0001 LINK
-    address public constant LINK_ADDRESS = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB;                          // Link token address on Matic Mumbai
+    uint256 private constant ORACLE_PAYMENT = 1 * 10**14;                                                       // 0.0001 LINK
+    address public constant LINK_ADDRESS = 0xa36085F69e2889c224210F603D836748e7dC0088;                          // Link token address on Matic Mumbai
 
     mapping(string => RainfallOption) public contracts;
     
@@ -32,15 +36,15 @@ contract RainfallDerivativeProvider is ConfirmedOwner {
      * @param _optType string type of option, "CALL" or "PUT"
      * @param _start uint256 unix timestamp of contract start date
      * @param _end uint256 unix timestamp of contract end date
-     * @param _strike uint256 contract strike (times 10^8 for solidity)
-     * @param _limit uint256 contract limit (times 10^8 for solidity)
-     * @param _tick uint256 contract tick (times 10^8 for solidity)
+     * @param _strike uint256 contract strike (times 10^20 for solidity)
+     * @param _limit uint256 contract limit (times 10^20 for solidity)
+     * @param _tick uint256 contract tick (times 10^20 for solidity)
      */
     function newContract(
         string[] memory _locations,     // e.g. ["[12.76727009, 104.01941681]","[12.76727009, 104.26941681]",...,"[13.51727009, 104.26941681]"]
         string memory _id,              // e.g. "Prasat Bakong PUT, limit: 1.18k"
         string memory _dataset,         // e.g. "chirpsc_final_25-daily"
-        string memory _optType,
+        string memory _optType,         
         uint256 _start,
         uint256 _end,
         uint256 _strike,
@@ -51,15 +55,15 @@ contract RainfallDerivativeProvider is ConfirmedOwner {
         onlyOwner 
     {
         RainfallOption rainfallContract = new RainfallOption(ORACLE_PAYMENT, LINK_ADDRESS);
-        rainfallContract.initialize(_locations, _dataset, _optType, _start, _end, _strike, _limit, _tick)
+        rainfallContract.initialize(_locations, _dataset, _optType, _start, _end, _strike, _limit, _tick);
         rainfallContract.addOracleJob(0x7bcfF26a5A05AF38f926715d433c576f9F82f5DC, stringToBytes32("6de976e92c294704b7b2e48358f43396"));
         contracts[_id] = rainfallContract;
         // fund the new contract with enough LINK tokens to make at least 1 Oracle request, with a buffer
-        LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
-        require(link.transfer(address(i), ORACLE_PAYMENT * 2), "Unable to fund deployed contract");
-        emit contractCreated(address(i), _id);
+        LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);
+        require(link.transfer(address(rainfallContract), ORACLE_PAYMENT * 2), "Unable to fund deployed contract");
+        emit contractCreated(address(rainfallContract), _id);
     }
-
+big
     /**
      * @notice Request payout evaluation for a specified contract
      * @dev Can only be called by the contract owner
@@ -230,7 +234,7 @@ contract RainfallDerivativeProvider is ConfirmedOwner {
         external 
         onlyOwner 
     {
-        LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
+        LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);
         require(link.transfer(owner(), link.balanceOf(address(this))), "Unable to transfer");
         selfdestruct(payable(owner()));
     }
@@ -238,10 +242,13 @@ contract RainfallDerivativeProvider is ConfirmedOwner {
 
 
 contract RainfallOption is ChainlinkClient, ConfirmedOwner {
+    /**
+     * @dev RainfallOption contract for rainfall option contracts
+     */
     using Chainlink for Chainlink.Request;
 
     uint256 private oraclePayment;
-    mapping(address => uint256) public oracleMap;
+    mapping(bytes32 => uint256) public oracleMap;
     address[] public oracles;
     bytes32[] public jobs;
 
@@ -249,15 +256,16 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
     bool public contractEvaluated;
     uint256 private requestsPending;
 
-    string[] private locations;
-    string private dataset;
-    string private optType;
-    uint256 private start;
-    uint256 private end;
-    uint256 private strike;
-    uint256 private limit;
-    uint256 private tick;
-    uint256 private payout;
+    string[] public locations;
+    string[] public parameters;
+    // string private dataset;
+    // string private optType;
+    // uint256 private start;
+    // uint256 private end;
+    // uint256 private strike;
+    // uint256 private limit;
+    // uint256 private tick;
+    uint256 public payout;
 
     event contractEnded(address _contract, uint256 _time);
     event evaluationRequestSent(address _contract, address _oracle, bytes32 _request, uint256 _time);
@@ -283,39 +291,43 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
         requestsPending = 0;
     }
 
+    //  * @param _dataset string name of the dataset for the contract
+    //  * @param _optType string type of option, "CALL" or "PUT"
+    //  * @param _start uint256 unix timestamp of contract start date
+    //  * @param _end uint256 unix timestamp of contract end date
+    //  * @param _strike uint256 contract strike (times 10^8 for solidity)
+    //  * @param _limit uint256 contract limit (times 10^8 for solidity)
+    //  * @param _tick uint256 contract tick (times 10^8 for solidity)
+
     /**
      * @notice Initializes rainfall contract terms
      * @dev Can only be called by the contract owner
      * @param _locations string array of lat-lon coordinate pairs (see examples below)
-     * @param _dataset string name of the dataset for the contract
-     * @param _optType string type of option, "CALL" or "PUT"
-     * @param _start uint256 unix timestamp of contract start date
-     * @param _end uint256 unix timestamp of contract end date
-     * @param _strike uint256 contract strike (times 10^8 for solidity)
-     * @param _limit uint256 contract limit (times 10^8 for solidity)
-     * @param _tick uint256 contract tick (times 10^8 for solidity)
+     * @param _parameters string array of all other contract parameters: [dataset, optType, start, end, strike, limit, tick]
      */
     function initialize(
         string[] memory _locations, 
-        string memory _dataset, 
-        string memory _opt_type, 
-        uint256 _start,
-        uint256 _end, 
-        uint256 _strike,
-        uint256 _limit,
-        uint256 _tick
+        string[] memory _parameters,
+        // string memory _dataset, 
+        // string memory _optType, 
+        // uint256 _start,
+        // uint256 _end, 
+        // uint256 _strike,
+        // uint256 _limit,
+        // uint256 _tick
     ) 
         public 
         onlyOwner 
     {
         locations = _locations;
-        dataset = _dataset;
-        opt_type = _opt_type;
-        start = _start;
-        end = _end;
-        strike = _strike;
-        limit = _limit;
-        tick = _tick;
+        parameters = _parameters;
+        // dataset = _parameters[0];
+        // optType = _parameters[1];
+        // start = _parameters[2];
+        // end = _parameters[3];
+        // strike = _parameters[4];
+        // limit = _parameters[5];
+        // tick = _parameters[6];
         contractActive = true;
     }
 
@@ -367,33 +379,36 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
         require(end < block.timestamp && contractActive, "unable to call until coverage period has ended");
         // prevents function from making more than one round of oracle requests
         contractActive = false;
-        emit contractEnded(address(this), end, block.timestamp);
+        emit contractEnded(address(this), block.timestamp);
         // do all looped reads from memory instead of storage
         uint256 _oraclePayment = oraclePayment;
         address[] memory _oracles = oracles;
         bytes32[] memory _jobs = jobs;
         string[] memory _locations = locations;
-        string memory _dataset = dataset;
-        string memory _optType = optType;
-        uint256 _start = start;
-        uint256 _end = end;
-        uint256 _strike = strike;
-        uint256 _limit = limit;
-        uint256 _tick = tick;
+        string[] memory memParameters = parameters;
+        // string memory _dataset = dataset;
+        // string memory _optType = optType;
+        uint256 requests = 0;
+        // uint256 _start = start;
+        // uint256 _end = end;
+        // uint256 _strike = strike;
+        // uint256 _limit = limit;
+        // uint256 _tick = tick;
         for (uint256 i = 0; i != _oracles.length; i += 1) {
             Chainlink.Request memory req = buildChainlinkRequest(_jobs[i], address(this), this.fulfillPayoutEvaluation.selector);
-            req.add("dataset", _dataset);
-            req.add("opt_type", _optType);
             req.addStringArray("locations", _locations);
-            req.addUint("start", _start);
-            req.addUint("end", _end);
-            req.addUint("strike", _strike);
-            req.addUint("limit", _limit);
-            req.addUint("tick", _tick);
+            req.add("dataset", memParameters[0]);
+            req.add("opt_type", memParameters[1]);
+            req.add("start", memParameters[2]);
+            req.add("end", memParameters[3]);
+            req.add("strike", memParameters[4]);
+            req.add("limit", memParameters[5]);
+            req.add("tick", memParameters[6]);
             bytes32 requestId = sendChainlinkRequestTo(_oracles[i], req, _oraclePayment);
-            requestsPending += 1;
+            requests += 1;
             emit evaluationRequestSent(address(this), _oracles[i], requestId, block.timestamp);
             }
+        requestsPending = requests;
     }
 
     /**

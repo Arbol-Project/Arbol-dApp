@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+// need to set LINK_ADDRESS, USDC_ADDRESS depending on network
+
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@chainlink/contracts/src/v0.8/SimpleWriteAccessController.sol";
 
 
 contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
     /**
-     * @notice BlizzardDerivativeProvider contract for Dallas Snow Protection 21-22 Season
-     * @dev Only enables a single purchase/creation of the contract instance
+     * @dev BlizzardDerivativeProvider contract for Dallas Snow Protection 21-22 Season
      */
     uint256 private constant ORACLE_PAYMENT = 1 * 10**14;                                                       // 0.0001 LINK
     uint256 public constant COLLATERAL_PAYMENT = 25 * 10**5 * 10**6;                                            // 250,000 * 1 USDC
@@ -122,7 +123,7 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
     function getContract()
         external
         view
-        returns (BlizzardOption)
+        returns (CubanBlizzardOption)
     {
         return blizzardContract;
     }
@@ -267,8 +268,7 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
 
 contract CubanBlizzardOption is ChainlinkClient, ConfirmedOwner {
     /**
-     * @notice BlizzardOption contract for Dallas Snow Protection 21-22 Season
-     * @dev Hard coded with contract terms (see requestPayoutEvaluation)
+     * @dev BlizzardOption contract for Dallas Snow Protection 21-22 Season
      */
     using Chainlink for Chainlink.Request;
 
@@ -360,9 +360,11 @@ contract CubanBlizzardOption is ChainlinkClient, ConfirmedOwner {
         emit contractEnded(address(this), block.timestamp);
         // do all looped reads from memory instead of storage
         uint256 _oraclePayment = oraclePayment;
-        string[] memory _dates = dates;
         address[] memory _oracles = oracles;
         bytes32[] memory _jobs = jobs;
+        string[] memory _dates = dates;
+        uint256 requests = 0;
+
         for (uint256 i = 0; i != _oracles.length; i += 1) {
             Chainlink.Request memory req = buildChainlinkRequest(_jobs[i], address(this), this.fulfillPayoutEvaluation.selector);
             req.addStringArray("dates", _dates);
@@ -375,9 +377,10 @@ contract CubanBlizzardOption is ChainlinkClient, ConfirmedOwner {
             req.addUint("tick", 250000);
             req.addUint("threshold", 6);
             bytes32 requestId = sendChainlinkRequestTo(_oracles[i], req, _oraclePayment);
-            requestsPending += 1;
+            requests += 1;
             emit evaluationRequestSent(address(this), _oracles[i], requestId, block.timestamp);
             }
+        requestsPending = requests;
     }
 
     /**

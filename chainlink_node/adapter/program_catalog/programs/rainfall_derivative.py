@@ -11,11 +11,11 @@ class RainfallDerivative:
     _PROGRAM_PARAMETERS = ['dataset', 'locations', 'start', 'end', 'strike', 'limit', 'opt_type']
     _PARAMETER_OPTIONS = ['exhaust', 'tick']
     _SOLIDITY_MULTIPLIERS = {
-        "strike" : 10**8,
-        "limit" : 10**8,
-        "exhaust" : 10**8,
-        "tick" : 10**8,
-        "payout": 10**8
+        "strike" : 10**0,
+        "limit" : 10**0,
+        "exhaust" : 10**0,
+        "tick" : 10**0,
+        "payout": 10**2
     }
 
     @classmethod
@@ -71,28 +71,28 @@ class RainfallDerivative:
         ''' Uses the provided contract parameters to calculate a payout and index
 
             Parameters: data (Pandas Series), weather data averaged over locations
-                        start (int), unix timestamp for start date of coverage period
-                        end (int), unix timestamp for end date of coverage period
+                        start (str), unix timestamp for start date of coverage period
+                        end (str), unix timestamp for end date of coverage period
                         opt_type (str), type of option contract, either PUT or CALL
-                        strike (int), 10^8 times the strike value for the payout (no floats in solidity)
-                        limit (int), 10^8 times the limit value for the payout (no floats in solidity)
-                        exhaust (int), 10^8 times the exhaust value for the payout (no floats in solidity)
+                        strike (str), 10^8 times the strike value for the payout (no floats in solidity)
+                        limit (str), 10^8 times the limit value for the payout (no floats in solidity)
+                        exhaust (str), 10^8 times the exhaust value for the payout (no floats in solidity)
             or None if tick is not None
-                        tick (number), tick value for payout or None if exhaust is not None
+                        tick (str), tick value for payout or None if exhaust is not None
             Returns: int, generated payout times 10^8 (in order to report back to chain)
         '''
-        strike /= cls._SOLIDITY_MULTIPLIERS['strike']
-        limit /= cls._SOLIDITY_MULTIPLIERS['limit']
+        strike = float(strike) * cls._SOLIDITY_MULTIPLIERS['strike']
+        limit = float(limit) * cls._SOLIDITY_MULTIPLIERS['limit']
         start_date = datetime.utcfromtimestamp(int(start)).strftime('%Y-%m-%d')
         end_date = datetime.utcfromtimestamp(int(end)).strftime('%Y-%m-%d')
         index_value = data.loc[start_date:end_date].sum()
         opt_type = opt_type.lower()
         direction = 1 if opt_type == 'call' else -1
         if tick is None:
-            exhaust /= cls._SOLIDITY_MULTIPLIERS['exhaust']
+            exhaust = float(exhaust) * cls._SOLIDITY_MULTIPLIERS['exhaust']
             tick = abs(limit / (strike - exhaust))
         else:
-            tick /= cls._SOLIDITY_MULTIPLIERS['tick']
+            tick = float(tick) * cls._SOLIDITY_MULTIPLIERS['tick']
         payout = (index_value - strike) * tick * direction
         if payout < 0:
             payout = 0

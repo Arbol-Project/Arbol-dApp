@@ -11,7 +11,7 @@ async function main() {
   var derivative_provider = null;
 
   if ("RainfallDerivativeProvider" in Providers) {
-    provider_address = DeployedContracts.RainfallDerivativeProvider;
+    provider_address = Providers.RainfallDerivativeProvider;
     derivative_provider = await RainfallDerivativeProvider.attach(provider_address);
     console.log("RainfallDerivativeProvider already deployed to:", provider_address);
   } else {
@@ -21,20 +21,18 @@ async function main() {
     console.log("RainfallDerivativeProvider deployed to:", address);
     Providers["RainfallDerivativeProvider"] = address;
     var deployment_content = JSON.stringify(Providers);
-    console.log(deployment_content);
-    fs.writeFile(process.cwd()+"/logs/deployments.json", deployment_content, "utf8", function (err) {
-      if (err) {
-        console.log("error writing to json");
-        return console.log(err)
-      }
-    });
+    try {
+      fs.writeFileSync(process.cwd()+"/logs/providers.json", deployment_content)
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   RainfallSRO1.__config__.contracts.push(RainfallSRO2);
   for (const contract of RainfallSRO1.__config__.contracts) {
     var id = contract.__config__.id.toString();
-    if (id in DeployedContracts) {
-      console.log("RainfallOption already deployed to:", DeployedContracts[id]);
+    if (id in Contracts) {
+      console.log("RainfallOption already deployed to:", Contracts[id]);
       continue;
     } else {
       var opt_type = contract.__config__.payouts.__config__.derivative.__config__.opt_type.toString();
@@ -69,13 +67,11 @@ async function main() {
   }
 
   var final_content = JSON.stringify(Contracts);
-  console.log(final_content);
-  fs.writeFile(process.cwd()+"/logs/deployments.json", final_content, "utf8", function (err) {
-    if (err) {
-      console.log("error writing to json");
-      return console.log(err)
-    }
-  });
+  try {
+    fs.writeFileSync(process.cwd()+"/logs/contracts.json", final_content)
+  } catch (error) {
+    console.error(error)
+  }
 }
 
 main()

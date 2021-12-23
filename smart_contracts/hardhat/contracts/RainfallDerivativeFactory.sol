@@ -65,20 +65,6 @@ contract RainfallDerivativeProvider is ConfirmedOwner {
      * @dev Can only be called by the contract owner
      * @param _id string contract ID
      */
-    function initiatePayoutEvaluation(
-        string memory _id
-    ) 
-        external 
-        onlyOwner 
-    {
-        contracts[_id].requestPayoutEvaluation();
-    }
-
-    /**
-     * @notice Request payout evaluation for a specified contract
-     * @dev Can only be called by the contract owner
-     * @param _id string contract ID
-     */
     function initiateContractEvaluation(
         string memory _id
     ) 

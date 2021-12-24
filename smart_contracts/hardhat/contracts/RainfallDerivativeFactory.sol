@@ -56,10 +56,7 @@ contract RainfallDerivativeProvider is ConfirmedOwner {
         contracts[_parameters[0]] = rainfallContract;
         // fund the new contract with enough LINK tokens to make at least 1 Oracle request, with a buffer
         LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);
-        if (link.allowance(msg.sender, address(this)) < ORACLE_PAYMENT) {
-            require(link.approve(address(this), ORACLE_PAYMENT * 1000), "unable to approve LINK transfer");
-        }
-        require(link.transferFrom(msg.sender, address(rainfallContract), ORACLE_PAYMENT * 2), "Unable to fund deployed contract");
+        require(link.transfer(address(rainfallContract), ORACLE_PAYMENT * 2), "Unable to fund deployed contract");
         emit contractCreated(address(rainfallContract), _parameters[0]);
     }
 

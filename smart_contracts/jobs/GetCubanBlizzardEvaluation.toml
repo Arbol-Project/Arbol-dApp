@@ -1,6 +1,6 @@
 type = "directrequest"
 schemaVersion = 1
-name = "Get Blizzard Evaluation"
+name = "Get Cuban Blizzard Evaluation"
 contractAddress = "0x7bcfF26a5A05AF38f926715d433c576f9F82f5DC"
 maxTaskDuration = "0s"
 observationSource = """

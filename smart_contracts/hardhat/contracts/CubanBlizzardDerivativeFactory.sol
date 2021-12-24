@@ -39,6 +39,20 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
     }
 
     /**
+     * @notice Approves this smart contract to move the sender's 
+     * @param _amount uint256 approved amount of USDC
+     */
+    function approveTransferUSDC(
+        uint256 _amount
+    )
+        external
+        checkAccess
+    {
+        LinkTokenInterface usdc = LinkTokenInterface(USDC_ADDRESS);  
+        require(usdc.approve(address(this), _amount), "unable to approve transfer settings");
+    }
+
+    /**
      * @notice Deposit collateral for Dallas snow protection contract (must first approve smart contract to move USDC!)
      * @dev Neither collateral nor premium can already be deposited, sender must have access
      */

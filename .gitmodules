@@ -1,3 +1,6 @@
 [submodule "chainlink_node/adapter/dweather"]
 	path = chainlink_node/adapter/dweather
 	url = https://github.com/dClimate/dWeather-Python-Client.git
+[submodule "smart_contracts/foundry/lib/ds-test"]
+	path = smart_contracts/foundry/lib/ds-test
+	url = https://github.com/dapphub/ds-test

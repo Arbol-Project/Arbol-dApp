@@ -10,7 +10,7 @@ contract RainfallDerivativeProvider is ConfirmedOwner {
     /**
      * @dev RainfallDerivativeProvider contract for general rainfall option contracts
      */
-    uint256 private constant ORACLE_PAYMENT = 1 * 10**14;                                                       // 0.0001 LINK
+    uint256 private constant ORACLE_PAYMENT = 1 * 10**15;                                                       // 0.001 LINK
     address public constant LINK_ADDRESS = 0xa36085F69e2889c224210F603D836748e7dC0088;                          // Link token address on Matic Mumbai
 
     mapping(string => RainfallOption) public contracts;

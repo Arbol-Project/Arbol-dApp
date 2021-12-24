@@ -11,7 +11,7 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
     /**
      * @dev BlizzardDerivativeProvider contract for Dallas Snow Protection 21-22 Season
      */
-    uint256 private constant ORACLE_PAYMENT = 1 * 10**14;                                                       // 0.0001 LINK
+    uint256 private constant ORACLE_PAYMENT = 1 * 10**15;                                                       // 0.001 LINK
     uint256 public constant COLLATERAL_PAYMENT = 25 * 10**5 * 10**6;                                            // 250,000 * 1 USDC
     uint256 public constant PREMIUM_PAYMENT = 10**5 * 10**6;                                                    // 10,000 * 1 USDC
     address public constant COLLATERAL_ADDRESS = 0x3382d07e2736AC80f07D7288750F2442d187a7e3;                    // Arbol USDC wallet

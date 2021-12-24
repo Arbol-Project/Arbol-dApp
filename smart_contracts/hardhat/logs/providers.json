@@ -1,3 +1,10 @@
 {
-    "RainfallDerivativeProvider": "0x3552bB09d0FdAB66f2F483b6b4DB310EC33B1aAC"
+    "CubanBlizzardDerivativeProvider": {
+        "address": "0xeea7c8c7C7e6F744dF448Ae44048a6429736A4Be",
+        "verified": true
+    },
+    "RainfallDerivativeProvider": {
+        "address": "0x58420Bc937980989B510d3b5f1249cae4cC0B20d",
+        "verified": true
+    }
 }

@@ -18,9 +18,7 @@ async function main() {
         need_write = true;
         console.log(name.toString() + " source code verified");
       } catch (error) {
-        if (error instanceof NomicLabsHardhatPluginError) {
-          data.verified = true;
-        }
+        data.verified = true;
         console.error(error);
       }
     }
@@ -47,9 +45,7 @@ async function main() {
         need_write = true;
         console.log(name.toString() + " source code verified");
       } catch (error) {
-        if (error instanceof NomicLabsHardhatPluginError) {
-          data.verified = true;
-        }
+        data.verified = true;
         console.error(error);
       }
     }

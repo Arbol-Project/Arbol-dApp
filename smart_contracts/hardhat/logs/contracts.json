@@ -126,5 +126,9 @@
     "Cambodia Rainfall December 21 - April 22": {
         "address": "0x213af8Ea2dF0604BD05950D5cfACAdB1F3D6077F",
         "verified": true
+    },
+    "Kralanh CALL, limit: 542": {
+        "address": "0x378399c43E8C167602Ec47830E0142894A1a5Aff",
+        "verified": true
     }
 }

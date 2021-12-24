@@ -64,7 +64,6 @@ async function main() {
 
         Contracts[id] = {"address": deployed_address, "verified": false};
       }
-      break;
     }
     var final_content = JSON.stringify(Contracts);
     try {
@@ -83,7 +82,3 @@ main()
     console.error(error);
     process.exit(1);
   });
-
-
-  // cargo install --git https://github.com/gakonst/foundry --bin forge --locked --features=solc-asm
-  // curl http://xn--2-kmb.com/forgeup/install | bash

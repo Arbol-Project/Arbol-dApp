@@ -44,7 +44,7 @@ contract RainfallDerivativeProvider is ConfirmedOwner {
      */
     function newContract(
         string[] memory _locations,         // e.g. ["[12.76727009, 104.01941681]","[12.76727009, 104.26941681]",...,"[13.51727009, 104.26941681]"]
-        string[] memory _parameters,
+        string[8] memory _parameters,
         uint256 _end
     ) 
         external 
@@ -254,7 +254,7 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
     uint256 private requestsPending;
 
     string[] public locations;
-    string[] public parameters;
+    string[8] public parameters;
     uint256 private end;
     uint256 public payout;
 
@@ -288,7 +288,7 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
         uint256 _oraclePayment,
         address _link,
         string[] memory _locations, 
-        string[] memory _parameters,
+        string[8] memory _parameters,
         uint256 _end
     ) 
         public 
@@ -356,7 +356,7 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
         address[] memory _oracles = oracles;
         bytes32[] memory _jobs = jobs;
         string[] memory _locations = locations;
-        string[] memory memParameters = parameters;
+        string[8] memory memParameters = parameters;
         uint256 requests = 0;
         for (uint256 i = 0; i != _oracles.length; i += 1) {
             Chainlink.Request memory req = buildChainlinkRequest(_jobs[i], address(this), this.fulfillPayoutEvaluation.selector);

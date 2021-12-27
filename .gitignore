@@ -1,5 +1,6 @@
 chainlink_node/adapter/tests/SROs/*
 chainlink_node/adapter/tests/payouts/*
+chainlink_node/adapter/tests/SROs.zip
 
 chainlink_node/chainlink/.env
 chainlink_node/chainlink/.api

@@ -30,4 +30,4 @@ docker compose up --build
 
 # Smart Contracts (on-chain)
 
-This directory holds smart contract source for Arbol derivative deals, Hardhat testing and deployment scripts, Chainlink oracle job definitions, and contract deployment records.
+This directory holds smart contract source for Arbol derivative deals, Hardhat testing, deployment, and manual evaluation scripts, Chainlink oracle job definitions, and contract deployment records.

@@ -19,8 +19,10 @@ sudo yum install -y git
 git clone --recurse-submodules https://github.com/dmp267/Arbol-dApp.git
 bash Arbol-dApp/chainlink_node/scripts/setup-AWS.sh
 exit
-# forward credentials from Arbol-dApp on local machine
+
+# forward credentials from Arbol-dApp repo on local machine
 bash chainlink_node/scripts/send-secrets.sh
+
 # log back in and set sensitive data
 bash Arbol-dApp/chainlink_node/scripts/receive-secrets.sh
 docker compose up --build

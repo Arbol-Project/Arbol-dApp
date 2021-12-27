@@ -12,7 +12,7 @@ A Docker Compose project to launch an Arbol-Chainlink node on a new AWS EC2 inst
 a Chainlink node for fulfilling smart contract oracle requests, an IPFS daemon for retrieving Arbol weather data and listening to IPFS-HTTP requests, and a Chainlink external adapter run as a Guicorn server for serving requests and computing payout evaluations on retrieved data.
 
 Follow the steps below with the proper credentials to launch a new node (doing so removes the smart_contract directory
-to save space since it is unlikely to be needed ):
+to save space since it is unlikely to be needed):
 
 ```
 sudo yum install -y git

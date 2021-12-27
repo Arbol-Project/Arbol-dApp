@@ -1,4 +1,4 @@
-chainlink_node/send-secrets.sh
+chainlink_node/scripts/send-secrets.sh
 
 chainlink_node/adapter/tests/SROs/*
 chainlink_node/adapter/tests/payouts/*

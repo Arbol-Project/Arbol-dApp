@@ -1,15 +1,81 @@
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-import csv
+# import csv
 import json
 import pytest
 from datetime import datetime
 
 import adapter
 
-SRO_DIR = os.path.join(os.path.dirname(__file__), 'SROs')
 
-def parse_available_contract_data(sropath, paypath):
+SRO_DIR = os.path.join(os.path.dirname(__file__), 'SROs')
+# PAYOUT_DIR = os.path.join(os.path.dirname(__file__), 'payouts')
+
+
+def parse_contract_data(contract, i):
+    if 'loaders' in contract['__config__']['payouts']['__config__']['index_distribution']['__config__']['index']['__config__']['loader']['__config__']:
+        config = contract['__config__']
+        name = config['id']
+        payouts = config['payouts']['__config__']
+        derivative = payouts['derivative']['__config__']
+        opt_type = derivative['opt_type']
+        index = payouts['index_distribution']['__config__']['index']['__config__']
+        loader = index['loader']['__config__']
+        dataset = loader['dataset_name']
+        
+        strike = str(derivative['strike'])
+        tick = str(derivative['tick'])
+        limit = str(derivative['limit'])
+
+        start = str(int(datetime.strptime(index['start'], '%Y-%m-%d').timestamp()))
+        end = str(int(datetime.strptime(index['end'], '%Y-%m-%d').timestamp()))
+        
+        locations = []
+        for loader_config in loader['loaders']:
+            pos = f"[{loader_config['__config__']['lat']}, {loader_config['__config__']['lon']}]"
+            locations.append(pos)
+
+        request_params = {
+            'name': name,
+            'strike': strike,
+            'tick': tick,
+            'exhaust': None,
+            'limit': limit,
+            'opt_type': opt_type,
+            'start': start,
+            'end': end,
+            'dataset': dataset,
+            'locations': locations,
+        }
+        request_data = {
+            'id': f'{i}',
+            'data': {
+                'params': request_params
+            }
+        }
+    else:
+        request_params = {
+            'name': "Dallas Mavs 2022-04-10 00:00:00",
+            'dates': ["2021-10-06", "2021-10-08", "2021-10-26", "2021-10-28", "2021-10-31", "2021-11-02", "2021-11-06", "2021-11-08", "2021-11-15", "2021-11-27", "2021-11-29", "2021-12-03", "2021-12-04", "2021-12-07", "2021-12-13", "2021-12-15", "2021-12-21", "2021-12-23", "2022-01-03", "2022-01-05", "2022-01-09", "2022-01-15", "2022-01-17", "2022-01-19", "2022-01-20", "2022-01-23", "2022-01-29", "2022-02-02", "2022-02-04", "2022-02-06", "2022-02-08", "2022-02-10", "2022-02-12", "2022-03-03", "2022-03-05", "2022-03-07", "2022-03-09", "2022-03-21", "2022-03-23", "2022-03-27", "2022-03-29", "2022-04-08", "2022-04-10"],
+            'station_id': 'USW00003927',
+            'weather_variable': "SNOW",
+            'dataset': 'ghcnd',
+            'opt_type': "CALL",
+            'strike': "0",
+            'exhaust': None,
+            'limit': "250000",
+            'threshold': "6",
+        }
+        request_data = {
+            'id': f'{i}',
+            'data': {
+                'params': request_params
+            }
+        }
+    return request_data
+
+
+def parse_available_contract_data():
     ''' Read contract data from json file and format requests
         for testing adapter
 
@@ -20,71 +86,26 @@ def parse_available_contract_data(sropath, paypath):
         Returns: list, formatted adapter requests for each set of contracts
         whose contract periods are ended
     '''
-    if os.path.isfile('./tests/log.txt'):
-        os.remove('./tests/log.txt')
-    contracts = {}
-    with open(paypath) as f:
-        data = csv.reader(f, delimiter=',')
-        for row in data:
-            name = row[0]
-            payout = row[1]
-            if payout == 'DATA UNAVAILABLE':
-                payout = None
-            else:
-                payout = int(round(float(payout), 2) * 100)
-            contracts[name] = payout
-        f.close()
-    with open(sropath) as f:
-        data = json.load(f)
-        f.close()
     contract_requests = []
-    for contract in data['__config__']['contracts']:
-        config = contract['__config__']
-        name = config['id']
-        payouts = config['payouts']['__config__']
-        derivative = payouts['derivative']['__config__']
-        opt_type = derivative['opt_type']
-        index = payouts['index_distribution']['__config__']['index']['__config__']
-        loader = index['loader']['__config__']
-        dataset = loader['dataset_name']
-        payout = contracts[name]
-        
-        strike = int(derivative['strike'] * 100)
-        exhaust = int(derivative['exhaust'] * 100)
-        limit = int(derivative['limit'] * 100)
-
-        start = int(datetime.strptime(index['start'], '%Y-%m-%d').timestamp())
-        end = int(datetime.strptime(index['end'], '%Y-%m-%d').timestamp())
-        
-        locations = []
-        for loader_config in loader['loaders']:
-            lat = loader_config['__config__']['lat']
-            lon = loader_config['__config__']['lon']
-            locations.append(str([lat, lon]))
-        
-        request_params = {
-            'name': name,
-            'strike': strike,
-            'exhaust': exhaust,
-            'limit': limit,
-            'opt_type': opt_type,
-            'start': start,
-            'end': end,
-            'dataset': dataset,
-            'locations': locations,
-            'program': 'GRP' if opt_type == 'PUT' else 'XSR',
-        }
-        request_data = {
-            'id': '1',
-            'data': {
-                'payout': payout,
-                'params': request_params
-            }
-        }
-        contract_requests.append(request_data)
+    i = 1
+    for filename in os.listdir(SRO_DIR):
+        if '.json' in filename:
+            sropath = os.path.join(SRO_DIR, filename)
+            with open(sropath) as f:
+                data = json.load(f)
+                f.close()
+            if 'contracts' in data['__config__']:
+                for contract in data['__config__']['contracts']:
+                    request_data = parse_contract_data(contract, i)
+                    contract_requests.append(request_data)
+                    i += 1
+            else:
+                request_data = parse_contract_data(data, i)
+                contract_requests.append(request_data)
+                i += 1
     return contract_requests
 
-TEST_DATA = parse_available_contract_data(SRO_PATH, PAYOUT_PATH)
+TEST_DATA = parse_available_contract_data()
 
 def adapter_setup(test_data):
     ''' Runs the adapter for a single test request
@@ -103,25 +124,13 @@ def test_create_request_success(test_data):
     '''
     result = adapter_setup(test_data)
     name = test_data['data']['params']['name']
-    payout = test_data['data']['payout']
     assert result['statusCode'] == 200
-    assert result['jobRunID'] == '1'
     assert result['data'] is not None
     assert type(result['result']) is int
     assert type(result['data']['result']) is int
-    if payout is not None:
-        assert result['result'] == round(float(payout), 2)
-        msg = f'name: {name}, result payout: {result["result"]} (x100), official payout: {payout} (x100)\n'
-        f = open('./tests/log.txt', 'a')
-        f.write(msg)
-        f.close()
-        print(msg)
-    else:
-        msg = f'name: {name}, request status: success\n'
-        f = open('./tests/log.txt', 'a')
-        f.write(msg)
-        f.close()
-        print(msg)
+    assert result['result'] == round(float(payout), 2)
+    msg = f'name: {name}, result payout: {result["result"]} (x100)\n'
+    print(msg)
 
 if __name__ == '__main__':
     _ = [test_create_request_success(test) for test in TEST_DATA]

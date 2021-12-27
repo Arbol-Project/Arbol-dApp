@@ -2,7 +2,7 @@
 
 This repository contains all components for Arbol dApp.
 
-# Frontend (off-chain)
+# Web App (off-chain)
 
 [in progress]
 

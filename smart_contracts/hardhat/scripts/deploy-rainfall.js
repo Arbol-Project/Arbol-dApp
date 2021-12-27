@@ -33,7 +33,7 @@ async function main() {
     for (const contract of ContractList) {
       var id = contract.__config__.id.toString();
       if (id in Contracts) {
-        console.log("RainfallOption already deployed to:", Contracts[id]);
+        console.log("RainfallOption already deployed to:", Contracts[id].address);
         continue;
       } else {
         var opt_type = contract.__config__.payouts.__config__.derivative.__config__.opt_type.toString();

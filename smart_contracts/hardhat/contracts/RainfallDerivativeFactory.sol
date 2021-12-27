@@ -156,7 +156,7 @@ contract RainfallDerivativeProvider is ConfirmedOwner {
     /**
      * @notice Get the ETH/matic/gas balance of the provider contract
      * @dev Can only be called by the contract owner
-     * @return uint256 ETH baalance
+     * @return uint256 ETH balance
      */
     function getETHBalance() 
         external 
@@ -170,7 +170,7 @@ contract RainfallDerivativeProvider is ConfirmedOwner {
     /**
      * @notice Get the LINK balance of the provider contract
      * @dev Can only be called by the contract owner
-     * @return uint256 LINK baalance
+     * @return uint256 LINK balance
      */
     function getLINKBalance() 
         external 
@@ -395,18 +395,6 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
     }
 
     /**
-     * @notice Get the contract status
-     * @return bool contract evaluation status
-     */
-    function getStatus() 
-        public 
-        view 
-        returns (bool) 
-    {
-        return contractEvaluated;
-    }
-
-    /**
      * @notice Get the contract payout value, which may not be final
      * @dev Returns the final evaluation or 0 most of the time, and can possibly return an approximate value if currently evaluating on multuiple nodes
      * @return uint256 evaluated payout
@@ -422,6 +410,21 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
             // 0 if contract is active, "close" if contract is currently evaluating, no effect if only one oracle job
             return payout / (oracles.length - requestsPending); 
         }
+    }
+
+    /**
+     * @notice Get the LINK balance of the contract
+     * @dev Can only be called by the contract owner
+     * @return uint256 LINK balance
+     */
+    function getLINKBalance() 
+        external 
+        view 
+        onlyOwner
+        returns (uint256) 
+    {
+        LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
+        return link.balanceOf(address(this));
     }
 
     /**

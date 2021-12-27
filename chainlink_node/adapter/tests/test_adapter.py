@@ -2,7 +2,7 @@ import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 # import csv
 import json
-import pytest
+# import pytest
 from datetime import datetime, timedelta
 
 import adapter
@@ -129,7 +129,7 @@ def adapter_setup(test_data):
     a = adapter.Adapter(test_data)
     return a.result
 
-@pytest.mark.parametrize('test_data', TEST_DATA)
+# @pytest.mark.parametrize('test_data', TEST_DATA)
 def test_create_request_success(test_data):
     ''' Tests the adapter against all contracts in the rainfall basket
 

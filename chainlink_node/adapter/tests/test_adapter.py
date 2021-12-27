@@ -7,8 +7,7 @@ from datetime import datetime
 
 import adapter
 
-SRO_PATH = './tests/rainfall_basket_sro.json'
-PAYOUT_PATH = './tests/payouts.csv'
+SRO_DIR = os.path.join(os.path.dirname(__file__), 'SROs')
 
 def parse_available_contract_data(sropath, paypath):
     ''' Read contract data from json file and format requests

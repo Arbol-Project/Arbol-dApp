@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-// need to set LINK_ADDRESS, USDC_ADDRESS depending on network
+// need to set LINK_ADDRESS, USDC_ADDRESS, and oracles/jobs depending on network
 
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@chainlink/contracts/src/v0.8/SimpleWriteAccessController.sol";
@@ -80,7 +80,7 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
             collateralDeposited = false;
             blizzardContract = new CubanBlizzardOption();
             blizzardContract.initialize(ORACLE_PAYMENT, LINK_ADDRESS);
-            blizzardContract.addOracleJob(0x7bcfF26a5A05AF38f926715d433c576f9F82f5DC, "6de976e92c294704b7b2e48358f43396");
+            blizzardContract.addOracleJob(0xc17D82Db74Ce38f0D417cBC78dE0B4E9edAA9a93, "3158889851c94c80bcd267114434bb0a");
             // fund the new contract with enough LINK tokens to make at least 1 Oracle request, with a buffer
             LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);
             require(link.transfer(address(blizzardContract), ORACLE_PAYMENT * 2), "unable to fund deployed contract");

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-// need to set LINK_ADDRESS depending on network
+// need to set LINK_ADDRESS and oracles/jobs depending on network
 
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
@@ -52,7 +52,7 @@ contract RainfallDerivativeProvider is ConfirmedOwner {
     {
         RainfallOption rainfallContract = new RainfallOption();
         rainfallContract.initialize(ORACLE_PAYMENT, LINK_ADDRESS, _locations, _parameters, _end);
-        rainfallContract.addOracleJob(0x7bcfF26a5A05AF38f926715d433c576f9F82f5DC, stringToBytes32("6de976e92c294704b7b2e48358f43396"));
+        rainfallContract.addOracleJob(0xc17D82Db74Ce38f0D417cBC78dE0B4E9edAA9a93, stringToBytes32("8bc2d13bfac345dbbda1933eb6c17438"));
         contracts[_parameters[0]] = rainfallContract;
         // fund the new contract with enough LINK tokens to make at least 1 Oracle request, with a buffer
         LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);

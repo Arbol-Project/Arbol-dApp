@@ -1,7 +1,7 @@
 type = "directrequest"
 schemaVersion = 1
-name = "Get Rainfall Evaluation"
-contractAddress = "0x7bcfF26a5A05AF38f926715d433c576f9F82f5DC"
+name = "Get Rainfall Evaluation Kovan"
+contractAddress = "0xc17D82Db74Ce38f0D417cBC78dE0B4E9edAA9a93"
 maxTaskDuration = "0s"
 observationSource = """
     decode_log   [type=ethabidecodelog
@@ -16,7 +16,7 @@ observationSource = """
                   abi="fulfillOracleRequest(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes32 data)"
                   data="{\\"requestId\\": $(decode_log.requestId), \\"payment\\": $(decode_log.payment), \\"callbackAddress\\": $(decode_log.callbackAddr), \\"callbackFunctionId\\": $(decode_log.callbackFunctionId), \\"expiration\\": $(decode_log.cancelExpiration), \\"data\\": $(encode_data)}"
                  ]
-    submit_tx    [type=ethtx to="0x7bcfF26a5A05AF38f926715d433c576f9F82f5DC" data="$(encode_tx)"]
+    submit_tx    [type=ethtx to="0xc17D82Db74Ce38f0D417cBC78dE0B4E9edAA9a93" data="$(encode_tx)"]
     decode_log -> decode_cbor -> arbol_dapp -> parse -> encode_data -> encode_tx -> submit_tx
 """
-externalJobID = "6de976e9-2c29-4704-b7b2-e48358f43396"
+externalJobID = "8bc2d13b-fac3-45db-bda1-933eb6c17438"

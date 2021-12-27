@@ -89,10 +89,6 @@ def parse_available_contract_data():
     ''' Read contract data from json file and format requests
         for testing adapter
 
-        Parameters: sropath (str), path to the json file holding
-        the contract data
-                    paypath (str), path to the csv file holding the
-        final calculated payouts
         Returns: list, formatted adapter requests for each set of contracts
         whose contract periods are ended
     '''

@@ -108,5 +108,5 @@ class GHCNDatasetLoader(dAppLoader):
         if series.empty:
             raise ValueError('No data returned for request')
         series = series.set_axis(pd.to_datetime(series.index)).sort_index()
-        covered_dates = series.loc(self._dates)
+        covered_dates = series.loc[self._dates]
         return covered_dates

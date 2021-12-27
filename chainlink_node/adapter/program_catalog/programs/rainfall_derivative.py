@@ -11,11 +11,11 @@ class RainfallDerivative:
     _PROGRAM_PARAMETERS = ['dataset', 'locations', 'start', 'end', 'strike', 'limit', 'opt_type']
     _PARAMETER_OPTIONS = ['exhaust', 'tick']
     _SOLIDITY_MULTIPLIERS = {
-        "strike" : 10**0,
-        "limit" : 10**0,
-        "exhaust" : 10**0,
-        "tick" : 10**0,
-        "payout": 10**2
+        "strike" : 10**0,       # input
+        "limit" : 10**0,        # input
+        "exhaust" : 10**0,      # input
+        "tick" : 10**0,         # input
+        "payout": 10**2         # output (USD decimals)
     }
 
     @classmethod
@@ -52,7 +52,7 @@ class RainfallDerivative:
         '''
         loader = GFDatasetLoader(params['locations'],
                                 params['dataset'],
-                                imperial_units=params.get('imperial_units', True)
+                                imperial_units=params.get('imperial_units', False)
                                 )
         avg_history = loader.load()
         payout = cls._generate_payouts(data=avg_history,
@@ -81,18 +81,18 @@ class RainfallDerivative:
                         tick (str), tick value for payout or None if exhaust is not None
             Returns: int, generated payout times 10^8 (in order to report back to chain)
         '''
-        strike = float(strike) * cls._SOLIDITY_MULTIPLIERS['strike']
-        limit = float(limit) * cls._SOLIDITY_MULTIPLIERS['limit']
+        strike = float(strike) / cls._SOLIDITY_MULTIPLIERS['strike']
+        limit = float(limit) / cls._SOLIDITY_MULTIPLIERS['limit']
         start_date = datetime.utcfromtimestamp(int(start)).strftime('%Y-%m-%d')
         end_date = datetime.utcfromtimestamp(int(end)).strftime('%Y-%m-%d')
         index_value = data.loc[start_date:end_date].sum()
         opt_type = opt_type.lower()
         direction = 1 if opt_type == 'call' else -1
-        if tick is None:
-            exhaust = float(exhaust) * cls._SOLIDITY_MULTIPLIERS['exhaust']
+        if exhaust is not None:
+            exhaust = float(exhaust) / cls._SOLIDITY_MULTIPLIERS['exhaust']
             tick = abs(limit / (strike - exhaust))
         else:
-            tick = float(tick) * cls._SOLIDITY_MULTIPLIERS['tick']
+            tick = float(tick) / cls._SOLIDITY_MULTIPLIERS['tick']
         payout = (index_value - strike) * tick * direction
         if payout < 0:
             payout = 0

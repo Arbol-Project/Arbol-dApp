@@ -11,8 +11,8 @@ class CriticalSnowfallDerivative:
     _PROGRAM_PARAMETERS = ['dates', 'station_id', 'weather_variable', 'threshold', 'dataset', 'limit', 'opt_type']
     _PARAMETER_OPTIONS = ['strike', 'exhaust', 'tick']
     _SOLIDITY_MULTIPLIERS = {
-        'limit' : 10**0,
-        'payout': 10**6 # USDC decimals
+        'limit' : 10**0,        # input
+        'payout': 10**6         # output (USDC decimals)
     }
 
     @classmethod
@@ -57,10 +57,7 @@ class CriticalSnowfallDerivative:
         payout = cls._generate_payouts(data=covered_history,
                                         threshold=params['threshold'],
                                         opt_type=params['opt_type'],
-                                        strike=params['strike'],
                                         limit=params['limit'],
-                                        exhaust=params.get('exhaust', None),
-                                        tick=params.get('tick', None)
                                         )
         return payout
 
@@ -77,11 +74,11 @@ class CriticalSnowfallDerivative:
                         tick (number), tick value for payout or None if exhaust is not None
             Returns: int, generated payout times 10^6 (in order to report back to chain in value of USDC)
         '''
-        limit /= cls._SOLIDITY_MULTIPLIERS['limit']
-        index_value = data.max()
+        limit = float(limit) / cls._SOLIDITY_MULTIPLIERS['limit']
+        index_value = data.max().value
         opt_type = opt_type.lower()
         direction = 1 if opt_type == 'call' else -1
-        payout = (index_value - threshold) * direction
+        payout = (index_value - float(threshold)) * direction
         if payout < 0:
             payout = 0
         if payout > 0:

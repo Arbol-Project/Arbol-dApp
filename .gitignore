@@ -1,6 +1,4 @@
-chainlink_node/adapter/tests/log.txt
-chainlink_node/adapter/tests/payouts.csv
-chainlink_node/adapter/tests/rainfall_basket_sro.json
+chainlink_node/adapter/tests/SROs
 
 chainlink_node/chainlink/.env
 chainlink_node/chainlink/.api

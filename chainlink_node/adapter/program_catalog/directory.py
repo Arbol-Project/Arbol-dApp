@@ -1,5 +1,5 @@
-from programs.rainfall_derivative import RainfallDerivative
-from programs.critical_snowfall_derivative import CriticalSnowfallDerivative
+from program_catalog.programs.rainfall_derivative import RainfallDerivative
+from program_catalog.programs.critical_snowfall_derivative import CriticalSnowfallDerivative
 
 
 def get_program(params):

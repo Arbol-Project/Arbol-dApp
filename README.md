@@ -1,13 +1,17 @@
 # Arbol-dApp
 
-This repository contains all components of Arbol dApp.
+This repository contains all components for Arbol dApp.
 
-# Chainlink Node
+# Frontend (off-chain)
+
+[in progress]
+
+# Chainlink Node (bridge)
 
 A Docker Compose project to launch an Arbol-Chainlink node on a new AWS EC2 instance. The project launches containers for
 a Chainlink node for fulfilling smart contract oracle requests, an IPFS daemon for retrieving Arbol weather data, and a Chainlink external adapter run as a Guicorn server for computing payout evaluations on retrieved data.
 
-To jointly deploy a Chainlink node, external adapter server, and IPFS daemon in a fresh Amazon Linux 2 instance, ssh in and install git, then clone this repo, run the setup script, and either import existing Chainlink credentials or set new ones. Finally logout and log back into the instance to refresh docker permissions and run docker compose:
+Follow the steps below with the proper credentials to launch a new node:
 
 ```
 sudo yum install -y git
@@ -20,3 +24,7 @@ bash chainlink_node/send-secrets.sh
 bash Arbol-dApp/chainlink_node/receive-secrets.sh
 docker compose up --build
 ```
+
+# Smart Contracts (on-chain)
+
+This directory holds smart contract source for Arbol derivative deals, Hardhat testing and deployment scripts, Chainlink oracle job definitions, and contract deployment records.

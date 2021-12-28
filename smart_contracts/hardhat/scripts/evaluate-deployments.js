@@ -11,6 +11,7 @@ async function main() {
       
       for (const [cname, caddr] of Object.entries(derivative_provider["contracts"])) {
         if (caddr == Contracts[cname].address && Contracts[cname].end < parseInt(Date.now() / 1000)) {
+          console.log("Initiating contract evaluation for:", cname);
           if (pname == "RainfallDerivativeProvider") {
             var tx = await derivative_provider.initiateContractEvaluation(cname);
             await tx.wait();

@@ -2,6 +2,7 @@ const hre = require("hardhat");
 const Providers = require(process.cwd()+"/logs/providers.json");
 const Contracts = require(process.cwd()+"/logs/contracts.json");
 const fs = require("fs");
+const delay = ms => new Promise(res => setTimeout(res, ms));
 
 async function main() {
 
@@ -21,6 +22,8 @@ async function main() {
             await tx.wait();
           }
           contracts.push(cname);
+          console.log("Waiting 60 seconds");
+          await delay(30*1000);
         }
       }
       for (const name in contracts) {

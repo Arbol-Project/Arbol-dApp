@@ -14,21 +14,13 @@ async function main() {
   if ("RainfallDerivativeProvider" in Providers) {
     provider = Providers.RainfallDerivativeProvider;
     derivative_provider = await RainfallDerivativeProvider.attach(provider.address);
-    console.log("RainfallDerivativeProvider already deployed to:", provider.address);
+    console.log("RainfallDerivativeProvider already deployed to:", derivative_provider.address);
   } else {
     derivative_provider = await RainfallDerivativeProvider.deploy();
     await derivative_provider.deployed();
-    var address = derivative_provider.address;
-    console.log("RainfallDerivativeProvider deployed to:", address);
-    Providers["RainfallDerivativeProvider"] = {"address": address, "verified": false};
-    var deployment_content = JSON.stringify(Providers);
-    try {
-      fs.writeFileSync(process.cwd()+"/logs/providers.json", deployment_content)
-    } catch (error) {
-      console.error(error)
-    }
+    console.log("RainfallDerivativeProvider deployed to:", derivative_provider.address);
   }
-
+  var contracts = {};
   try {
     for (const contract of ContractList) {
       var id = contract.__config__.id.toString();
@@ -55,14 +47,15 @@ async function main() {
         }
 
         var tx = await derivative_provider.newContract(locations, parameters, end);
-        var receipt = await tx.wait();
+        await tx.wait();
 
         var deployed_address = await derivative_provider.getContractAddress(id);
         const RainfallOption = await hre.ethers.getContractFactory("RainfallOption");
         rainfall_option = await RainfallOption.attach(deployed_address);
         console.log("RainfallOption deployed to:", deployed_address);
 
-        Contracts[id] = {"address": deployed_address, "verified": false};
+        Contracts[id] = {"address": deployed_address, "verified": false, "provider": derivative_provider.address, "end": end};
+        contracts[id] = deployed_address;
       }
     }
     var final_content = JSON.stringify(Contracts);
@@ -71,6 +64,13 @@ async function main() {
     } catch (error) {
       console.error(error)
     }
+  } catch (error) {
+    console.error(error)
+  }
+  Providers["RainfallDerivativeProvider"] = {"address": derivative_provider.address, "verified": false, "contracts": contracts};
+  var deployment_content = JSON.stringify(Providers);
+  try {
+    fs.writeFileSync(process.cwd()+"/logs/providers.json", deployment_content)
   } catch (error) {
     console.error(error)
   }

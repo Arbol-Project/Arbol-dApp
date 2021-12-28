@@ -1,22 +1,22 @@
 type = "directrequest"
 schemaVersion = 1
 name = "Get Rainfall Evaluation Kovan"
-contractAddress = "0xc17D82Db74Ce38f0D417cBC78dE0B4E9edAA9a93"
-maxTaskDuration = "0s"
+contractAddress = "0x58935F97aB874Bc4181Bc1A3A85FDE2CA80885cd"
+maxTaskDuration = "30s"
 observationSource = """
     decode_log   [type=ethabidecodelog
                   abi="OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)"
                   data="$(jobRun.logData)"
                   topics="$(jobRun.logTopics)"]
     decode_cbor  [type=cborparse data="$(decode_log.data)"]
-    arbol_dapp   [type="bridge" name="arbol-adapter" timeout="30s" requestData="{\\"data\\":{\\"params\\":{\\"dataset\\": $(decode_cbor.dataset), \\"opt_type\\": $(decode_cbor.opt_type), \\"locations\\": $(decode_cbor.locations), \\"start\\": $(decode_cbor.start), \\"end\\": $(decode_cbor.end), \\"strike\\": $(decode_cbor.strike), \\"limit\\": $(decode_cbor.limit), \\"tick\\": $(decode_cbor.tick)}}}"]
+    arbol_dapp   [type="bridge" name="arbol-adapter" timeout="60s" requestData="{\\"data\\":{\\"params\\":{\\"dataset\\": $(decode_cbor.dataset), \\"opt_type\\": $(decode_cbor.opt_type), \\"locations\\": $(decode_cbor.locations), \\"start\\": $(decode_cbor.start), \\"end\\": $(decode_cbor.end), \\"strike\\": $(decode_cbor.strike), \\"limit\\": $(decode_cbor.limit), \\"tick\\": $(decode_cbor.tick)}}}"]
     parse        [type=jsonparse path="result" data="$(arbol_dapp)"]
     encode_data  [type=ethabiencode abi="(uint256 value)" data="{ \\"value\\": $(parse) }"]
     encode_tx    [type=ethabiencode
                   abi="fulfillOracleRequest(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes32 data)"
                   data="{\\"requestId\\": $(decode_log.requestId), \\"payment\\": $(decode_log.payment), \\"callbackAddress\\": $(decode_log.callbackAddr), \\"callbackFunctionId\\": $(decode_log.callbackFunctionId), \\"expiration\\": $(decode_log.cancelExpiration), \\"data\\": $(encode_data)}"
                  ]
-    submit_tx    [type=ethtx to="0xc17D82Db74Ce38f0D417cBC78dE0B4E9edAA9a93" data="$(encode_tx)"]
+    submit_tx    [type=ethtx to="0x58935F97aB874Bc4181Bc1A3A85FDE2CA80885cd" data="$(encode_tx)"]
     decode_log -> decode_cbor -> arbol_dapp -> parse -> encode_data -> encode_tx -> submit_tx
 """
-externalJobID = "8bc2d13b-fac3-45db-bda1-933eb6c17438"
+externalJobID = "d08ebafd-27de-4e50-8624-0a15b2fb1bde"

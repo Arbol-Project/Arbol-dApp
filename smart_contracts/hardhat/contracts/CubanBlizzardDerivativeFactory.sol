@@ -18,7 +18,7 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
     address public constant COLLATERAL_ADDRESS = 0x3382d07e2736AC80f07D7288750F2442d187a7e3;                    // Arbol USDC wallet
     address public constant PREMIUM_ADDRESS = 0xa679c6154b8d4619Af9F83f0bF9a13A680e01eCf;                       // Buyer's wallet
     address public constant LINK_ADDRESS = 0xa36085F69e2889c224210F603D836748e7dC0088;                          // Link token address on Ethereum Kovan
-    address public constant USDC_ADDRESS = 0x8677871C4F153eCc1f9089022f21A937B8483ed9;                          // USDC token address on Ethereum Kovan
+    address public constant USDC_ADDRESS = 0xe77995b023A2a2Bf2150E570D6a8072e04E665FF;                          // USDC token address on Ethereum Kovan
 
     CubanBlizzardOption public blizzardContract;
     bool public collateralDeposited;
@@ -81,7 +81,7 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
             collateralDeposited = false;
             blizzardContract = new CubanBlizzardOption();
             blizzardContract.initialize(ORACLE_PAYMENT, LINK_ADDRESS);
-            blizzardContract.addOracleJob(0xc17D82Db74Ce38f0D417cBC78dE0B4E9edAA9a93, "3158889851c94c80bcd267114434bb0a");
+            blizzardContract.addOracleJob(0xc17D82Db74Ce38f0D417cBC78dE0B4E9edAA9a93, stringToBytes32("3158889851c94c80bcd267114434bb0a"));
             // fund the new contract with enough LINK tokens to make at least 1 Oracle request, with a buffer
             LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);
             require(link.transfer(address(blizzardContract), ORACLE_PAYMENT * 10), "unable to fund deployed contract");

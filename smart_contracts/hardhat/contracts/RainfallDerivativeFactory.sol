@@ -53,7 +53,7 @@ contract RainfallDerivativeProvider is ConfirmedOwner {
     {
         RainfallOption rainfallContract = new RainfallOption();
         rainfallContract.initialize(ORACLE_PAYMENT, LINK_ADDRESS, _locations, _parameters, _end);
-        rainfallContract.addOracleJob(0xc17D82Db74Ce38f0D417cBC78dE0B4E9edAA9a93, stringToBytes32("8bc2d13bfac345dbbda1933eb6c17438"));
+        rainfallContract.addOracleJob(0x58935F97aB874Bc4181Bc1A3A85FDE2CA80885cd, stringToBytes32("d08ebafd27de4e5086240a15b2fb1bde"));
         contracts[_parameters[0]] = rainfallContract;
         // fund the new contract with enough LINK tokens to make at least 1 Oracle request, with a buffer
         LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);

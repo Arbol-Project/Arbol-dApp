@@ -1,7 +1,8 @@
 {
     "CubanBlizzardDerivativeProvider": {
         "address": "0xDc7BA32147695F1d7c25D4D7FdbF1fc81cAf9b84",
-        "verified": true
+        "verified": true,
+        "contracts": {}
     },
     "RainfallDerivativeProvider": {
         "address": "0xaFD080Ef5CA0f4c2a5fd7B7bB1B860cEF8729704",

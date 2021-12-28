@@ -7,10 +7,10 @@ async function main() {
 
     for (const [pname, pdata] of Object.entries(Providers)) {
       const DerivativeProvider = await hre.ethers.getContractFactory(pname);
-      derivative_provider = await DerivativeProvider.attach(pdata["address"]);
-      contracts = [];
+      var derivative_provider = await DerivativeProvider.attach(pdata.address);
+      var contracts = [];
       
-      for (const [cname, caddr] of Object.entries(derivative_provider["contracts"])) {
+      for (const [cname, caddr] of Object.entries(pdata.contracts)) {
         if (caddr == Contracts[cname].address && Contracts[cname].end < parseInt(Date.now() / 1000)) {
           console.log("Initiating contract evaluation for:", cname);
           if (pname == "RainfallDerivativeProvider") {

@@ -51,10 +51,10 @@ async function main() {
 
         var deployed_address = await derivative_provider.getContractAddress(id);
         const RainfallOption = await hre.ethers.getContractFactory("RainfallOption");
-        rainfall_option = await RainfallOption.attach(deployed_address);
-        console.log("RainfallOption deployed to:", deployed_address);
+        var rainfall_option = await RainfallOption.attach(deployed_address);
+        console.log("RainfallOption deployed to:", rainfall_option.address);
 
-        Contracts[id] = {"address": deployed_address, "verified": false, "provider": derivative_provider.address, "end": end};
+        Contracts[id] = {"address": rainfall_option.address, "verified": false, "provider": derivative_provider.address, "end": end};
         contracts[id] = deployed_address;
       }
     }

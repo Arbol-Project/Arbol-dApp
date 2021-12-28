@@ -444,12 +444,13 @@ contract CubanBlizzardOption is ChainlinkClient, ConfirmedOwner {
         view 
         returns (uint256) 
     {
-        if (contractEvaluated) {
-            return payout;
-        } else {
-            // 0 if contract is active, "close" if contract is currently evaluating, no effect if only one oracle job
-            return 0; // payout / (oracles.length - requestsPending); 
-        }
+        return payout;
+        // if (contractEvaluated) {
+        //     return payout;
+        // } else {
+        //     // 0 if contract is active, "close" if contract is currently evaluating, no effect if only one oracle job
+        //     return 0; // payout / (oracles.length - requestsPending); 
+        // }
     }
 
     /**

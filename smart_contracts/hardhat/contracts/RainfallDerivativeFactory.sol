@@ -400,12 +400,7 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
         view 
         returns (uint256) 
     {
-        if (contractEvaluated) {
-            return payout;
-        } else {
-            // 0 if contract is active, "close" if contract is currently evaluating, no effect if only one oracle job
-            return payout / (oracles.length - requestsPending); 
-        }
+        return payout;
     }
 
     /**

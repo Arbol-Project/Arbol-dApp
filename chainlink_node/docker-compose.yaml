@@ -7,8 +7,8 @@ services:
     build: chainlink/
     env_file:
       - chainlink/.env
-    ports:
-      - 6689:6689
+    # ports:
+    #   - 6689:6689
     volumes:
       - chainlink:/chainlink
 

@@ -16,7 +16,7 @@ async function main() {
     await derivative_provider.deployed();
     var address = derivative_provider.address;
     console.log("CubanBlizzardDerivativeProvider deployed to:", address);
-    Providers["CubanBlizzardDerivativeProvider"] = {"address": address, "verified": false};
+    Providers["CubanBlizzardDerivativeProvider"] = {"address": address, "verified": false, "contracts": {}};
     var deployment_content = JSON.stringify(Providers);
     try {
       fs.writeFileSync(process.cwd()+"/logs/providers.json", deployment_content)

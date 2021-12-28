@@ -249,7 +249,6 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
     address[] public oracles;
     bytes32[] public jobs;
 
-    bool public contractActive;
     bool public contractEvaluated;
     uint256 private requestsPending;
 
@@ -270,7 +269,6 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
         ConfirmedOwner(msg.sender) 
     {
         payout = 0;
-        contractActive = false;
         contractEvaluated = false;
         requestsPending = 0;
     }
@@ -299,7 +297,6 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
         locations = _locations;
         parameters = _parameters;
         end = _end;
-        contractActive = true;
     }
 
     /**
@@ -347,9 +344,7 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
         public 
         onlyOwner 
     {
-        require(end < block.timestamp && contractActive, "unable to call until coverage period has ended");
-        // prevents function from making more than one round of oracle requests
-        contractActive = false;
+        require(end < block.timestamp, "unable to call until coverage period has ended");
         emit contractEnded(address(this), block.timestamp);
         // do all looped reads from memory instead of storage
         uint256 _oraclePayment = oraclePayment;

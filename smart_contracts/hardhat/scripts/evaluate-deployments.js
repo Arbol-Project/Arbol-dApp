@@ -4,10 +4,11 @@ const Contracts = require(process.cwd()+"/logs/contracts.json");
 const fs = require("fs");
 
 async function main() {
-    
+
     for (const [pname, pdata] of Object.entries(Providers)) {
       const DerivativeProvider = await hre.ethers.getContractFactory(pname);
       derivative_provider = await DerivativeProvider.attach(pdata["address"]);
+      contracts = [];
       
       for (const [cname, caddr] of Object.entries(derivative_provider["contracts"])) {
         if (caddr == Contracts[cname].address && Contracts[cname].end < parseInt(Date.now() / 1000)) {
@@ -19,8 +20,12 @@ async function main() {
             var tx = await derivative_provider.initiateContractEvaluation();
             await tx.wait();
           }
-          // var payout = await derivative_provider.getContractPayout(cname);
+          contracts.push(cname);
         }
+      }
+      for (const name in contracts) {
+        var payout = derivative_provider.getContractPayout(name);
+        console.log("Contract:", name, "Payout:", payout);
       }
   }
 }

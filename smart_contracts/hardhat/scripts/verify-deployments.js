@@ -12,7 +12,7 @@ async function main() {
     } else {
       try {
         await hre.run("verify:verify", {
-          address: data["address"],
+          address: data.address,
         });
         data.verified = true;
         need_write = true;
@@ -39,7 +39,7 @@ async function main() {
     } else {
       try {
         await hre.run("verify:verify", {
-          address: data["address"],
+          address: data.address,
         });
         data.verified = true;
         need_write = true;

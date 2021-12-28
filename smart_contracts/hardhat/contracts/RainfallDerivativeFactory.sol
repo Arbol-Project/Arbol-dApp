@@ -415,7 +415,6 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
     function getLINKBalance() 
         external 
         view 
-        onlyOwner
         returns (uint256) 
     {
         LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());

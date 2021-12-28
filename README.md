@@ -25,6 +25,7 @@ bash chainlink_node/scripts/send-secrets.sh
 
 # log back in and set sensitive data
 bash Arbol-dApp/chainlink_node/scripts/receive-secrets.sh
+cd Arbol-dApp/chainlink_node
 docker compose up --build
 ```
 

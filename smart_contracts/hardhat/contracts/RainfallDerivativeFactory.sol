@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 // need to set LINK_ADDRESS and oracles/jobs depending on network
+// also need to set LINK buffer back to 2x
 
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
@@ -11,7 +12,7 @@ contract RainfallDerivativeProvider is ConfirmedOwner {
      * @dev RainfallDerivativeProvider contract for general rainfall option contracts
      */
     uint256 private constant ORACLE_PAYMENT = 1 * 10**15;                                                       // 0.001 LINK
-    address public constant LINK_ADDRESS = 0xa36085F69e2889c224210F603D836748e7dC0088;                          // Link token address on Matic Mumbai
+    address public constant LINK_ADDRESS = 0xa36085F69e2889c224210F603D836748e7dC0088;                          // Link token address on Ethereum Kovan
 
     mapping(string => RainfallOption) public contracts;
     
@@ -56,7 +57,7 @@ contract RainfallDerivativeProvider is ConfirmedOwner {
         contracts[_parameters[0]] = rainfallContract;
         // fund the new contract with enough LINK tokens to make at least 1 Oracle request, with a buffer
         LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);
-        require(link.transfer(address(rainfallContract), ORACLE_PAYMENT * 2), "Unable to fund deployed contract");
+        require(link.transfer(address(rainfallContract), ORACLE_PAYMENT * 10), "Unable to fund deployed contract");
         emit contractCreated(address(rainfallContract), _parameters[0]);
     }
 

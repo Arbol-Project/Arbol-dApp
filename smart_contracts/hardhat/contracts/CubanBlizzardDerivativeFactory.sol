@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 // need to set LINK_ADDRESS, USDC_ADDRESS, and oracles/jobs depending on network
+// also need to set LINK buffer back to 2x
 
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@chainlink/contracts/src/v0.8/SimpleWriteAccessController.sol";
@@ -12,12 +13,12 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
      * @dev BlizzardDerivativeProvider contract for Dallas Snow Protection 21-22 Season
      */
     uint256 private constant ORACLE_PAYMENT = 1 * 10**15;                                                       // 0.001 LINK
-    uint256 public constant COLLATERAL_PAYMENT = 25 * 10**5 * 10**6;                                            // 250,000 * 1 USDC
-    uint256 public constant PREMIUM_PAYMENT = 10**5 * 10**6;                                                    // 10,000 * 1 USDC
+    uint256 public constant COLLATERAL_PAYMENT = 250000 * 10**6;                                            // 250,000 * 1 USDC
+    uint256 public constant PREMIUM_PAYMENT = 10000 * 10**6;                                                    // 10,000 * 1 USDC
     address public constant COLLATERAL_ADDRESS = 0x3382d07e2736AC80f07D7288750F2442d187a7e3;                    // Arbol USDC wallet
     address public constant PREMIUM_ADDRESS = 0xa679c6154b8d4619Af9F83f0bF9a13A680e01eCf;                       // Buyer's wallet
-    address public constant LINK_ADDRESS = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB;                          // Link token address on Matic Mumbai
-    address public constant USDC_ADDRESS = 0x8677871C4F153eCc1f9089022f21A937B8483ed9;                          // USDC token address on Matic Mumbai (ERC677 is backwards compatible to ERC20)
+    address public constant LINK_ADDRESS = 0xa36085F69e2889c224210F603D836748e7dC0088;                          // Link token address on Ethereum Kovan
+    address public constant USDC_ADDRESS = 0x8677871C4F153eCc1f9089022f21A937B8483ed9;                          // USDC token address on Ethereum Kovan
 
     CubanBlizzardOption public blizzardContract;
     bool public collateralDeposited;
@@ -83,7 +84,7 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
             blizzardContract.addOracleJob(0xc17D82Db74Ce38f0D417cBC78dE0B4E9edAA9a93, "3158889851c94c80bcd267114434bb0a");
             // fund the new contract with enough LINK tokens to make at least 1 Oracle request, with a buffer
             LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);
-            require(link.transfer(address(blizzardContract), ORACLE_PAYMENT * 2), "unable to fund deployed contract");
+            require(link.transfer(address(blizzardContract), ORACLE_PAYMENT * 10), "unable to fund deployed contract");
             emit contractCreated(address(blizzardContract), "Dallas Mavs 2022-04-10 00:00:00");
         }
     }

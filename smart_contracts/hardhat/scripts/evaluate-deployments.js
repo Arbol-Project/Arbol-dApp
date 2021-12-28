@@ -23,7 +23,7 @@ async function main() {
           }
           contracts.push(cname);
           console.log("Waiting 60 seconds");
-          await delay(30*1000);
+          await delay(60*1000);
         }
       }
       for (const name in contracts) {

@@ -1,8 +1,8 @@
 FROM smartcontract/chainlink:0.10.14
 
-# RUN mkdir /chainlink
-# RUN mkdir /chainlink/tls
-COPY . /chainlink
+RUN mkdir /chainlink
+RUN mkdir /chainlink/tls
+# COPY . /chainlink
 WORKDIR /chainlink
 
 COPY tls /tls

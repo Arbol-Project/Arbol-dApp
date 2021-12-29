@@ -2,11 +2,11 @@
 
 Arbol-dApp "Monorepo".
 
-# Web App (off-chain)
+## Web App (off-chain)
 
-[in progress]
+The frontend is bootstrapped with [Create Eth App](https://github.com/paulrberg/create-eth-app) and hosted on a Heroku server and provides interfaces for all deployed contracts: {}
 
-# Chainlink Node (bridge)
+## Chainlink Node (bridge)
 
 A Docker Compose project to launch an Arbol-Chainlink node on a new AWS EC2 (Amazon Linux 2) instance. The project deploys containers for
 a Chainlink node for fulfilling smart contract oracle requests, an IPFS daemon for retrieving Arbol weather data and listening to IPFS-HTTP requests, and a Gunicorn server running a Chainlink external adapter for serving requests and computing payout evaluations on retrieved data.
@@ -32,7 +32,7 @@ The Chainlink Node GUI can be accessed at ```https://localhost:6689```; if SSH t
 
 The IPFS web UI can be accessed at ```http://localhost:5001/webui```; if SSH tunneling into EC2 instance on a VPC add ```-L 5001:localhost:5001``` to forward to your local machine.
 
-# Smart Contracts (on-chain)
+## Smart Contracts (on-chain)
 
 This directory holds smart contract source for Arbol derivative deals, Hardhat testing, deployment, and manual evaluation scripts, Chainlink oracle job definitions, and contract deployment records.
 

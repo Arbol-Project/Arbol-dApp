@@ -1,6 +1,6 @@
 # Arbol-dApp
 
-This repository contains all components for Arbol dApp.
+Arbol-dApp "Monorepo".
 
 # Web App (off-chain)
 
@@ -44,4 +44,4 @@ npx hardhat run scripts/verify-deployments.js
 npx hardhat run scripts/evaluate-deployments.js
 ```
 
-Depending on the contract, evaluation may fail if certain conditions are not met (for example, for all contracts, LINK token provider must first approve derivativeProvider contract to move funds for oracle requests).
+Deployment details can be viewed in ```smart_contracts/hardhat/logs```. Depending on the contract, evaluation may fail if certain conditions are not met (for example, for all contracts, LINK token provider must first approve derivativeProvider contract to move funds for oracle requests).

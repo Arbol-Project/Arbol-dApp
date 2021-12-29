@@ -28,11 +28,9 @@ cd Arbol-dApp/chainlink_node
 docker compose up --build
 ```
 
-The Chainlink Node GUI can be accessed at ```https://localhost:6689``` 
-(if SSH tunneling into EC2 instance on a VPC add ```-L 6689:localhost:6689``` to forward to your local machine).
+The Chainlink Node GUI can be accessed at ```https://localhost:6689```; if SSH tunneling into EC2 instance on a VPC add ```-L 6689:localhost:6689``` to forward to your local machine.
 
-The IPFS web UI can be accessed at ```http://localhost:5001/webui``` 
-(if SSH tunneling into EC2 instance on a VPC add ```-L 5001:localhost:5001``` to forward to your local machine).
+The IPFS web UI can be accessed at ```http://localhost:5001/webui```; if SSH tunneling into EC2 instance on a VPC add ```-L 5001:localhost:5001``` to forward to your local machine.
 
 # Smart Contracts (on-chain)
 

@@ -4,7 +4,7 @@ Arbol-dApp "Monorepo".
 
 ## Web App (off-chain)
 
-The frontend is bootstrapped with [Create Eth App](https://github.com/paulrberg/create-eth-app) and hosted on a Heroku server and provides interfaces for all deployed contracts: {}
+The frontend is bootstrapped with [Create Eth App](https://github.com/paulrberg/create-eth-app) and hosted on a Heroku server. It provides interfaces for all deployed contracts: {}
 
 ## Chainlink Node (bridge)
 

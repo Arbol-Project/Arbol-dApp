@@ -13,7 +13,7 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
      * @dev BlizzardDerivativeProvider contract for Dallas Snow Protection 21-22 Season
      */
     uint256 private constant ORACLE_PAYMENT = 1 * 10**15;                                                       // 0.001 LINK
-    uint256 public constant COLLATERAL_PAYMENT = 250000 * 10**6;                                            // 250,000 * 1 USDC
+    uint256 public constant COLLATERAL_PAYMENT = 250000 * 10**6;                                                // 250,000 * 1 USDC
     uint256 public constant PREMIUM_PAYMENT = 10000 * 10**6;                                                    // 10,000 * 1 USDC
     address public constant COLLATERAL_ADDRESS = 0x3382d07e2736AC80f07D7288750F2442d187a7e3;                    // Arbol USDC wallet
     address public constant PREMIUM_ADDRESS = 0xa679c6154b8d4619Af9F83f0bF9a13A680e01eCf;                       // Buyer's wallet
@@ -31,7 +31,7 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
     event contractCreated(address _contract, string _id);
     
     /**
-     * @dev Sets deploying address as owner
+     * @dev Sets deploying address as owner, owner must approve this address to move LINK
      */
     constructor() {
         collateralDeposited = false;
@@ -81,25 +81,24 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
             collateralDeposited = false;
             blizzardContract = new CubanBlizzardOption();
             blizzardContract.initialize(ORACLE_PAYMENT, LINK_ADDRESS);
-            blizzardContract.addOracleJob(0xc17D82Db74Ce38f0D417cBC78dE0B4E9edAA9a93, stringToBytes32("3158889851c94c80bcd267114434bb0a"));
-            // fund the new contract with enough LINK tokens to make at least 1 Oracle request, with a buffer
-            LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);
-            require(link.transfer(address(blizzardContract), ORACLE_PAYMENT * 10), "unable to fund deployed contract");
+            blizzardContract.addOracleJob(0x58935F97aB874Bc4181Bc1A3A85FDE2CA80885cd, stringToBytes32("240af5b906f74ac6b83cbc42a235714f"));
             emit contractCreated(address(blizzardContract), "Dallas Mavs 2022-04-10 00:00:00");
         }
     }
 
     /**
      * @notice Request payout evaluation for the snow protection contract
-     * @dev Sender must have access
+     * @dev Sender must have access, owner must first approve this address to move LINK
      */
     function initiateContractEvaluation() 
         external 
         checkAccess 
     {
+        LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);
+        uint256 oracle_mult = blizzardContract.getNumJobs();
+        require(link.transferFrom(owner(), address(blizzardContract), ORACLE_PAYMENT * oracle_mult), "unable to fund oracle request");
         blizzardContract.requestPayoutEvaluation();
     }
-
     /**
      * @notice Fulfill payout evaluation for the snow protection contract
      * @dev Sender must have access
@@ -432,6 +431,18 @@ contract CubanBlizzardOption is ChainlinkClient, ConfirmedOwner {
         returns (bool) 
     {
         return contractEvaluated;
+    }
+
+    /**
+     * @notice Get the number of contract jobs
+     * @return uint256 number of jobs
+     */
+    function getNumJobs() 
+        public 
+        view 
+        returns (uint256) 
+    {
+        return jobs.length;
     }
 
     /**

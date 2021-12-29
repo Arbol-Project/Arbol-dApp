@@ -28,7 +28,7 @@ contract RainfallDerivativeProvider is ConfirmedOwner {
 
     /**
      * @notice Create a new rainfall options contract
-     * @dev Can only be called by the contract owner
+     * @dev Can only be called by the contract owner, sender must first approve this address to move LINK
      * @param _locations string array of lat-lon coordinate pairs (see examples below)
      * @param _parameters string array of all other contract parameters
      * @param _end uint256 unix timestamp of contract end date
@@ -55,9 +55,6 @@ contract RainfallDerivativeProvider is ConfirmedOwner {
         rainfallContract.initialize(ORACLE_PAYMENT, LINK_ADDRESS, _locations, _parameters, _end);
         rainfallContract.addOracleJob(0x58935F97aB874Bc4181Bc1A3A85FDE2CA80885cd, stringToBytes32("d08ebafd27de4e5086240a15b2fb1bde"));
         contracts[_parameters[0]] = rainfallContract;
-        // fund the new contract with enough LINK tokens to make at least 1 Oracle request, with a buffer
-        LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);
-        require(link.transfer(address(rainfallContract), ORACLE_PAYMENT * 10), "Unable to fund deployed contract");
         emit contractCreated(address(rainfallContract), _parameters[0]);
     }
 
@@ -72,7 +69,10 @@ contract RainfallDerivativeProvider is ConfirmedOwner {
         external 
         onlyOwner 
     {
-        contracts[_id].requestPayoutEvaluation();
+        RainfallOption rainfallContract = contracts[_id];
+        LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);
+        require(link.transferFrom(msg.sender, address(rainfallContract), ORACLE_PAYMENT * rainfallContract.getNumJobs()), "Unable to fund deployed contract");
+        rainfallContract.requestPayoutEvaluation();
     }
 
     /**
@@ -390,6 +390,18 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
         emit evaluationRequestFulfilled(address(this), _result, block.timestamp);
     }
 
+    /**
+     * @notice Get the number of contract jobs
+     * @return uint256 number of jobs
+     */
+    function getNumJobs() 
+        public 
+        view 
+        returns (uint256) 
+    {
+        return jobs.length;
+    }
+    
     /**
      * @notice Get the contract payout value, which may not be final
      * @dev Returns the final evaluation or 0 most of the time, and can possibly return an approximate value if currently evaluating on multuiple nodes

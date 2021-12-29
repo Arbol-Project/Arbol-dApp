@@ -46,6 +46,3 @@ volumes:
   export:
   data:
   chainlink:
-
-    # for whitelisting contracts against oracle jobs
-    # psql -d "host=nodestorage.cluster-cxcluinxlxok.us-east-1.rds.amazonaws.com port=5432 dbname=EthereumKovan user=NodeOperator" -W

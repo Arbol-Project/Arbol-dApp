@@ -18,5 +18,3 @@ EOF
 sudo yum install postgresql13 postgresql13-server -y
 sudo /usr/pgsql-13/bin/postgresql-13-setup initdb
 sudo systemctl enable --now postgresql-13
-
-sudo rm -rf ~/Arbol-dApp/smart_contracts

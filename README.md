@@ -32,3 +32,16 @@ docker compose up --build
 # Smart Contracts (on-chain)
 
 This directory holds smart contract source for Arbol derivative deals, Hardhat testing, deployment, and manual evaluation scripts, Chainlink oracle job definitions, and contract deployment records.
+
+To deploy, verify, and test smart contracts located in ```smart_contracts/hardhat/contracts```, first make sure Hardhat
+is installed locally, then run the following:
+
+```
+# from Arbol-dApp
+cd smart_contracts/hardhat
+npx hardhat run scripts/deploy-all.js # or replace with specific deployment script
+npx hardhat run scripts/verify-deployments.js
+npx hardhat run scripts/evaluate-deployments.js
+```
+
+Depending on the contract, evaluation may fail if certain conditions are not met (for example, for all contracts, LINK token provider must first approve derivativeProvider contract to move funds for oracle requests).

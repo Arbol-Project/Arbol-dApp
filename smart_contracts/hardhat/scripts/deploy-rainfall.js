@@ -54,7 +54,7 @@ async function main() {
         var rainfall_option = await RainfallOption.attach(deployed_address);
         console.log("RainfallOption deployed to:", rainfall_option.address);
 
-        Contracts[id] = {"address": rainfall_option.address, "verified": false, "provider": derivative_provider.address, "end": end};
+        Contracts[id] = {"address": rainfall_option.address, "verified": false, "provider": derivative_provider.address, "end": end, "evaluated": true, "payout": "0"};
         contracts[id] = deployed_address;
       }
     }

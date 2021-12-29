@@ -3,133 +3,177 @@
         "address": "0x684501Aa32EB44c35a0521f90d0ba15109e2be08",
         "verified": true,
         "provider": "0x00Bb660F9be0422f8BBDF070025E510C2982F3Ec",
-        "end": 1630368000
+        "end": 1630368000,
+        "evaluated": true,
+        "payout": "0"
     },
     "Kralanh PUT, limit: 542": {
         "address": "0x4cd841455f7607abB23B00D9793A53FD9Da5A17b",
         "verified": true,
         "provider": "0x00Bb660F9be0422f8BBDF070025E510C2982F3Ec",
-        "end": 1630368000
+        "end": 1630368000,
+        "evaluated": true,
+        "payout": "0"
     },
     "Prasat Bakong CALL, limit: 1.18k": {
         "address": "0x013839416Ff9BC76e302dFa5Ff4d714fAdcE2dDE",
         "verified": true,
         "provider": "0x00Bb660F9be0422f8BBDF070025E510C2982F3Ec",
-        "end": 1632960000
+        "end": 1632960000,
+        "evaluated": true,
+        "payout": "0"
     },
     "Prasat Bakong PUT, limit: 1.18k": {
         "address": "0xB14B9Ee610e0426c56dDa33335097E077F098cEb",
         "verified": true,
         "provider": "0x00Bb660F9be0422f8BBDF070025E510C2982F3Ec",
-        "end": 1632960000
+        "end": 1632960000,
+        "evaluated": true,
+        "payout": "0"
     },
     "Puok CALL, limit: 420": {
         "address": "0xCC56EFdA0E9bFbDEeCd5f9938370946f48B8C84b",
         "verified": true,
         "provider": "0x00Bb660F9be0422f8BBDF070025E510C2982F3Ec",
-        "end": 1630368000
+        "end": 1630368000,
+        "evaluated": true,
+        "payout": "0"
     },
     "Puok PUT, limit: 420": {
         "address": "0xA17C9904B7D231048b8704B7cE6Ba28480e2395f",
         "verified": true,
         "provider": "0x00Bb660F9be0422f8BBDF070025E510C2982F3Ec",
-        "end": 1630368000
+        "end": 1630368000,
+        "evaluated": true,
+        "payout": "0"
     },
     "Soutr Nikom CALL, limit: 534": {
         "address": "0x48e9Ce99defaB6122f8B012D4ca1e1f4288BaF5e",
         "verified": true,
         "provider": "0x00Bb660F9be0422f8BBDF070025E510C2982F3Ec",
-        "end": 1632960000
+        "end": 1632960000,
+        "evaluated": true,
+        "payout": "563"
     },
     "Soutr Nikom PUT, limit: 534": {
         "address": "0x15D0E7Ac8bFF9248099428c104017CE7B0592c78",
         "verified": true,
         "provider": "0x00Bb660F9be0422f8BBDF070025E510C2982F3Ec",
-        "end": 1632960000
+        "end": 1632960000,
+        "evaluated": true,
+        "payout": "0"
     },
     "Angkor Chum CALL, limit: 465": {
         "address": "0xA2Df71f99B8A1C05404940dD9aC5281afbae18ad",
         "verified": true,
         "provider": "0x00Bb660F9be0422f8BBDF070025E510C2982F3Ec",
-        "end": 1635638400
+        "end": 1635638400,
+        "evaluated": true,
+        "payout": "14494"
     },
     "Angkor Chum PUT, limit: 465": {
         "address": "0xe4432Cdf310C8f01Ff83dF7250BCf3eeF7bc86dA",
         "verified": true,
         "provider": "0x00Bb660F9be0422f8BBDF070025E510C2982F3Ec",
-        "end": 1635638400
+        "end": 1635638400,
+        "evaluated": true,
+        "payout": "0"
     },
     "Puok CALL, limit: 1.46k": {
         "address": "0xfcD33A60cbC4880e37e9AdFA979e23Ee9dA13374",
         "verified": true,
         "provider": "0x00Bb660F9be0422f8BBDF070025E510C2982F3Ec",
-        "end": 1635638400
+        "end": 1635638400,
+        "evaluated": true,
+        "payout": "23331"
     },
     "Puok PUT, limit: 1.46k": {
         "address": "0xCc1FDfEc2a4e6B09331976835342546B215184b6",
         "verified": true,
         "provider": "0x00Bb660F9be0422f8BBDF070025E510C2982F3Ec",
-        "end": 1635638400
+        "end": 1635638400,
+        "evaluated": true,
+        "payout": "0"
     },
     "Angkor Chum CALL, limit: 321": {
         "address": "0x6E06bF5D4F2faF77Dbac08f17fA977A9396fFcB9",
         "verified": true,
         "provider": "0x00Bb660F9be0422f8BBDF070025E510C2982F3Ec",
-        "end": 1638230400
+        "end": 1638230400,
+        "evaluated": true,
+        "payout": "6714"
     },
     "Angkor Chum PUT, limit: 321": {
         "address": "0x7679B8EB68306B1e51a2428B09042f2022bdd129",
         "verified": true,
         "provider": "0x00Bb660F9be0422f8BBDF070025E510C2982F3Ec",
-        "end": 1638230400
+        "end": 1638230400,
+        "evaluated": true,
+        "payout": "0"
     },
     "Chi Kraeng CALL, limit: 392": {
         "address": "0xcC15dEE467e82Bcca6F63c0d27197F3cDd6b6e0E",
         "verified": true,
         "provider": "0x00Bb660F9be0422f8BBDF070025E510C2982F3Ec",
-        "end": 1638230400
+        "end": 1638230400,
+        "evaluated": true,
+        "payout": "41"
     },
     "Chi Kraeng PUT, limit: 392": {
         "address": "0xBf511798Af9ee1E973dcB6bc5588c0E10c85453B",
         "verified": true,
         "provider": "0x00Bb660F9be0422f8BBDF070025E510C2982F3Ec",
-        "end": 1638230400
+        "end": 1638230400,
+        "evaluated": true,
+        "payout": "0"
     },
     "Kralanh CALL, limit: 840": {
         "address": "0xE0A1D207e3AA5995bCf2451D9558bD2933605f6e",
         "verified": true,
         "provider": "0x00Bb660F9be0422f8BBDF070025E510C2982F3Ec",
-        "end": 1638230400
+        "end": 1638230400,
+        "evaluated": true,
+        "payout": "0"
     },
     "Kralanh PUT, limit: 840": {
         "address": "0xA1a4b91b6Aa8d43bb8721b22f949094C6b03E8Dd",
         "verified": true,
         "provider": "0x00Bb660F9be0422f8BBDF070025E510C2982F3Ec",
-        "end": 1638230400
+        "end": 1638230400,
+        "evaluated": true,
+        "payout": "0"
     },
     "Puok CALL, limit: 1.32k": {
         "address": "0x89179b60cEc68a688A04Cf89B901436069AF2974",
         "verified": true,
         "provider": "0x00Bb660F9be0422f8BBDF070025E510C2982F3Ec",
-        "end": 1638230400
+        "end": 1638230400,
+        "evaluated": true,
+        "payout": "18164"
     },
     "Puok PUT, limit: 1.32k": {
         "address": "0xca380a5a81b32CE411fB7d4e3b669ca86935C02c",
         "verified": true,
         "provider": "0x00Bb660F9be0422f8BBDF070025E510C2982F3Ec",
-        "end": 1638230400
+        "end": 1638230400,
+        "evaluated": true,
+        "payout": "0"
     },
     "Soutr Nikom CALL, limit: 3.35k": {
         "address": "0xaE02cda5aa1e09BE50D28F155cE0B2F5f301d1a1",
         "verified": true,
         "provider": "0x00Bb660F9be0422f8BBDF070025E510C2982F3Ec",
-        "end": 1638230400
+        "end": 1638230400,
+        "evaluated": true,
+        "payout": "70554"
     },
     "Soutr Nikom PUT, limit: 3.35k": {
         "address": "0x8a59D72116cC34B779289B691723d3e4BF28C489",
         "verified": true,
         "provider": "0x00Bb660F9be0422f8BBDF070025E510C2982F3Ec",
-        "end": 1638230400
+        "end": 1638230400,
+        "evaluated": true,
+        "payout": "0"
     },
     "Moung Ruessei CALL, limit: 1.9k": {
         "address": "0x64e865750D6A9e286616b31Df295ae4f97D1Ce9C",

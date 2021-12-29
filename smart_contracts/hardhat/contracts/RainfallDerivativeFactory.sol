@@ -12,7 +12,7 @@ contract RainfallDerivativeProvider is ConfirmedOwner {
      * @dev RainfallDerivativeProvider contract for general rainfall option contracts
      */
     uint256 private constant ORACLE_PAYMENT = 1 * 10**15;                                                       // 0.001 LINK
-    address private constant ORACLE_BANK = 0x69640770407A09B166AED26B778699045B304768;                          // address of LINK provider for oracle requests
+    address public constant ORACLE_BANK = 0x69640770407A09B166AED26B778699045B304768;                          // address of LINK provider for oracle requests
     address public constant LINK_ADDRESS = 0xa36085F69e2889c224210F603D836748e7dC0088;                          // Link token address on Ethereum Kovan
 
     mapping(string => RainfallOption) public contracts;

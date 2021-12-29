@@ -1,1 +1,46 @@
-{"CubanBlizzardDerivativeProvider":{"address":"0xE6b21b24E1B2AF3F441D91382626Ae544A200DaD","verified":true,"contracts":{}},"RainfallDerivativeProvider":{"address":"0xFb0c72bd523A130eB08c2685C3887d39704762ED","verified":true,"contracts":{"Kralanh CALL, limit: 542":"0x1be70f308126C7B0e2aD32ffFDC0700cB5aa3D38","Kralanh PUT, limit: 542":"0x780A612811478182e16503E98cC315Bf92F03B11","Prasat Bakong CALL, limit: 1.18k":"0xba8300Ec0A8301d9259cdb8D6bACE6f117385c76","Prasat Bakong PUT, limit: 1.18k":"0x1A5d194A24EE6AA3510a9f26C51aDE58A9444a54","Puok CALL, limit: 420":"0x212EBA53918da78ED57CAD9Bb7BFdf38582BF442","Puok PUT, limit: 420":"0x1dEA3Ad21052775881bbE29096a38f5B476D2977","Soutr Nikom CALL, limit: 534":"0x4DbF9928C41A0C1b32a45ef926E0d4E4f66f2a31","Soutr Nikom PUT, limit: 534":"0x0bdc2911910E1B4a93E64A0507128b87038265a6","Angkor Chum CALL, limit: 465":"0x11b85978518F880151B397E1246Ac30B5df3Fd59","Angkor Chum PUT, limit: 465":"0x9f48a5A8B55B00e141863DE53db649d842BaC9e2","Puok CALL, limit: 1.46k":"0x47b149a9D7AA7C73e4C6b6DdF6d90F5062341786","Puok PUT, limit: 1.46k":"0xc169c3Db1c0b86a86ca8A88E514F736e75107B84","Angkor Chum CALL, limit: 321":"0xD5De110a1CBC125F38D5A8DeEdcDb229d201C3dd","Angkor Chum PUT, limit: 321":"0x1Bc70E3BB510A4B536c61D04a2098a29BD97d597","Chi Kraeng CALL, limit: 392":"0xDAe52b69037F489C0f63D5d4DDb8e675a92cAFAA","Chi Kraeng PUT, limit: 392":"0xA2831B8C6D830Beb46F2e0ea417A68f7E059eF0D","Kralanh CALL, limit: 840":"0xa1BEB9Ae10C31FD22557D68a42C606E308E00f0a","Kralanh PUT, limit: 840":"0xd19C4e75dAefd1FF7bd4CE494351A0f23048B23b","Puok CALL, limit: 1.32k":"0xEA34991A7D6b501950B3888fa5D9F8B782a02389","Puok PUT, limit: 1.32k":"0x7E3234376A379ca82c3b2516d84C2F08603509cf","Soutr Nikom CALL, limit: 3.35k":"0x68f8FE87dD27BEB8E2922b947Fd349CE8d8d857F","Soutr Nikom PUT, limit: 3.35k":"0x74215DdE7507817DdcF58d92B4304171bD842092","Moung Ruessei CALL, limit: 1.9k":"0x721efCefE49dd8340f22dFa08e32Fe7943618698","Moung Ruessei PUT, limit: 1.9k":"0x7E123E8285C2762Ff917C3499040B14f72667179","Samlout CALL, limit: 142":"0x2ED32E832055Cb9dC9aEf5FBc9d9057a6705E7eB","Samlout PUT, limit: 142":"0xd95336d250759C0198483786c03ce598d3aFE9D6","Moung Ruessei CALL, limit: 6.69k":"0x81B880e6573d80936CDEcEe2583626f36293D0bb","Moung Ruessei PUT, limit: 6.69k":"0xaC58778D9e067d20808a47945eFaC7dB572C4655","Samlout CALL, limit: 3.03k":"0x46e62b26Aa6B25c3F40c3d50d57d81cd7E5BFeF3","Samlout PUT, limit: 3.03k":"0x5B71a7Ddd04C1d902B045F7200198fc21D59f7a0","Moung Ruessei CALL, limit: 955":"0x1F9b7e4A3C00B29CBbEA246F4F1648D0d9F3D04C","Moung Ruessei PUT, limit: 955":"0xF9943cCCAD43bdf07721832e3Dd9b4af2778DD61","Cambodia Rainfall December 21 - April 22":"0x01126b14Bf80c4eC001b468c3717f81fE463D94e"}}}
+{
+    "CubanBlizzardDerivativeProvider": {
+        "address": "0xE287fBf162B3c1CBF50e8F381f1E25A3E869E07d",
+        "verified": true,
+        "contracts": {}
+    },
+    "RainfallDerivativeProvider": {
+        "address": "0x00Bb660F9be0422f8BBDF070025E510C2982F3Ec",
+        "verified": true,
+        "contracts": {
+            "Kralanh CALL, limit: 542": "0x684501Aa32EB44c35a0521f90d0ba15109e2be08",
+            "Kralanh PUT, limit: 542": "0x4cd841455f7607abB23B00D9793A53FD9Da5A17b",
+            "Prasat Bakong CALL, limit: 1.18k": "0x013839416Ff9BC76e302dFa5Ff4d714fAdcE2dDE",
+            "Prasat Bakong PUT, limit: 1.18k": "0xB14B9Ee610e0426c56dDa33335097E077F098cEb",
+            "Puok CALL, limit: 420": "0xCC56EFdA0E9bFbDEeCd5f9938370946f48B8C84b",
+            "Puok PUT, limit: 420": "0xA17C9904B7D231048b8704B7cE6Ba28480e2395f",
+            "Soutr Nikom CALL, limit: 534": "0x48e9Ce99defaB6122f8B012D4ca1e1f4288BaF5e",
+            "Soutr Nikom PUT, limit: 534": "0x15D0E7Ac8bFF9248099428c104017CE7B0592c78",
+            "Angkor Chum CALL, limit: 465": "0xA2Df71f99B8A1C05404940dD9aC5281afbae18ad",
+            "Angkor Chum PUT, limit: 465": "0xe4432Cdf310C8f01Ff83dF7250BCf3eeF7bc86dA",
+            "Puok CALL, limit: 1.46k": "0xfcD33A60cbC4880e37e9AdFA979e23Ee9dA13374",
+            "Puok PUT, limit: 1.46k": "0xCc1FDfEc2a4e6B09331976835342546B215184b6",
+            "Angkor Chum CALL, limit: 321": "0x6E06bF5D4F2faF77Dbac08f17fA977A9396fFcB9",
+            "Angkor Chum PUT, limit: 321": "0x7679B8EB68306B1e51a2428B09042f2022bdd129",
+            "Chi Kraeng CALL, limit: 392": "0xcC15dEE467e82Bcca6F63c0d27197F3cDd6b6e0E",
+            "Chi Kraeng PUT, limit: 392": "0xBf511798Af9ee1E973dcB6bc5588c0E10c85453B",
+            "Kralanh CALL, limit: 840": "0xE0A1D207e3AA5995bCf2451D9558bD2933605f6e",
+            "Kralanh PUT, limit: 840": "0xA1a4b91b6Aa8d43bb8721b22f949094C6b03E8Dd",
+            "Puok CALL, limit: 1.32k": "0x89179b60cEc68a688A04Cf89B901436069AF2974",
+            "Puok PUT, limit: 1.32k": "0xca380a5a81b32CE411fB7d4e3b669ca86935C02c",
+            "Soutr Nikom CALL, limit: 3.35k": "0xaE02cda5aa1e09BE50D28F155cE0B2F5f301d1a1",
+            "Soutr Nikom PUT, limit: 3.35k": "0x8a59D72116cC34B779289B691723d3e4BF28C489",
+            "Moung Ruessei CALL, limit: 1.9k": "0x64e865750D6A9e286616b31Df295ae4f97D1Ce9C",
+            "Moung Ruessei PUT, limit: 1.9k": "0x94645cB715c5ACAcca9D12226EcB74BCF9007ca1",
+            "Samlout CALL, limit: 142": "0xa75287f5615221A14455ebfb8A2d84c3DCFd90b8",
+            "Samlout PUT, limit: 142": "0xa226d0cD73b329Ed41C9026b7f8B773e7854ceD9",
+            "Moung Ruessei CALL, limit: 6.69k": "0x85EeFf6dCEcFa9a05DDDa78d82c45ACb3Cd76994",
+            "Moung Ruessei PUT, limit: 6.69k": "0xC1FC794Ef0721F828FB7A29eF29C937B8f4AABfB",
+            "Samlout CALL, limit: 3.03k": "0x0fBf292e6b5943aAD7492e9939Cbd0C39f03bA92",
+            "Samlout PUT, limit: 3.03k": "0x8ceAd995c3bB1Eb86a38b0cE9912F6F95fA5F466",
+            "Moung Ruessei CALL, limit: 955": "0xDf712bdF27d48a6DE7D21B7Cd2727f1470295524",
+            "Moung Ruessei PUT, limit: 955": "0xf71d11cF8333E274eb70D628e7e926D621716cd9",
+            "Cambodia Rainfall December 21 - April 22": "0xe2C9acA5EEA2672C6A35F98B2D1e9Ca13a74Fa3a"
+        }
+    }
+}

@@ -15,11 +15,11 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
     uint256 private constant ORACLE_PAYMENT = 1 * 10**15;                                                       // 0.001 LINK
     uint256 public constant COLLATERAL_PAYMENT = 250000 * 10**6;                                                // 250,000 * 1 USDC
     uint256 public constant PREMIUM_PAYMENT = 10000 * 10**6;                                                    // 10,000 * 1 USDC
-    address private constant ORACLE_BANK = 0x69640770407A09B166AED26B778699045B304768;                          // address of LINK provider for oracle requests
+    address public constant ORACLE_BANK = 0x69640770407A09B166AED26B778699045B304768;                          // address of LINK provider for oracle requests
     address public constant COLLATERAL_ADDRESS = 0x3382d07e2736AC80f07D7288750F2442d187a7e3;                    // Arbol USDC wallet
     address public constant PREMIUM_ADDRESS = 0xa679c6154b8d4619Af9F83f0bF9a13A680e01eCf;                       // Buyer's wallet
     address public constant LINK_ADDRESS = 0xa36085F69e2889c224210F603D836748e7dC0088;                          // Link token address on Ethereum Kovan
-    address public constant USDC_ADDRESS = 0xe77995b023A2a2Bf2150E570D6a8072e04E665FF;                          // USDC token address on Ethereum Kovan
+    address public constant USDC_ADDRESS = 0xe22da380ee6B445bb8273C81944ADEB6E8450422;                          // USDC token address on Ethereum Kovan
 
     CubanBlizzardOption public blizzardContract;
     bool public collateralDeposited;

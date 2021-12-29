@@ -11,7 +11,7 @@ Arbol-dApp "Monorepo".
 A Docker Compose project to launch an Arbol-Chainlink node on a new AWS EC2 (Amazon Linux 2) instance. The project deploys containers for
 a Chainlink node for fulfilling smart contract oracle requests, an IPFS daemon for retrieving Arbol weather data and listening to IPFS-HTTP requests, and a Guicorn server running a Chainlink external adapter for serving requests and computing payout evaluations on retrieved data.
 
-To launch a new node with new or imported credentials and contract data:
+To launch a new node with new or imported credentials and contract data, run the following:
 
 ```
 sudo yum install -y git
@@ -27,6 +27,10 @@ bash Arbol-dApp/chainlink_node/scripts/receive-secrets.sh
 cd Arbol-dApp/chainlink_node
 docker compose up --build
 ```
+
+The Chainlink Node GUI can be accessed at ```https://localhost:6689``` (if SSH tunneling into EC2 instance on a VPC add ```-L 6689:localhost:6689``` to forward to your local machine).
+
+The IPFS Webui can be accessed at ```http://localhost:5001/webui``` (if SSH tunneling into EC2 instance on a VPC add ```-L 5001:localhost:5001``` to forward to your local machine).
 
 # Smart Contracts (on-chain)
 

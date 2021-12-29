@@ -9,7 +9,7 @@ The frontend is bootstrapped with [Create Eth App](https://github.com/paulrberg/
 ## Chainlink Node (bridge)
 
 A Docker Compose project to launch an Arbol-Chainlink node on a new AWS EC2 (Amazon Linux 2) instance. The project deploys containers for
-a Chainlink node for fulfilling smart contract oracle requests, an IPFS daemon for retrieving Arbol weather data and listening to IPFS-HTTP requests, and a Gunicorn server running a Chainlink external adapter for serving requests and computing payout evaluations on retrieved data.
+a [Chainlink](https://github.com/smartcontractkit/chainlink) node for fulfilling smart contract oracle requests, an [IPFS](https://github.com/ipfs/go-ipfs) daemon for retrieving Arbol weather data and listening to IPFS-HTTP requests, and a Gunicorn server running a Chainlink external adapter for serving requests using the [dClimate Python Client](https://github.com/dClimate/dWeather-Python-Client) and computing payout evaluations on retrieved data.
 
 To launch a new node with new or imported credentials and contract data, run the following:
 

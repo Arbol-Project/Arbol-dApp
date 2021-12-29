@@ -12,6 +12,7 @@ contract RainfallDerivativeProvider is ConfirmedOwner {
      * @dev RainfallDerivativeProvider contract for general rainfall option contracts
      */
     uint256 private constant ORACLE_PAYMENT = 1 * 10**15;                                                       // 0.001 LINK
+    address private constant ORACLE_BANK = 0x69640770407A09B166AED26B778699045B304768;                          // address of LINK provider for oracle requests
     address public constant LINK_ADDRESS = 0xa36085F69e2889c224210F603D836748e7dC0088;                          // Link token address on Ethereum Kovan
 
     mapping(string => RainfallOption) public contracts;
@@ -71,7 +72,7 @@ contract RainfallDerivativeProvider is ConfirmedOwner {
     {
         RainfallOption rainfallContract = contracts[_id];
         LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);
-        require(link.transferFrom(msg.sender, address(rainfallContract), ORACLE_PAYMENT * rainfallContract.getNumJobs()), "Unable to fund deployed contract");
+        require(link.transferFrom(ORACLE_BANK, address(rainfallContract), ORACLE_PAYMENT * rainfallContract.getNumJobs()), "Unable to fund deployed contract");
         rainfallContract.requestPayoutEvaluation();
     }
 
@@ -233,7 +234,7 @@ contract RainfallDerivativeProvider is ConfirmedOwner {
         onlyOwner 
     {
         LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);
-        require(link.transfer(owner(), link.balanceOf(address(this))), "Unable to transfer");
+        require(link.transfer(ORACLE_BANK, link.balanceOf(address(this))), "Unable to transfer");
         selfdestruct(payable(owner()));
     }
 }
@@ -401,7 +402,7 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
     {
         return jobs.length;
     }
-    
+
     /**
      * @notice Get the contract payout value, which may not be final
      * @dev Returns the final evaluation or 0 most of the time, and can possibly return an approximate value if currently evaluating on multuiple nodes

@@ -31,7 +31,7 @@ services:
     volumes:
       - "./adapter:/adapter"
     depends_on:
-      # - chainlink-node-1
+      - chainlink-node-1
       - ipfs-daemon
 
     # for whitelisting contracts against oracle jobs

@@ -1,6 +1,6 @@
 # Arbol-dApp
 
-Arbol-dApp "Monorepo".
+Arbol-dApp Monorepo.
 
 ## Web App (off-chain)
 

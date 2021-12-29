@@ -9,7 +9,7 @@ Arbol-dApp "Monorepo".
 # Chainlink Node (bridge)
 
 A Docker Compose project to launch an Arbol-Chainlink node on a new AWS EC2 (Amazon Linux 2) instance. The project deploys containers for
-a Chainlink node for fulfilling smart contract oracle requests, an IPFS daemon for retrieving Arbol weather data and listening to IPFS-HTTP requests, and a Chainlink external adapter run as a Guicorn server for serving requests and computing payout evaluations on retrieved data.
+a Chainlink node for fulfilling smart contract oracle requests, an IPFS daemon for retrieving Arbol weather data and listening to IPFS-HTTP requests, and a Guicorn server running a Chainlink external adapter for serving requests and computing payout evaluations on retrieved data.
 
 To launch a new node with new or imported credentials and contract data:
 

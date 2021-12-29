@@ -8,7 +8,7 @@ This repository contains all components for Arbol dApp.
 
 # Chainlink Node (bridge)
 
-A Docker Compose project to launch an Arbol-Chainlink node on a new AWS EC2 instance. The project deploys containers for
+A Docker Compose project to launch an Arbol-Chainlink node on a new AWS EC2 (Amazon Linux 2) instance. The project deploys containers for
 a Chainlink node for fulfilling smart contract oracle requests, an IPFS daemon for retrieving Arbol weather data and listening to IPFS-HTTP requests, and a Chainlink external adapter run as a Guicorn server for serving requests and computing payout evaluations on retrieved data.
 
 Follow the steps below with the proper credentials to launch a new node (doing so removes the smart_contract directory

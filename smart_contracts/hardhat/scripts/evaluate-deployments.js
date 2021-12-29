@@ -14,16 +14,16 @@ async function main() {
       for (const [cname, caddr] of Object.entries(pdata.contracts)) {
         if (caddr == Contracts[cname].address && Contracts[cname].end < parseInt(Date.now() / 1000)) {
           console.log("Initiating contract evaluation for:", cname);
-          // if (pname == "RainfallDerivativeProvider") {
-          //   var tx = await derivative_provider.initiateContractEvaluation(cname);
-          //   await tx.wait();
-          // } else if (pname == "CubanBlizzardDerivativeProvider") {
-          //   var tx = await derivative_provider.initiateContractEvaluation();
-          //   await tx.wait();
-          // }
+          if (pname == "RainfallDerivativeProvider") {
+            var tx = await derivative_provider.initiateContractEvaluation(cname);
+            await tx.wait();
+          } else if (pname == "CubanBlizzardDerivativeProvider") {
+            var tx = await derivative_provider.initiateContractEvaluation();
+            await tx.wait();
+          }
           contracts.push(cname);
-          // console.log("Waiting 60 seconds");
-          // await delay(60*1000);
+          console.log("Waiting 60 seconds");
+          await delay(60*1000);
         }
       }
 

@@ -1,1 +1,1 @@
-yarn react-app:start
+packages/react-app: yarn start

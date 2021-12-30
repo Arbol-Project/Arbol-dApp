@@ -12,7 +12,7 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
     /**
      * @dev BlizzardDerivativeProvider contract for Dallas Snow Protection 21-22 Season
      */
-    uint256 private constant ORACLE_PAYMENT = 1 * 10**15;                                                       // 0.001 LINK
+    uint256 private constant ORACLE_PAYMENT = 1 * 10**14;                                                       // 0.0001 LINK
     uint256 public constant COLLATERAL_PAYMENT = 250000 * 10**6;                                                // 250,000 * 1 USDC
     uint256 public constant PREMIUM_PAYMENT = 10000 * 10**6;                                                    // 10,000 * 1 USDC
     address public constant ORACLE_BANK = 0x69640770407A09B166AED26B778699045B304768;                           // address of LINK provider for oracle requests

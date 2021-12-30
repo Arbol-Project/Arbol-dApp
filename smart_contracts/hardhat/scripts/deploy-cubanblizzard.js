@@ -39,7 +39,7 @@ async function main() {
     var access = await derivative_provider.hasAccess(premium, 64);
     console.log("Access granted:", access);
 
-    Providers["CubanBlizzardDerivativeProvider"] = {"address": address, "verified": false, "contracts": {}};
+    Providers["CubanBlizzardDerivativeProvider"] = {"address": address, "types": {"CubanBlizzardOption": false},  "verified": false, "contracts": {}};
     var deployment_content = JSON.stringify(Providers);
     try {
       fs.writeFileSync(process.cwd()+"/logs/providers.json", deployment_content)

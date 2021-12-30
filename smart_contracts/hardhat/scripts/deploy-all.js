@@ -43,7 +43,7 @@ async function main() {
     var access = await derivative_provider.hasAccess(premium, 64);
     console.log("Access granted:", access);
 
-    Providers["CubanBlizzardDerivativeProvider"] = {"address": address, "verified": false, "contracts": {}};
+    Providers["CubanBlizzardDerivativeProvider"] = {"address": address, "types": {"CubanBlizzardOption": false},  "verified": false, "contracts": {}};
     var deployment_content = JSON.stringify(Providers);
     try {
       fs.writeFileSync(process.cwd()+"/logs/providers.json", deployment_content)
@@ -98,7 +98,7 @@ async function main() {
         var rainfall_option = await RainfallOption.attach(deployed_address);
         console.log("RainfallOption deployed to:", rainfall_option.address);
 
-        Contracts[id] = {"address": rainfall_option.address, "verified": false, "provider": derivative_provider.address, "end": end};
+        Contracts[id] = {"type": "RainfallOption", "address": rainfall_option.address, "verified": false, "provider": "RainfallDerivativeProvider", "end": end, "evaluated": false, "payout": "0"};
         contracts[id] = deployed_address;
       }
     }
@@ -111,7 +111,7 @@ async function main() {
   } catch (error) {
     console.error(error)
   }
-  Providers["RainfallDerivativeProvider"] = {"address": derivative_provider.address, "verified": false, "contracts": contracts};
+  Providers["RainfallDerivativeProvider"] = {"address": derivative_provider.address, "types": {"RainfallOption": false}, "verified": false, "contracts": contracts};
   var deployment_content = JSON.stringify(Providers);
   try {
     fs.writeFileSync(process.cwd()+"/logs/providers.json", deployment_content)

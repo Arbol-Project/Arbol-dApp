@@ -22,26 +22,22 @@ async function main() {
         console.error(error);
       }
     }
-    if (need_write) {
-      var deployment_content = JSON.stringify(Providers);
-      try {
-        fs.writeFileSync(process.cwd()+"/logs/providers.json", deployment_content)
-      } catch (error) {
-        console.error(error)
-      }
-    }
   }
 
-  need_write = false;
   for (const [name, data] of Object.entries(Contracts)) {
     if (data.verified) {
       continue;
+    } else if (Providers[data.provider].types[data.type]) {
+      Contracts[name].verified = true;
+      need_write = true;
+      continue
     } else {
       try {
         await hre.run("verify:verify", {
           address: data.address,
         });
         data.verified = true;
+        Providers[data.provider].types[data.type] = true;
         need_write = true;
         console.log(name.toString() + " source code verified");
       } catch (error) {
@@ -49,13 +45,19 @@ async function main() {
         console.error(error);
       }
     }
-    if (need_write) {
-      var deployment_content = JSON.stringify(Contracts);
-      try {
-        fs.writeFileSync(process.cwd()+"/logs/contracts.json", deployment_content)
-      } catch (error) {
-        console.error(error)
-      }
+  }
+  if (need_write) {
+    var deployment_content = JSON.stringify(Contracts);
+    try {
+      fs.writeFileSync(process.cwd()+"/logs/contracts.json", deployment_content)
+    } catch (error) {
+      console.error(error)
+    }
+    deployment_content = JSON.stringify(Providers);
+    try {
+      fs.writeFileSync(process.cwd()+"/logs/providers.json", deployment_content)
+    } catch (error) {
+      console.error(error)
     }
   }
 }

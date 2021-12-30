@@ -34,7 +34,7 @@ The IPFS web UI can be accessed at ```http://localhost:5001/webui```; if SSH tun
 
 ## Smart Contracts (on-chain)
 
-This directory holds smart contract source for Arbol derivative deals, Hardhat testing, deployment, and manual evaluation scripts, Chainlink oracle job definitions, and contract deployment records.
+This directory holds smart contract source for Arbol derivative deals, Hardhat deployment, verification, and evaluation scripts, Chainlink oracle job definitions, and contract deployment records.
 
 To deploy, verify, and test smart contracts located in ```smart_contracts/hardhat/contracts```, first make sure Hardhat
 is installed locally, then run the following:

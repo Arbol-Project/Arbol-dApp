@@ -1,2 +1,2 @@
-npm i create-eth-app
+npm install create-eth-app
 yarn react-app:start

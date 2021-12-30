@@ -33,13 +33,14 @@ export const Link = styled.a.attrs({
 })`
   color: #61dafb;
   margin-top: 10px;
+  font-family: 'Sora';
 `;
 
 export const Button = styled.button`
-  background-color: #282c34;
+  background-color: #1DB16A;
   border: none;
-  border-radius: 8px;
-  color: white;
+  border-radius: 20px;
+  color: #4D4D62;
   cursor: pointer;
   font-size: 16px;
   text-align: center;

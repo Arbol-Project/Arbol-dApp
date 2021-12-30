@@ -48,11 +48,10 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
         external
         checkAccess
     {
-        if (!premiumDeposited && !collateralDeposited) {
-            LinkTokenInterface usdc = LinkTokenInterface(USDC_ADDRESS);  
-            require(usdc.transferFrom(msg.sender, address(this), COLLATERAL_PAYMENT), "unable to deposit collateral");
-            collateralDeposited = true;
-        }
+        require(!premiumDeposited && !collateralDeposited, "unable to deposit premium more than once");
+        LinkTokenInterface usdc = LinkTokenInterface(USDC_ADDRESS);  
+        require(usdc.transferFrom(msg.sender, address(this), COLLATERAL_PAYMENT), "unable to deposit collateral");
+        collateralDeposited = true;
     }
 
     /**
@@ -63,12 +62,11 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
         external
         checkAccess
     {
-        if (!premiumDeposited && collateralDeposited) {
-            LinkTokenInterface usdc = LinkTokenInterface(USDC_ADDRESS);
-            require(usdc.transferFrom(msg.sender, address(this), PREMIUM_PAYMENT), "unable to deposit premium");
-            premiumDeposited = true;
-            newContract();
-        }
+        require(!premiumDeposited && collateralDeposited, "unable to deposit premium until collateral has been deposited");
+        LinkTokenInterface usdc = LinkTokenInterface(USDC_ADDRESS);
+        require(usdc.transferFrom(msg.sender, address(this), PREMIUM_PAYMENT), "unable to deposit premium");
+        premiumDeposited = true;
+        newContract();
     }
 
     /**
@@ -100,6 +98,7 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
         require(link.transferFrom(ORACLE_BANK, address(blizzardContract), ORACLE_PAYMENT * oracle_mult), "unable to fund oracle request");
         blizzardContract.requestPayoutEvaluation();
     }
+
     /**
      * @notice Fulfill payout evaluation for the snow protection contract
      * @dev Sender must have access
@@ -109,25 +108,27 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
         checkAccess 
     {
         LinkTokenInterface usdc = LinkTokenInterface(USDC_ADDRESS);
-        uint256 payout = blizzardContract.getPayout();
+        uint256 payout = blizzardContract.payout();
         if (payout > 0) {
             require(usdc.transfer(PREMIUM_ADDRESS, payout), "unable to payout to buyer");
             require(usdc.transfer(COLLATERAL_ADDRESS, usdc.balanceOf(address(this))), "unable to return remaining balance to provider");
 
-        }
+        } else {
             require(usdc.transfer(COLLATERAL_ADDRESS, usdc.balanceOf(address(this))), "unable to return balance to provider");
+        }
+        contractPaidOut = true;
     }
 
     /**
-     * @notice Returns the snow protection contract
-     * @return BlizzardContract instance
+     * @notice Returns the evaluation status of the snow protection contract
+     * @return bool evaluated
      */
-    function getContract()
+    function getContractEvaluated()
         external
         view
-        returns (CubanBlizzardOption)
+        returns (bool)
     {
-        return blizzardContract;
+        return blizzardContract.contractEvaluated();
     }
 
     /**
@@ -151,7 +152,7 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
         view
         returns (uint256)
     {
-        return blizzardContract.getPayout();
+        return blizzardContract.payout();
     }
 
     /**
@@ -261,8 +262,8 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
     {
         LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);
         LinkTokenInterface usdc = LinkTokenInterface(USDC_ADDRESS);
-        uint256 payout = blizzardContract.getPayout();
-        bool evaluated = blizzardContract.getStatus();
+        uint256 payout = blizzardContract.payout();
+        bool evaluated = blizzardContract.contractEvaluated();
 
         if (evaluated) {
             require(usdc.transfer(PREMIUM_ADDRESS, payout), "unable to transfer payout to buyer");
@@ -333,7 +334,7 @@ contract CubanBlizzardOption is ChainlinkClient, ConfirmedOwner {
  
     /**
      * @notice Add a new node and associated job ID to the contract evaluator set
-     * @dev Can only be called by the contract ownder
+     * @dev Can only be called by the contract owner
      * @param _oracle address of oracle contract for chainlink node
      * @param _job bytes32 ID for associated oracle job
      */
@@ -351,7 +352,7 @@ contract CubanBlizzardOption is ChainlinkClient, ConfirmedOwner {
 
     /**
      * @notice Remove a node and associated job ID from the contract evaluator set
-     * @dev Can only be called by the contract ownder
+     * @dev Can only be called by the contract owner
      * @param _job bytes32 ID of oracle job to remove
      */
     function removeOracleJob(
@@ -361,11 +362,16 @@ contract CubanBlizzardOption is ChainlinkClient, ConfirmedOwner {
         onlyOwner
     {
         uint256 index = oracleMap[_job];
-        oracles[index] = oracles[oracles.length - 1];
-        oracles.pop();
-        jobs[index] = jobs[jobs.length - 1];
-        jobs.pop();
-        oracleMap[jobs[index]] = index;
+        if (index == jobs.length - 1) {
+            oracles.pop();
+            jobs.pop();
+        } else {
+            oracles[index] = oracles[oracles.length - 1];
+            oracles.pop();
+            jobs[index] = jobs[jobs.length - 1];
+            jobs.pop();
+            oracleMap[jobs[index]] = index;
+        }
     }
 
     /**
@@ -423,18 +429,6 @@ contract CubanBlizzardOption is ChainlinkClient, ConfirmedOwner {
     }
 
     /**
-     * @notice Get the contract status
-     * @return bool contract evaluation status
-     */
-    function getStatus() 
-        public 
-        view 
-        returns (bool) 
-    {
-        return contractEvaluated;
-    }
-
-    /**
      * @notice Get the number of contract jobs
      * @return uint256 number of jobs
      */
@@ -444,25 +438,6 @@ contract CubanBlizzardOption is ChainlinkClient, ConfirmedOwner {
         returns (uint256) 
     {
         return jobs.length;
-    }
-
-    /**
-     * @notice Get the contract payout value, which may not be final
-     * @dev Returns the final evaluation or 0 most of the time, and can possibly return an approximate value if currently evaluating on multuiple nodes
-     * @return uint256 evaluated payout
-     */
-    function getPayout() 
-        public 
-        view 
-        returns (uint256) 
-    {
-        return payout;
-        // if (contractEvaluated) {
-        //     return payout;
-        // } else {
-        //     // 0 if contract is active, "close" if contract is currently evaluating, no effect if only one oracle job
-        //     return 0; // payout / (oracles.length - requestsPending); 
-        // }
     }
 
     /**

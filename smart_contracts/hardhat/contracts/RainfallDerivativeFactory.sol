@@ -77,18 +77,18 @@ contract RainfallDerivativeProvider is ConfirmedOwner {
     }
 
     /**
-     * @notice Returns the contract for a given id
+     * @notice Returns the evaluation status of the contract for a given id
      * @param _id string contract ID
-     * @return RainfallOption instance
+     * @return bool evaluated
      */
-    function getContract(
+    function getContractEvaluated(
         string memory _id
     )
         external
         view
-        returns (RainfallOption)
+        returns (bool)
     {
-        return contracts[_id];
+        return contracts[_id].contractEvaluated();
     }
 
     /**
@@ -118,7 +118,7 @@ contract RainfallDerivativeProvider is ConfirmedOwner {
         view
         returns (uint256)
     {
-        return contracts[_id].getPayout();
+        return contracts[_id].payout();
     }
 
     /**
@@ -303,7 +303,7 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
 
     /**
      * @notice Add a new node and associated job ID to the contract evaluator set
-     * @dev Can only be called by the contract ownder
+     * @dev Can only be called by the contract owner
      * @param _oracle address of oracle contract for chainlink node
      * @param _job bytes32 ID for associated oracle job
      */
@@ -321,7 +321,7 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
 
     /**
      * @notice Remove a node and associated job ID from the contract evaluator set
-     * @dev Can only be called by the contract ownder
+     * @dev Can only be called by the contract owner
      * @param _job bytes32 ID of oracle job to remove
      */
     function removeOracleJob(
@@ -331,12 +331,18 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
         onlyOwner
     {
         uint256 index = oracleMap[_job];
-        oracles[index] = oracles[oracles.length - 1];
-        oracles.pop();
-        jobs[index] = jobs[jobs.length - 1];
-        jobs.pop();
-        oracleMap[jobs[index]] = index;
+        if (index == jobs.length - 1) {
+            oracles.pop();
+            jobs.pop();
+        } else {
+            oracles[index] = oracles[oracles.length - 1];
+            oracles.pop();
+            jobs[index] = jobs[jobs.length - 1];
+            jobs.pop();
+            oracleMap[jobs[index]] = index;
+        }
     }
+
 
     /**
      * @notice Makes a chainlink oracle request to compute a payout evaluation for this contract
@@ -401,19 +407,6 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
         returns (uint256) 
     {
         return jobs.length;
-    }
-
-    /**
-     * @notice Get the contract payout value, which may not be final
-     * @dev Returns the final evaluation or 0 most of the time, and can possibly return an approximate value if currently evaluating on multuiple nodes
-     * @return uint256 evaluated payout
-     */
-    function getPayout() 
-        public 
-        view 
-        returns (uint256) 
-    {
-        return payout;
     }
 
     /**

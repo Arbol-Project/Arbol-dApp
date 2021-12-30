@@ -23,8 +23,5 @@
     "packages": [
       "packages/*"
     ]
-  },
-  "dependencies": {
-    "create-eth-app": "^1.7.4"
   }
 }

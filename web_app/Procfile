@@ -1,1 +1,1 @@
-packages/react-app: yarn start
+web: yarn -cwd ./packages/react-app start

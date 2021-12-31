@@ -117,7 +117,7 @@ def parse_available_contract_data():
                             contract_requests.append(request_data)
                             i += 1
             else:
-                id = contract['__config__']['id']
+                id = data['__config__']['id']
                 if contracts[id]['evaluated']:
                     print(f'{id} already evaluated')
                 else:

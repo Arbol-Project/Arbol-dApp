@@ -108,14 +108,18 @@ def parse_available_contract_data():
             if 'contracts' in data['__config__']:
                 for contract in data['__config__']['contracts']:
                     id = contract['__config__']['id']
-                    if not contracts[id]['evaluated']:
+                    if contracts[id]['evaluated']:
+                        print(f'{id} already evaluated')
+                    else:
                         request_data = parse_contract_data(contract, i)
                         if request_data is not None:
                             contract_requests.append(request_data)
                             i += 1
             else:
                 id = contract['__config__']['id']
-                if not contracts[id]['evaluated']:
+                if contracts[id]['evaluated']:
+                    print(f'{id} already evaluated')
+                else:
                     request_data = parse_contract_data(data, i)
                     if request_data is not None:
                         contract_requests.append(request_data)

@@ -1,8 +1,6 @@
 chainlink_node/scripts/send-secrets.sh
 
-chainlink_node/adapter/tests/SROs/*
-chainlink_node/adapter/tests/payouts/*
-chainlink_node/adapter/tests/SROs.zip
+chainlink_node/adapter/tests/payouts
 
 chainlink_node/chainlink/.env
 chainlink_node/chainlink/.api
@@ -14,6 +12,8 @@ smart_contracts/foundry
 smart_contracts/other
 smart_contracts/web3_deploy.py
 smart_contracts/brownie
+smart_contracts/hardhat/SROs
+smart_contracts/hardhat/SROs.zip
 
 smart_contracts/hardhat/hardhat.config.js
 smart_contracts/hardhat/cache/*

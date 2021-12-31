@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 import adapter
 
 
-SRO_DIR = os.path.join(os.path.dirname(__file__), 'SROs')
+SRO_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), 'smart_contracts/hardhat/SROs')
 CONTRACTS_LOG = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), 'web_app/packages/contracts/src/logs/contracts.json')
 # PAYOUT_DIR = os.path.join(os.path.dirname(__file__), 'payouts')
 

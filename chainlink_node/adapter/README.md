@@ -1,5 +1,7 @@
 # Arbol-dApp
 
+[N.B. this readme is a little old]
+
 Chainlink External Adapter for dClimate data retrieval and Arbol contract evaluation.
 
 To test the adapter locally, first make sure you have Go-IPFS version 0.7.0 installed: https://github.com/ipfs/go-ipfs/releases/tag/v0.7.0, http://docs.ipfs.io.ipns.localhost:8080/install/command-line/#system-requirements.
@@ -58,12 +60,12 @@ Structure for data of the request above:
 
 You can test the adapter with an SRO file and an associated CSV of payouts. To do
 so, set the `SROFILEPATH` and `PAYOUTFILEPATH` variables in
-`tests/test_adapter.py` and run:
+`utils/preload_adapter.py` and run:
 
 ```
 pipenv run pytest
 # or
-pipenv run python3 tests/test_adapter.py
+pipenv run python3 utils/preload_adapter.py
 ```
 
 This will test the adapter for any contracts in the SRO whose coverage periods are

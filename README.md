@@ -4,7 +4,7 @@ Arbol-dApp Monorepo.
 
 ## Web App (off-chain)
 
-The frontend is bootstrapped with [Create Eth App](https://github.com/paulrberg/create-eth-app) and hosted on a Heroku server. It provides interfaces for all deployed contracts: {}
+The frontend is bootstrapped with [Create Eth App](https://github.com/paulrberg/create-eth-app) and hosted on a Heroku server. It is a work in progress and currently provides interfaces for the Dallas Blizzard Protection contract. It will contain interfaces for all deployed contracts.
 
 ## Chainlink Node (bridge)
 
@@ -28,15 +28,15 @@ cd Arbol-dApp/chainlink_node
 docker compose up --build
 ```
 
-The Chainlink Node GUI can be accessed at ```https://localhost:6689```; if SSH tunneling into EC2 instance on a VPC add ```-L 6689:localhost:6689``` to forward to your local machine.
+The Chainlink Node GUI can be accessed at `https://localhost:6689`; if SSH tunneling into EC2 instance on a VPC add `-L 6689:localhost:6689` to forward to your local machine.
 
-The IPFS web UI can be accessed at ```http://localhost:5001/webui```; if SSH tunneling into EC2 instance on a VPC add ```-L 5001:localhost:5001``` to forward to your local machine.
+The IPFS web UI can be accessed at `http://localhost:5001/webui`; if SSH tunneling into EC2 instance on a VPC add `-L 5001:localhost:5001` to forward to your local machine.
 
 ## Smart Contracts (on-chain)
 
 This directory holds smart contract source for Arbol derivative deals, Hardhat deployment, verification, and evaluation scripts, Chainlink oracle job definitions, and contract deployment records.
 
-To deploy, verify, and test smart contracts located in ```smart_contracts/hardhat/contracts```, first make sure Hardhat
+To deploy, verify, and test smart contracts located in `smart_contracts/hardhat/contracts`, first make sure Hardhat
 is installed locally, then run the following:
 
 ```
@@ -47,4 +47,4 @@ npx hardhat run scripts/verify-deployments.js
 npx hardhat run scripts/evaluate-deployments.js
 ```
 
-Deployment details can be viewed in ```smart_contracts/hardhat/logs```. Depending on the contract, evaluation may fail if certain conditions are not met (for example, for all contracts, LINK token provider must first approve derivativeProvider contract to move funds for oracle requests).
+Deployment details can be viewed in `smart_contracts/hardhat/logs`. Depending on the contract, evaluation may fail if certain conditions are not met (for example, for all contracts, LINK token provider must first approve derivativeProvider contract to move funds for oracle requests).

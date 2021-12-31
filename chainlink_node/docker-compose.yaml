@@ -34,6 +34,8 @@ services:
     build: adapter/
     volumes:
       - adapter:/adapter
+      - "../web_app/packages/contracts/src/logs:/adapter/logs"
+      - "../smart_contracts/hardhat/SROs:/adapter/SROs"
     restart: on-failure
     depends_on:
       ipfs-daemon:

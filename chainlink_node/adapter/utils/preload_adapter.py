@@ -7,9 +7,10 @@ from datetime import datetime, timedelta
 
 import adapter
 
-
-SRO_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), 'smart_contracts/hardhat/SROs')
-CONTRACTS_LOG = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), 'web_app/packages/contracts/src/logs/contracts.json')
+CONTRACT_LOGS = os.path.join(os.path.dirname(os.path.dirname(__file__)), "logs");
+SRO_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "SROs");
+# SRO_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), 'smart_contracts/hardhat/SROs')
+# CONTRACT_LOGS = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), 'web_app/packages/contracts/src/logs/contracts.json')
 # PAYOUT_DIR = os.path.join(os.path.dirname(__file__), 'payouts')
 
 
@@ -96,7 +97,7 @@ def parse_available_contract_data():
     '''
     contract_requests = []
     i = 1
-    with open(CONTRACTS_LOG) as log:
+    with open(CONTRACT_LOGS) as log:
         contracts = json.load(log)
         log.close()
     for filename in os.listdir(SRO_DIR):

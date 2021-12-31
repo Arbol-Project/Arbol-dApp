@@ -3,7 +3,7 @@ import { Contract } from "@ethersproject/contracts";
 // import { getDefaultProvider } from "@ethersproject/providers";
 import React, { useEffect, useState } from "react";
 
-import { Body, Button, Header, Image, Link, Text, Col } from "./components";
+import { Body, Button, Header, Image, Link, Text, Col, Title } from "./components";
 import logo from "./Arbol_logo.png";
 import useWeb3Modal from "./hooks/useWeb3Modal";
 
@@ -125,27 +125,40 @@ function App() {
   return (
     <div>
       <Header>
+        <Title>
+          Arbol dApp Portal
+        </Title>
         <WalletButton provider={provider} loadWeb3Modal={loadWeb3Modal} logoutOfWeb3Modal={logoutOfWeb3Modal} />
       </Header>
       <Body>
         <Col>
         <Image src={logo} alt="react-logo" />
-        <Text>
-          Arbol dApp Portal
-        </Text>
         {/* Remove the "hidden" prop and open the JavaScript console in the browser to see what this function does */}
         <Link href="https://kovan.etherscan.io/address/0xffB2F37940ef05168ee40113B1fccA541E957A42#code#F1#L1" style={{ marginTop: "8px" }}> etherscan </Link>
         <Link href="https://github.com/dmp267/Arbol-dApp/tree/master/web_app" style={{ marginTop: "8px" }}> github </Link>
         </Col>
-        <Button onClick={() => approveTransferUSDC(provider)}>
-          Approve USDC Transfer
-        </Button>
-        <Button onClick={() => depositCollateral(provider)}>
-          Deposit Collateral
-        </Button>
-        <Button onClick={() => purchaseContract(provider)}>
-          Purchase Contract
-        </Button>
+        <Col>
+          <Text>
+          Purchaser
+          </Text>
+          <Button onClick={() => approveTransferUSDC(provider)}>
+            Approve USDC Transfer
+          </Button>
+          <Button onClick={() => depositCollateral(provider)}>
+            Deposit Collateral
+          </Button>
+        </Col>
+        <Col>
+          <Text>
+          Provider
+          </Text>
+          <Button onClick={() => approveTransferUSDC(provider)}>
+            Approve USDC Transfer
+          </Button>
+          <Button onClick={() => purchaseContract(provider)}>
+            Purchase Contract
+          </Button>
+        </Col>
       </Body>
     </div>
   );

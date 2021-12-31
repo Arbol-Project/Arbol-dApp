@@ -6,7 +6,7 @@ export const Header = styled.header`
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   color: #3c3c3c;
 `;
 
@@ -41,6 +41,15 @@ export const Image = styled.img`
   pointer-events: none;
 `;
 
+export const Title = styled.p`
+  color: #3c3c3c;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  margin-left: 8px;
+  font-size: calc(24px + 2vmin);
+  font-family: Inter;
+`;
+
 export const Text = styled.p`
   color: white;
   margin-top: 8px;
@@ -63,7 +72,7 @@ export const Link = styled.a.attrs({
 export const Button = styled.button`
   background-color: #1DB16A;
   border: none;
-  border-radius: 14px;
+  border-radius: 8px;
   color: #3c3c3c;
   cursor: pointer;
   font-size: 10px;

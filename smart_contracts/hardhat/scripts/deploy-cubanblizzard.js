@@ -1,6 +1,8 @@
 const hre = require("hardhat");
-const Providers = require(process.cwd()+"/logs/providers.json");
+const ProviderLogs = "../../../web_app/packages/contracts/src/logs/providers.json";
+const Providers = require(ProviderLogs);
 const fs = require("fs");
+
 
 async function main() {
 
@@ -42,7 +44,7 @@ async function main() {
     Providers["CubanBlizzardDerivativeProvider"] = {"address": address, "types": {"CubanBlizzardOption": false},  "verified": false, "contracts": {}};
     var deployment_content = JSON.stringify(Providers);
     try {
-      fs.writeFileSync(process.cwd()+"/logs/providers.json", deployment_content)
+      fs.writeFileSync(ProviderLogs, deployment_content)
     } catch (error) {
       console.error(error)
     }

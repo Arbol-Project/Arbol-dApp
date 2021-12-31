@@ -1,7 +1,11 @@
 const hre = require("hardhat");
-const Providers = require(process.cwd()+"/logs/providers.json");
-const Contracts = require(process.cwd()+"/logs/contracts.json");
+const ProviderLogs = "../../../web_app/packages/contracts/src/logs/providers.json";
+const Providers = require(ProviderLogs);
+const ContractLogs = "../../../web_app/packages/contracts/src/logs/contracts.json";
+const Contracts = require(ContractLogs);
 const fs = require("fs");
+const path = require("path");
+
 
 async function main() {
 
@@ -49,16 +53,42 @@ async function main() {
   if (need_write) {
     var deployment_content = JSON.stringify(Contracts);
     try {
-      fs.writeFileSync(process.cwd()+"/logs/contracts.json", deployment_content)
+      fs.writeFileSync(ContractLogs, deployment_content)
     } catch (error) {
       console.error(error)
     }
     deployment_content = JSON.stringify(Providers);
     try {
-      fs.writeFileSync(process.cwd()+"/logs/providers.json", deployment_content)
+      fs.writeFileSync(ProviderLogs, deployment_content)
     } catch (error) {
       console.error(error)
     }
+
+    const source = path.join(process.cwd(), "/artifacts/contracts");
+    const dest = "../../../web_app/packages/contracts/src/abis"
+    (async ()=>{
+      try {
+        const files = await fs.promises.readdir(source);
+        for (const file of files) {
+          const fromDir = path.join(source, file);
+  
+          const abis = await fs.promises.readdir(fromDir);
+          for (const abi of abis) {
+            if (abi.includes(".dbg.")) {
+              continue
+            } else if (abi.includes(".json")) {
+              const fromPath = path.join(fromDir, abi)
+              const toPath = path.join(dest, abi);
+              await fs.promises.rename(fromPath, toPath);
+              console.log("Moved '%s'->'%s'", fromPath, toPath);
+            } 
+          }
+        }
+      }
+      catch(err) {
+        console.error(err);
+      }
+    })();
   }
 }
 

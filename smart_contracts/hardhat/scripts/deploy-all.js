@@ -2,9 +2,12 @@ const hre = require("hardhat");
 const RainfallSRO1 = require("../../../chainlink_node/adapter/tests/SROs/Cambodia_rain_basket_August21-December21.json");
 const RainfallSRO2 = require("../../../chainlink_node/adapter/tests/SROs/Cambodia_rain_basket_December21-April22.json");
 const ContractList = RainfallSRO1.__config__.contracts.concat([RainfallSRO2]);
-const Providers = require(process.cwd()+"/logs/providers.json");
-const Contracts = require(process.cwd()+"/logs/contracts.json");
+const ProviderLogs = "../../../web_app/packages/contracts/src/logs/providers.json";
+const Providers = require(ProviderLogs);
+const ContractLogs = "../../../web_app/packages/contracts/src/logs/contracts.json";
+const Contracts = require(ContractLogs);
 const fs = require("fs");
+
 
 async function main() {
 
@@ -46,7 +49,7 @@ async function main() {
     Providers["CubanBlizzardDerivativeProvider"] = {"address": address, "types": {"CubanBlizzardOption": false},  "verified": false, "contracts": {}};
     var deployment_content = JSON.stringify(Providers);
     try {
-      fs.writeFileSync(process.cwd()+"/logs/providers.json", deployment_content)
+      fs.writeFileSync(ProviderLogs, deployment_content)
     } catch (error) {
       console.error(error)
     }
@@ -104,7 +107,7 @@ async function main() {
     }
     var final_content = JSON.stringify(Contracts);
     try {
-      fs.writeFileSync(process.cwd()+"/logs/contracts.json", final_content)
+      fs.writeFileSync(ContractLogs, final_content)
     } catch (error) {
       console.error(error)
     }
@@ -114,7 +117,7 @@ async function main() {
   Providers["RainfallDerivativeProvider"] = {"address": derivative_provider.address, "types": {"RainfallOption": false}, "verified": false, "contracts": contracts};
   var deployment_content = JSON.stringify(Providers);
   try {
-    fs.writeFileSync(process.cwd()+"/logs/providers.json", deployment_content)
+    fs.writeFileSync(ProviderLogs, deployment_content)
   } catch (error) {
     console.error(error)
   }

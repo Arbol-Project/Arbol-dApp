@@ -1,8 +1,11 @@
 const hre = require("hardhat");
-const Providers = require(process.cwd()+"/logs/providers.json");
-const Contracts = require(process.cwd()+"/logs/contracts.json");
+const ProviderLogs = "../../../web_app/packages/contracts/src/logs/providers.json";
+const Providers = require(ProviderLogs);
+const ContractLogs = "../../../web_app/packages/contracts/src/logs/contracts.json";
+const Contracts = require(ContractLogs);
 const fs = require("fs");
 const delay = ms => new Promise(res => setTimeout(res, ms));
+
 
 async function main() {
 
@@ -41,7 +44,7 @@ async function main() {
         }
         var deployment_content = JSON.stringify(Contracts);
         try {
-          fs.writeFileSync(process.cwd()+"/logs/contracts.json", deployment_content)
+          fs.writeFileSync(ContractLogs, deployment_content)
         } catch (error) {
           console.error(error)
         }

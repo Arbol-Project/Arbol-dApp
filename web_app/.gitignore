@@ -21,6 +21,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # subgraph
+packages/subgraph
 packages/subgraph/build/
 packages/subgraph/src/types/
-packages/react-app/src/keys.js
+packages/react-app/src/graphql

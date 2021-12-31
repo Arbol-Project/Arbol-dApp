@@ -9,7 +9,7 @@ import adapter
 
 
 SRO_DIR = os.path.join(os.path.dirname(__file__), 'SROs')
-CONTRACTS_LOG = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), 'smart_contracts/hardhat/logs/contracts.json')
+CONTRACTS_LOG = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), 'web_app/packages/contracts/src/logs/contracts.json')
 # PAYOUT_DIR = os.path.join(os.path.dirname(__file__), 'payouts')
 
 

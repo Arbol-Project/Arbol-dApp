@@ -10,17 +10,32 @@ import useWeb3Modal from "./hooks/useWeb3Modal";
 import { addresses, abis } from "@project/contracts";
 import GET_TRANSFERS from "./graphql/subgraph";
 
-async function readOnChainData() {
+async function depositCollateral() {
   // Should replace with the end-user wallet, e.g. Metamask
   const defaultProvider = getDefaultProvider();
   // Create an instance of an ethers.js Contract
   // Read more about ethers.js on https://docs.ethers.io/v5/api/contract/contract/
-  console.log("provider address:", addresses.CubanBlizzardDerivativeProvider);
 
   const CubanMainContract = new Contract(addresses.CubanBlizzardDerivativeProvider, abis.CubanBlizzardDerivativeProvider, defaultProvider);
 
   const USDCbalance = await CubanMainContract.getUSDCBalance();
   console.log({ USDCbalance: USDCbalance.toString() });
+}
+
+async function purchaseContract() {
+  // Should replace with the end-user wallet, e.g. Metamask
+  const defaultProvider = getDefaultProvider();
+  // Create an instance of an ethers.js Contract
+  // Read more about ethers.js on https://docs.ethers.io/v5/api/contract/contract/
+
+  const CubanMainContract = new Contract(addresses.CubanBlizzardDerivativeProvider, abis.CubanBlizzardDerivativeProvider, defaultProvider);
+
+  var tx = await CubanMainContract.depositPremium();
+  await tx.wait();
+
+  var balance = await CubanMainContract.getUSDCBalance();
+
+  console.log("Contract USDC balance:", balance);
 }
 
 function WalletButton({ provider, loadWeb3Modal, logoutOfWeb3Modal }) {
@@ -91,11 +106,14 @@ function App() {
       <Body>
         <Image src={logo} alt="react-logo" />
         <p>
-          Arbol dApp Smart Contract Interface [a work in progress]
+          Arbol dApp Smart Contract Interface
         </p>
         {/* Remove the "hidden" prop and open the JavaScript console in the browser to see what this function does */}
-        <Button onClick={() => readOnChainData()}>
-          Cuban Blizzard: USDC Balance
+        <Button onClick={() => depositCollateral()}>
+          Cuban Blizzard: Deposit Collateral
+        </Button>
+        <Button onClick={() => purchaseContract()}>
+          Cuban Blizzard: Purchase Contract
         </Button>
         <Link href="https://github.com/dmp267/Arbol-dApp" style={{ marginTop: "8px" }}> Source </Link>
       </Body>

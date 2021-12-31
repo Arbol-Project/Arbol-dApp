@@ -18,7 +18,7 @@ smart_contracts/brownie
 smart_contracts/hardhat/hardhat.config.js
 smart_contracts/hardhat/cache/*
 smart_contracts/hardhat/artifacts/*
-!smart_contracts/hardhat/artifacts/contracts
+# !smart_contracts/hardhat/artifacts/contracts
 smart_contracts/hardhat/node_modules/*
 
 __pycache__

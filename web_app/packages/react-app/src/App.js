@@ -3,7 +3,7 @@ import { Contract } from "@ethersproject/contracts";
 // import { getDefaultProvider } from "@ethersproject/providers";
 import React, { useEffect, useState } from "react";
 
-import { Body, Button, Header, Image, Link } from "./components";
+import { Body, Button, Header, Image, Link, Text } from "./components";
 import logo from "./Arbol_logo.png";
 import useWeb3Modal from "./hooks/useWeb3Modal";
 
@@ -129,9 +129,9 @@ function App() {
       </Header>
       <Body>
         <Image src={logo} alt="react-logo" />
-        <p>
+        <Text>
           Arbol dApp Portal
-        </p>
+        </Text>
         {/* Remove the "hidden" prop and open the JavaScript console in the browser to see what this function does */}
         <Button onClick={() => approveTransferUSDC(provider)}>
           Approve USDC Transfer

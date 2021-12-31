@@ -15,6 +15,18 @@ export const Body = styled.div`
   background-color: #3c3c3c;
   color: white;
   display: flex;
+  flex-direction: row;
+  font-size: calc(10px + 2vmin);
+  justify-content: center;
+  min-height: calc(100vh - 70px);
+  font-family: Inter;
+`;
+
+export const Col = styled.div`
+  align-items: center;
+  background-color: #3c3c3c;
+  color: white;
+  display: flex;
   flex-direction: column;
   font-size: calc(10px + 2vmin);
   justify-content: center;
@@ -42,7 +54,8 @@ export const Link = styled.a.attrs({
   rel: "noopener noreferrer",
 })`
   color: #ea5f44;
-  margin-top: 10px;
+  margin-top: 8px;
+  margin-bottom: 8px;
   font-size: 10px;
   font-family: "Press Start 2P";
 `;

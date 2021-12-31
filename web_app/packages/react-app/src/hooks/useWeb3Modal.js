@@ -2,14 +2,15 @@ import { Web3Provider } from "@ethersproject/providers";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Web3Modal from "web3modal";
-import { ALCHEMY_TOKEN } from "../keys.js";
+// import { ALCHEMY_TOKEN } from "../keys.js";
+const INFURA_ID = "57683385d9284daea40fe2f6e42269f9";
 
 const NETWORK = "Kovan";
 
 function useWeb3Modal(config = {}) {
   const [provider, setProvider] = useState();
   const [autoLoaded, setAutoLoaded] = useState(false);
-  const { autoLoad = true, providerID = ALCHEMY_TOKEN, network = NETWORK } = config;
+  const { autoLoad = true, providerID = INFURA_ID, network = NETWORK } = config;
 
   // Web3Modal also supports many other wallets.
   // You can see other options at https://github.com/Web3Modal/web3modal

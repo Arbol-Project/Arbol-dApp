@@ -1,7 +1,7 @@
-import RainfallDerivativeProviderAbi from "../../../../smart_contracts/hardhat/artifacts/contracts/RainfallDerivativeFactory.sol/RainfallDerivativeProvider.json";
-import RainfallOptionAbi from "../../../../smart_contracts/hardhat/artifacts/contracts/RainfallDerivativeFactory.sol/RainfallOption.json";
-import CubanBlizzardDerivativeProviderAbi from "../../../../smart_contracts/hardhat/artifacts/contracts/CubanBlizzardDerivativeFactory.sol/CubanBlizzardDerivativeProvider.json";
-import CubanBlizzardOptionAbi from "../../../../smart_contracts/hardhat/artifacts/contracts/CubanBlizzardDerivativeFactory.sol/CubanBlizzardOption.json";
+import RainfallDerivativeProviderAbi from "./abis/RainfallDerivativeProvider.json";
+import RainfallOptionAbi from "./abis//RainfallOption.json";
+import CubanBlizzardDerivativeProviderAbi from "./abis/CubanBlizzardDerivativeProvider.json";
+import CubanBlizzardOptionAbi from "./abis/CubanBlizzardOption.json";
 
 
 const abis = {

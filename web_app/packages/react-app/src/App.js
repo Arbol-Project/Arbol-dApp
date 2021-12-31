@@ -1,22 +1,42 @@
 import { useQuery } from "@apollo/react-hooks";
 import { Contract } from "@ethersproject/contracts";
-import { getDefaultProvider } from "@ethersproject/providers";
+// import { getDefaultProvider } from "@ethersproject/providers";
 import React, { useEffect, useState } from "react";
 
 import { Body, Button, Header, Image, Link } from "./components";
-import logo from "./Arbol_logo.jpeg";
+import logo from "./Arbol_logo.png";
 import useWeb3Modal from "./hooks/useWeb3Modal";
 
 import { addresses, abis } from "@project/contracts";
 import GET_TRANSFERS from "./graphql/subgraph";
 
-async function depositCollateral() {
+async function approveTransferUSDC(provider) {
   // Should replace with the end-user wallet, e.g. Metamask
-  const defaultProvider = getDefaultProvider();
+  const defaultSigner = provider.getSigner();
   // Create an instance of an ethers.js Contract
   // Read more about ethers.js on https://docs.ethers.io/v5/api/contract/contract/
 
-  const CubanMainContract = new Contract(addresses.CubanBlizzardDerivativeProvider, abis.CubanBlizzardDerivativeProvider, defaultProvider);
+  const linkToken = new Contract(addresses.LinkTokenInterface, abis.erc20, defaultSigner);
+
+  const accounts = await provider.listAccounts();
+  var linkBalance = await linkToken.balanceOf(accounts[0]);
+
+  console.log("LINK Balance:", linkBalance);
+  
+  var tx = await linkToken.approve(addresses.CubanBlizzardDerivativeProvider, linkBalance);
+  await tx.wait();
+
+  var allowance = await linkToken.allowance(accounts[0], addresses.CubanBlizzardDerivativeProvider);
+  console.log("Contract USDC allowance:", allowance);
+}
+
+async function depositCollateral(provider) {
+  // Should replace with the end-user wallet, e.g. Metamask
+  const defaultSigner = provider.getSigner();
+  // Create an instance of an ethers.js Contract
+  // Read more about ethers.js on https://docs.ethers.io/v5/api/contract/contract/
+
+  const CubanMainContract = new Contract(addresses.CubanBlizzardDerivativeProvider, abis.CubanBlizzardDerivativeProvider, defaultSigner);
 
   var tx = await CubanMainContract.depositCollateral();
   await tx.wait();
@@ -25,13 +45,13 @@ async function depositCollateral() {
   console.log("Contract USDC balance:", balance);
 }
 
-async function purchaseContract() {
+async function purchaseContract(provider) {
   // Should replace with the end-user wallet, e.g. Metamask
-  const defaultProvider = getDefaultProvider();
+  const defaultSigner = provider.getSigner();
   // Create an instance of an ethers.js Contract
   // Read more about ethers.js on https://docs.ethers.io/v5/api/contract/contract/
 
-  const CubanMainContract = new Contract(addresses.CubanBlizzardDerivativeProvider, abis.CubanBlizzardDerivativeProvider, defaultProvider);
+  const CubanMainContract = new Contract(addresses.CubanBlizzardDerivativeProvider, abis.CubanBlizzardDerivativeProvider, defaultSigner);
 
   var tx = await CubanMainContract.depositPremium();
   await tx.wait();
@@ -110,17 +130,20 @@ function App() {
       <Body>
         <Image src={logo} alt="react-logo" />
         <p>
-          Arbol dApp Smart Contract Interface
+          Arbol dApp Portal
         </p>
         {/* Remove the "hidden" prop and open the JavaScript console in the browser to see what this function does */}
-        <Button onClick={() => depositCollateral()}>
-          Cuban Blizzard: Deposit Collateral
+        <Button onClick={() => approveTransferUSDC(provider)}>
+          Approve USDC Transfer
         </Button>
-        <Button onClick={() => purchaseContract()}>
-          Cuban Blizzard: Purchase Contract
+        <Button onClick={() => depositCollateral(provider)}>
+          Deposit Collateral
         </Button>
-        <Link href="https://kovan.etherscan.io/address/0xffB2F37940ef05168ee40113B1fccA541E957A42#code#F1#L1" style={{ marginTop: "8px" }}> smart contract </Link>
-        <Link href="https://github.com/dmp267/Arbol-dApp/tree/master/web_app" style={{ marginTop: "8px" }}> web app </Link>
+        <Button onClick={() => purchaseContract(provider)}>
+          Purchase Contract
+        </Button>
+        <Link href="https://kovan.etherscan.io/address/0xffB2F37940ef05168ee40113B1fccA541E957A42#code#F1#L1" style={{ marginTop: "8px" }}> etherscan </Link>
+        <Link href="https://github.com/dmp267/Arbol-dApp/tree/master/web_app" style={{ marginTop: "8px" }}> github </Link>
       </Body>
     </div>
   );

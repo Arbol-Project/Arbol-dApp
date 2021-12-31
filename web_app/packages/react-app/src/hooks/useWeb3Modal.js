@@ -3,7 +3,7 @@ import WalletConnectProvider from "@walletconnect/web3-provider";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Web3Modal from "web3modal";
 // import { ALCHEMY_TOKEN } from "../keys.js";
-const INFURA_ID = "57683385d9284daea40fe2f6e42269f9";
+const INFURA_ID = "";
 
 const NETWORK = "Kovan";
 

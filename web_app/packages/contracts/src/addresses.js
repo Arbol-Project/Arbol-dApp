@@ -3,7 +3,7 @@
 const Contracts = require("./logs/contracts.json");
 const Providers = require("./logs/providers.json");
 
-var _addresses = {};
+var _addresses = {LinkTokenInterface: "0xa36085F69e2889c224210F603D836748e7dC0088"};
 for (const [cname, cdata] of Object.entries(Contracts)) {
   _addresses[cname] = cdata.address;
 }

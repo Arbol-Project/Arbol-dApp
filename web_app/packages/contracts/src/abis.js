@@ -2,6 +2,7 @@ import RainfallDerivativeProviderAbi from "./abis/RainfallDerivativeProvider.jso
 import RainfallOptionAbi from "./abis//RainfallOption.json";
 import CubanBlizzardDerivativeProviderAbi from "./abis/CubanBlizzardDerivativeProvider.json";
 import CubanBlizzardOptionAbi from "./abis/CubanBlizzardOption.json";
+import erc20Abi from "./abis/erc20.json";
 
 
 const abis = {
@@ -9,6 +10,7 @@ const abis = {
   RainfallOption: RainfallOptionAbi.abi,
   CubanBlizzardDerivativeProvider: CubanBlizzardDerivativeProviderAbi.abi,
   CubanBlizzardOption: CubanBlizzardOptionAbi.abi,
+  erc20: erc20Abi
 };
 
 export default abis;

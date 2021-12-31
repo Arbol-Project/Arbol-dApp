@@ -28,11 +28,6 @@ export const Image = styled.img`
   pointer-events: none;
 `;
 
-export const Text = styled.p`
-  color: #F67C61;
-  font-size: calc(10px + 2vmin);
-`;
-
 export const Link = styled.a.attrs({
   target: "_blank",
   rel: "noopener noreferrer",

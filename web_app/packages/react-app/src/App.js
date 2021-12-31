@@ -1,4 +1,4 @@
-import { useQuery } from "@apollo/react-hooks";
+// import { useQuery } from "@apollo/react-hooks";
 import { Contract } from "@ethersproject/contracts";
 // import { getDefaultProvider } from "@ethersproject/providers";
 import React, { useEffect, useState } from "react";
@@ -8,7 +8,7 @@ import logo from "./Arbol_logo.png";
 import useWeb3Modal from "./hooks/useWeb3Modal";
 
 import { addresses, abis } from "@project/contracts";
-import GET_TRANSFERS from "./graphql/subgraph";
+// import GET_TRANSFERS from "./graphql/subgraph";
 
 async function approveTransferUSDC(provider) {
   // Should replace with the end-user wallet, e.g. Metamask
@@ -113,14 +113,14 @@ function WalletButton({ provider, loadWeb3Modal, logoutOfWeb3Modal }) {
 }
  
 function App() {
-  const { loading, error, data } = useQuery(GET_TRANSFERS);
+  // const { loading, error, data } = useQuery(GET_TRANSFERS);
   const [provider, loadWeb3Modal, logoutOfWeb3Modal] = useWeb3Modal();
 
-  React.useEffect(() => {
-    if (!loading && !error && data && data.transfers) {
-      console.log({ transfers: data.transfers });
-    }
-  }, [loading, error, data]);
+  // React.useEffect(() => {
+  //   if (!loading && !error && data && data.transfers) {
+  //     console.log({ transfers: data.transfers });
+  //   }
+  // }, [loading, error, data]);
 
   return (
     <div>

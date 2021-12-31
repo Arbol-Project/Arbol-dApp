@@ -18,8 +18,11 @@ async function depositCollateral() {
 
   const CubanMainContract = new Contract(addresses.CubanBlizzardDerivativeProvider, abis.CubanBlizzardDerivativeProvider, defaultProvider);
 
-  const USDCbalance = await CubanMainContract.getUSDCBalance();
-  console.log({ USDCbalance: USDCbalance.toString() });
+  var tx = await CubanMainContract.depositCollateral();
+  await tx.wait();
+
+  var balance = await CubanMainContract.getUSDCBalance();
+  console.log("Contract USDC balance:", balance);
 }
 
 async function purchaseContract() {
@@ -34,7 +37,6 @@ async function purchaseContract() {
   await tx.wait();
 
   var balance = await CubanMainContract.getUSDCBalance();
-
   console.log("Contract USDC balance:", balance);
 }
 
@@ -52,6 +54,8 @@ function WalletButton({ provider, loadWeb3Modal, logoutOfWeb3Modal }) {
         // Load the user's accounts.
         const accounts = await provider.listAccounts();
         setAccount(accounts[0]);
+
+        console.log("account signed in:", accounts[0]);
 
         // disabled for testing (not on Mainnet)
         // // Resolve the ENS name for the first account.

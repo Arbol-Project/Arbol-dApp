@@ -9,6 +9,7 @@ import adapter
 
 
 SRO_DIR = os.path.join(os.path.dirname(__file__), 'SROs')
+CONTRACTS_LOG = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), 'smart_contracts/hardhat/logs/contracts.json')
 # PAYOUT_DIR = os.path.join(os.path.dirname(__file__), 'payouts')
 
 
@@ -17,6 +18,7 @@ def parse_contract_data(contract, i):
 
     config = contract['__config__']
     name = config['id']
+
     payouts = config['payouts']['__config__']
     derivative = payouts['derivative']['__config__']
     opt_type = derivative['opt_type']
@@ -94,6 +96,9 @@ def parse_available_contract_data():
     '''
     contract_requests = []
     i = 1
+    with open(CONTRACTS_LOG) as log:
+        contracts = json.load(log)
+        log.close()
     for filename in os.listdir(SRO_DIR):
         if '.json' in filename:
             sropath = os.path.join(SRO_DIR, filename)
@@ -102,15 +107,19 @@ def parse_available_contract_data():
                 f.close()
             if 'contracts' in data['__config__']:
                 for contract in data['__config__']['contracts']:
-                    request_data = parse_contract_data(contract, i)
+                    id = contract['__config__']['id']
+                    if not contracts[id]['evaluated']:
+                        request_data = parse_contract_data(contract, i)
+                        if request_data is not None:
+                            contract_requests.append(request_data)
+                            i += 1
+            else:
+                id = contract['__config__']['id']
+                if not contracts[id]['evaluated']:
+                    request_data = parse_contract_data(data, i)
                     if request_data is not None:
                         contract_requests.append(request_data)
                         i += 1
-            else:
-                request_data = parse_contract_data(data, i)
-                if request_data is not None:
-                    contract_requests.append(request_data)
-                    i += 1
     return contract_requests
 
 TEST_DATA = parse_available_contract_data()

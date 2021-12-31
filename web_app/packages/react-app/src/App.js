@@ -115,7 +115,8 @@ function App() {
         <Button onClick={() => purchaseContract()}>
           Cuban Blizzard: Purchase Contract
         </Button>
-        <Link href="https://github.com/dmp267/Arbol-dApp" style={{ marginTop: "8px" }}> Source </Link>
+        <Link href="https://kovan.etherscan.io/address/0xffB2F37940ef05168ee40113B1fccA541E957A42#code#F1#L1" style={{ marginTop: "8px" }}> smart contract </Link>
+        <Link href="https://github.com/dmp267/Arbol-dApp/tree/master/web_app" style={{ marginTop: "8px" }}> web app </Link>
       </Body>
     </div>
   );

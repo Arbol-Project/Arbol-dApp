@@ -1,13 +1,13 @@
-const hre = require("hardhat");
-const RainfallSRO1 = require("../../../smart_contracts/hardhat/SROs/Cambodia_rain_basket_August21-December21.json");
-const RainfallSRO2 = require("../../../smart_contracts/hardhat/SROs/Cambodia_rain_basket_December21-April22.json");
-const ContractList = RainfallSRO1.__config__.contracts.concat([RainfallSRO2]);
-const ProviderLogs = "../../../web_app/packages/contracts/src/logs/providers.json";
-const Providers = require(ProviderLogs);
-const ContractLogs = "../../../web_app/packages/contracts/src/logs/contracts.json";
-const Contracts = require(ContractLogs);
 const fs = require("fs");
-
+const path = require("path");
+const hre = require("hardhat");
+const ProviderLogs = path.join(process.cwd(), "../../web_app/packages/contracts/src/logs/providers.json");
+const ContractLogs = path.join(process.cwd(), "../../web_app/packages/contracts/src/logs/contracts.json");
+const Providers = require(ProviderLogs);
+const Contracts = require(ContractLogs);
+const RainfallSRO1 = require("../SROs/Cambodia_rain_basket_August21-December21.json");
+const RainfallSRO2 = require("../SROs/Cambodia_rain_basket_December21-April22.json");
+const ContractList = RainfallSRO1.__config__.contracts.concat([RainfallSRO2]);
 
 async function main() {
 

@@ -1,9 +1,11 @@
-const hre = require("hardhat");
-const ProviderLogs = "../../../web_app/packages/contracts/src/logs/providers.json";
-const Providers = require(ProviderLogs);
-const ContractLogs = "../../../web_app/packages/contracts/src/logs/contracts.json";
-const Contracts = require(ContractLogs);
 const fs = require("fs");
+const path = require("path");
+const hre = require("hardhat");
+const ProviderLogs = path.join(process.cwd(), "../../web_app/packages/contracts/src/logs/providers.json");
+const ContractLogs = path.join(process.cwd(), "../../web_app/packages/contracts/src/logs/contracts.json");
+const Providers = require(ProviderLogs);
+const Contracts = require(ContractLogs);
+
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
 
@@ -15,7 +17,7 @@ async function main() {
       
       for (const [cname, caddr] of Object.entries(pdata.contracts)) {
         // add two days (in ms) to end to make sure data is there
-        if (caddr == Contracts[cname].address && Contracts[cname].end < parseInt(Date.now() / 1000 + 1000*60*60*24*2)) {
+        if (caddr == Contracts[cname].address && (Contracts[cname].end + 60*60*24*2) < parseInt(Date.now() / 1000)) {
           if (Contracts[cname].evaluated) {
             continue;
           }

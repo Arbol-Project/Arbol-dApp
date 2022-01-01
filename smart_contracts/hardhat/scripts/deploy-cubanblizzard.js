@@ -1,7 +1,8 @@
-const hre = require("hardhat");
-const ProviderLogs = "../../../web_app/packages/contracts/src/logs/providers.json";
-const Providers = require(ProviderLogs);
 const fs = require("fs");
+const path = require("path");
+const hre = require("hardhat");
+const ProviderLogs = path.join(process.cwd(), "../../web_app/packages/contracts/src/logs/providers.json");
+const Providers = require(ProviderLogs);
 
 
 async function main() {

@@ -16,7 +16,7 @@ async function main() {
       var derivative_provider = await DerivativeProvider.attach(pdata.address);
       
       for (const [cname, caddr] of Object.entries(pdata.contracts)) {
-        // add two days (in ms) to end to make sure data is there
+        // add two days to end to make sure data is there
         if (caddr == Contracts[cname].address && (Contracts[cname].end + 60*60*24*2) < parseInt(Date.now() / 1000)) {
           if (Contracts[cname].evaluated) {
             continue;

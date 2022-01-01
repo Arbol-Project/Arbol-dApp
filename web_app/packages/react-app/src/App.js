@@ -10,7 +10,7 @@ import useWeb3Modal from "./hooks/useWeb3Modal";
 import { addresses, abis } from "@project/contracts";
 // import GET_TRANSFERS from "./graphql/subgraph";
 
-async function approveTransferUSDC(provider) {
+async function approveTransferUSDC(provider, ammount) {
   // Should replace with the end-user wallet, e.g. Metamask
   const defaultSigner = provider.getSigner();
   // Create an instance of an ethers.js Contract
@@ -19,11 +19,11 @@ async function approveTransferUSDC(provider) {
   const linkToken = new Contract(addresses.LinkTokenInterface, abis.erc20, defaultSigner);
 
   const accounts = await provider.listAccounts();
-  var linkBalance = await linkToken.balanceOf(accounts[0]);
+  // var linkBalance = await linkToken.balanceOf(accounts[0]);
 
-  console.log("LINK Balance:", linkBalance);
+  // console.log("LINK Balance:", linkBalance);
   
-  var tx = await linkToken.approve(addresses.CubanBlizzardDerivativeProvider, linkBalance);
+  var tx = await linkToken.approve(addresses.CubanBlizzardDerivativeProvider, ammount);
   await tx.wait();
 
   var allowance = await linkToken.allowance(accounts[0], addresses.CubanBlizzardDerivativeProvider);
@@ -141,22 +141,22 @@ function App() {
           <Text>
           Purchaser
           </Text>
-          <Button onClick={() => approveTransferUSDC(provider)}>
+          <Button onClick={() => approveTransferUSDC(provider, 10000*10**6)}>
             APPROVE USDC TRANSFER
           </Button>
-          <Button onClick={() => depositCollateral(provider)}>
-            ESCROW COLLATERAL
+          <Button onClick={() => purchaseContract(provider)}>
+            PURCHASE CONTRACT
           </Button>
         </Col>
         <Col>
           <Text>
           Provider
           </Text>
-          <Button onClick={() => approveTransferUSDC(provider)}>
+          <Button onClick={() => approveTransferUSDC(provider, 250000*10**6)}>
             APPROVE USDC TRANSFER
           </Button>
-          <Button onClick={() => purchaseContract(provider)}>
-            PURCHASE CONTRACT
+          <Button onClick={() => depositCollateral(provider)}>
+            ESCROW COLLATERAL
           </Button>
         </Col>
       </Body>

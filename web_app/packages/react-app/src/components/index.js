@@ -32,6 +32,8 @@ export const Col = styled.div`
   justify-content: center;
   min-height: calc(100vh - 70px);
   font-family: Inter;
+  margin-left: 8px;
+  margin-right: 8px;
 `;
 
 export const Image = styled.img`
@@ -73,16 +75,16 @@ export const Button = styled.button`
   background-color: #ea5f44;
   border: none;
   border-radius: 8px;
-  color: #3c3c3c;
+  color: white;
   cursor: pointer;
-  font-size: 10px;
+  font-size: 16px;
   text-align: center;
   text-decoration: none;
   margin: 0px 20px;
-  padding: 12px 24px;
+  padding: 10px 14px;
   margin-top: 8px;
   margin-bottom: 8px;
-  font-family: "Press Start 2P";
+  font-family: Quicksand;
 
   ${props => props.hidden && "hidden"} :focus {
     border: none;

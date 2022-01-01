@@ -142,10 +142,10 @@ function App() {
           Purchaser
           </Text>
           <Button onClick={() => approveTransferUSDC(provider)}>
-            Approve USDC Transfer
+            APPROVE USDC TRANSFER
           </Button>
           <Button onClick={() => depositCollateral(provider)}>
-            Deposit Collateral
+            ESCROW COLLATERAL
           </Button>
         </Col>
         <Col>
@@ -153,10 +153,10 @@ function App() {
           Provider
           </Text>
           <Button onClick={() => approveTransferUSDC(provider)}>
-            Approve USDC Transfer
+            APPROVE USDC TRANSFER
           </Button>
           <Button onClick={() => purchaseContract(provider)}>
-            Purchase Contract
+            PURCHASE CONTRACT
           </Button>
         </Col>
       </Body>

@@ -42,12 +42,12 @@ export const Image = styled.img`
 `;
 
 export const Title = styled.p`
-  color: #3c3c3c;
+  color: #1DB16A;
   margin-top: 8px;
   margin-bottom: 8px;
   margin-left: 8px;
   font-size: calc(24px + 2vmin);
-  font-family: Inter;
+  font-family: "Archivo Black";
 `;
 
 export const Text = styled.p`
@@ -62,7 +62,7 @@ export const Link = styled.a.attrs({
   target: "_blank",
   rel: "noopener noreferrer",
 })`
-  color: #ea5f44;
+  color: #1DB16A;
   margin-top: 8px;
   margin-bottom: 8px;
   font-size: 10px;
@@ -70,7 +70,7 @@ export const Link = styled.a.attrs({
 `;
 
 export const Button = styled.button`
-  background-color: #1DB16A;
+  background-color: #ea5f44;
   border: none;
   border-radius: 8px;
   color: #3c3c3c;

@@ -126,7 +126,7 @@ function App() {
     <div>
       <Header>
         <Title>
-          Arbol dApp Portal
+          ARBOL dAPP PORTAL
         </Title>
         <WalletButton provider={provider} loadWeb3Modal={loadWeb3Modal} logoutOfWeb3Modal={logoutOfWeb3Modal} />
       </Header>

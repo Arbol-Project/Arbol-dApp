@@ -44,12 +44,12 @@ export const Image = styled.img`
 `;
 
 export const Title = styled.p`
-  color: #1DB16A;
+  color: #30A804;
   margin-top: 8px;
   margin-bottom: 8px;
   margin-left: 8px;
-  font-size: calc(24px + 2vmin);
-  font-family: "Archivo Black";
+  font-size: calc(18px + 2vmin);
+  font-family: "Montserrat";
 `;
 
 export const Text = styled.p`
@@ -64,7 +64,7 @@ export const Link = styled.a.attrs({
   target: "_blank",
   rel: "noopener noreferrer",
 })`
-  color: #1DB16A;
+  color: #30A804;
   margin-top: 8px;
   margin-bottom: 8px;
   font-size: 10px;

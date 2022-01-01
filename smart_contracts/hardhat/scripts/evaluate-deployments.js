@@ -14,7 +14,8 @@ async function main() {
       var derivative_provider = await DerivativeProvider.attach(pdata.address);
       
       for (const [cname, caddr] of Object.entries(pdata.contracts)) {
-        if (caddr == Contracts[cname].address && Contracts[cname].end < parseInt(Date.now() / 1000)) {
+        // add two days (in ms) to end to make sure data is there
+        if (caddr == Contracts[cname].address && Contracts[cname].end < parseInt(Date.now() / 1000 + 1000*60*60*24*2)) {
           if (Contracts[cname].evaluated) {
             continue;
           }
@@ -39,7 +40,20 @@ async function main() {
             Contracts[cname].evaluated = true;
             Contracts[cname].payout = payout;
           } else {
-            console.log("Contract evaluation undetermined:", cname);
+            console.log("Waiting 4 more minutes...");
+            await delay(60*1000);
+            evaluated = await derivative_provider.getContractEvaluated(cname);
+
+            if (evaluated) {
+              var payout = await derivative_provider.getContractPayout(cname);
+              payout = payout.toString();
+              console.log("Contract:", cname, "Payout:", payout.slice(0, -2) + "." + payout.slice(-2));
+
+              Contracts[cname].evaluated = true;
+              Contracts[cname].payout = payout;
+            } else {
+              console.log("Contract evaluation undetermined:", cname);
+            }
           }
         }
         var deployment_content = JSON.stringify(Contracts);

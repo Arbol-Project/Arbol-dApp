@@ -4,7 +4,7 @@ Arbol-dApp Monorepo.
 
 ## Web App (off-chain)
 
-The frontend is bootstrapped with [Create Eth App](https://github.com/paulrberg/create-eth-app) and hosted on a Heroku server. It is a work in progress and currently provides interfaces for the Dallas Blizzard Protection contract. It will contain interfaces for all deployed contracts.
+The frontend is hosted at [arbol-dapp.xyz](https://www.arbol-dapp.xyz). The web app is bootstrapped with [Create Eth App](https://github.com/paulrberg/create-eth-app) and powered by Netlify. It is a work in progress and will contain interfaces for all deployed contracts.
 
 ## Chainlink Node (bridge)
 

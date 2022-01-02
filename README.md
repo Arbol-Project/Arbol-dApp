@@ -1,14 +1,14 @@
 # Arbol-dApp
 
-Arbol-dApp Monorepo.
+[Arbol](https://www.arbolmarket.com/)-dApp Monorepo.
 
 ## Web App (off-chain)
 
-The frontend is hosted at [arbol-dapp.xyz](https://www.arbol-dapp.xyz). The web app is bootstrapped with [Create Eth App](https://github.com/paulrberg/create-eth-app) and powered by Netlify. It is a work in progress and will contain interfaces for all deployed contracts.
+The frontend is a mostly-React app bootstrapped with [Create Eth App](https://github.com/paulrberg/create-eth-app) and powered by [Netlify](https://www.netlify.com/). It is a work in progress and will contain interfaces for all deployed contracts. It is hosted at [arbol-dapp.xyz](https://www.arbol-dapp.xyz)
 
 ## Chainlink Node (bridge)
 
-A Docker Compose project to launch an Arbol-Chainlink node on a new AWS EC2 (Amazon Linux 2) instance. The project deploys containers for
+A [Docker Compose](https://docs.docker.com/compose/) project to launch an Arbol-Chainlink node on a new [AWS EC2](https://aws.amazon.com/ec2/)(Amazon Linux 2) instance. The project deploys containers for
 a [Chainlink](https://github.com/smartcontractkit/chainlink) node for fulfilling smart contract oracle requests, an [IPFS](https://github.com/ipfs/go-ipfs) daemon for retrieving Arbol weather data and listening to IPFS-HTTP requests, and a Gunicorn server running a Chainlink external adapter for serving requests using the [dClimate Python Client](https://github.com/dClimate/dWeather-Python-Client) and computing payout evaluations on retrieved data.
 
 To launch a new node with new or imported credentials and contract data, run the following:

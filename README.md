@@ -15,7 +15,7 @@ To launch a new node with new or imported credentials and contract data, run the
 
 ```
 sudo yum install -y git
-git clone --recurse-submodules https://github.com/dmp267/Arbol-dApp.git
+git clone --recurse-submodules https://github.com/Arbol-Project/Arbol-dApp.git
 bash Arbol-dApp/chainlink_node/scripts/setup-AWS.sh
 exit
 

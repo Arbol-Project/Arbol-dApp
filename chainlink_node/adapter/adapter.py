@@ -35,13 +35,13 @@ class Adapter:
         if parameters is None:
             self.request_error = 'no parameters specified'
             return False
-        parameters = {parameters[i]:parameters[i+1] for i in range(0, len(parameters), 2)}
-        self.parameters = parameters
+        # see utils/preload_adapter.py for example parameters format
+        self.parameters = {parameters[i]:parameters[i+1] for i in range(0, len(parameters), 2)}
         self.program = get_program(self.parameters)
         if self.program is None:
             self.request_error = 'invalid program specified'
             return False
-        valid, self.request_error = self.program.validate_request(parameters)
+        valid, self.request_error = self.program.validate_request(self.parameters)
         return valid
 
     def execute_request(self):

@@ -10,7 +10,7 @@ class RainfallDerivative:
     '''
     _PROGRAM_PARAMETERS = ['dataset', 'locations', 'start', 'end', 'strike', 'limit', 'opt_type']
     _PARAMETER_OPTIONS = ['exhaust', 'tick']
-    _OUTPUT_MULTIPLER = 10**2
+    _OUTPUT_MULTIPLIER = 10**2
 
 
     @classmethod

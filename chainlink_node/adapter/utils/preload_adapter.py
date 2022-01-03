@@ -34,7 +34,7 @@ def parse_contract_data(contract, i):
         start = index['start']
         end = index['end']
 
-        if int(str(int(datetime.strptime(end, '%Y-%m-%d').timestamp()))) > int(datetime.timestamp(datetime.now()+timedelta(days=2))):
+        if datetime.strptime(end, '%Y-%m-%d') > (datetime.now() + timedelta(days=2)):
             print(f'{name} data not available yet')
             return None
         
@@ -42,18 +42,18 @@ def parse_contract_data(contract, i):
         for loader_config in loader['loaders']:
             locations.append([loader_config['__config__']['lat'], loader_config['__config__']['lon']])
 
-        params = {
-            'name': name,
-            'strike': strike,
-            'tick': tick,
-            'exhaust': exhaust,
-            'limit': limit,
-            'opt_type': opt_type,
-            'start': start,
-            'end': end,
-            'dataset': dataset,
-            'locations': str(locations),
-        }
+        params = [
+            'name', name,
+            'dataset', dataset,
+            'opt_type', opt_type,
+            'locations', str(locations),
+            'start', start,
+            'end', end,
+            'strike', strike,
+            'tick', tick,
+            'exhaust', exhaust,
+            'limit', limit,
+        ]
         request_data = {
             'id': f'{i}',
             'data': {
@@ -63,7 +63,8 @@ def parse_contract_data(contract, i):
     elif 'station_id' in loader:
         print('Dallas Mavs 2022-04-10 data only partially available')
         _dates = ["2021-10-06", "2021-10-08", "2021-10-26", "2021-10-28", "2021-10-31", "2021-11-02", "2021-11-06", "2021-11-08", "2021-11-15", "2021-11-27", "2021-11-29", "2021-12-03", "2021-12-04", "2021-12-07", "2021-12-13", "2021-12-15", "2021-12-21", "2021-12-23", "2022-01-03", "2022-01-05", "2022-01-09", "2022-01-15", "2022-01-17", "2022-01-19", "2022-01-20", "2022-01-23", "2022-01-29", "2022-02-02", "2022-02-04", "2022-02-06", "2022-02-08", "2022-02-10", "2022-02-12", "2022-03-03", "2022-03-05", "2022-03-07", "2022-03-09", "2022-03-21", "2022-03-23", "2022-03-27", "2022-03-29", "2022-04-08", "2022-04-10"]
-        dates = [date for date in _dates if int(datetime.strptime(date, '%Y-%m-%d').timestamp()) < int(datetime.timestamp(datetime.now()-timedelta(days=14)))]
+        dates = [date for date in _dates if datetime.strptime(date, '%Y-%m-%d') < (datetime.now() - timedelta(days=14))]
+        
         params = [
             'name', "Dallas Mavs 2022-04-10 00:00:00 PARTIAL [TEST]",
             'dates', str(dates),
@@ -145,7 +146,7 @@ def test_create_request_success(test_data):
     '''
     print('running test...')
     result = adapter_setup(test_data)
-    name = test_data['data']['params']['name']
+    name = test_data['data']['params'][1]
     assert result['statusCode'] == 200
     assert result['data'] is not None
     assert type(result['result']) is int

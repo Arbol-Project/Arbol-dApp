@@ -1,0 +1,20 @@
+name: Arbol-dApp External Adapter
+description: External adapter for querying Arbol weather data on IPFS and computing payout evaluations for on-chain contracts.
+node_identifier: arbol-adapter
+platforms:
+  - Docker
+data_sources:
+  - name: dClimate
+    url: https://api.dclimate.net/
+parameters:
+  - dataset
+  - locations
+  - opt_type
+  - strike
+  - limit
+  - exhaust
+  - tick
+  - station_id
+  - weather_variable
+  - dates
+  - threshold

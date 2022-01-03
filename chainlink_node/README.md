@@ -15,7 +15,7 @@ TODO when initializing new Chainlink Node:
 - Required Chainlink environment variables to set in `chainlink/.env`:
     - `ETH_CHAIN_ID`: Chain ID for desired network (e.g. 42 for Kovan)
     - `LINK_CONTRACT_ADDRESS`: LINK token address (e.g. 0xa36085F69e2889c224210F603D836748e7dC0088 for Kovan)
-    - `ETH_URL`: node provider web socket (Infura, Alchemy, etc)
+    - `ETH_URL`: node provider web socket ([Infura](https://infura.io/), [Alchemy](https://www.alchemy.com/), etc)
     - `ETH_HTTP_URL`: HTTP node provider address (Infura, Alchemy, etc)
     - `TLS_CERT_PATH`: self-sign TLS certificates and move to `chainlink/tls`
     - `TLS_KEY_PATH`: self-sign TLS certificates and move to `chainlink/tls`

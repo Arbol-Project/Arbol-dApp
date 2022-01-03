@@ -134,7 +134,7 @@ def adapter_setup(test_data):
         Parameters: test_data (dict), the request to test
         Returns: dict, the result data of the adapter request
     '''
-    print(f"getting data for {test_data['data']['params']['name']}")
+    print(f"getting data for {test_data['data']['params'][0]}")
     a = adapter.Adapter(test_data)
     return a.result
 

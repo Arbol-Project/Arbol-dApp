@@ -20,8 +20,8 @@ TODO when initializing new Chainlink Node:
     - `TLS_CERT_PATH`: self-sign TLS certificates and move to `chainlink/tls`
     - `TLS_KEY_PATH`: self-sign TLS certificates and move to `chainlink/tls`
     - `DATABASE_URL`: setup Postgres DB and set connection string
-- Deploy [Oracle.sol](https://remix.ethereum.org/#url=https://docs.chain.link/samples/NodeOperators/Oracle.sol&optimize=false&runs=200&evmVersion=null) contract and record `Oracle` address if deploying on a new chain for the first time
-- Run `docker compose up --build` and sign into the Chainlink GUI
+- If deploying to a new chain for the first time, first deploy an [Oracle.sol](https://remix.ethereum.org/#url=https://docs.chain.link/samples/NodeOperators/Oracle.sol&optimize=false&runs=200&evmVersion=null) contract or an [Operator.sol](https://github.com/smartcontractkit/chainlink/blob/develop/contracts/src/v0.7/Operator.sol) contract for Multi-word requests and record the `Oracle` address
+- Start the app/node (run `docker compose up --build`) and sign into the Chainlink GUI
     - Add all desired jobs with `Oracle` address and save IDs and `Node` address
     - Call setFulfillmentPermission on the deployed `Oracle` contract with `Node` address
     - Send some ETH/MATIC/Gas to `Node` address so that it can write back to chain to fulfill requests

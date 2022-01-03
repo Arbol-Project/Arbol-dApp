@@ -17,7 +17,7 @@ ipfs daemon
 To run the app from source, clone this repo and install the dependencies:
 
 ```
-git clone --recurse-submodules --remote-submodules https://github.com/dmp267/Arbol-dApp.git
+git clone --recurse-submodules --remote-submodules https://github.com/Arbol-Project/Arbol-dApp.git
 cd Arbol-dApp/adapter
 pipenv install
 ```

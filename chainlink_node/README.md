@@ -10,6 +10,7 @@ TODO when initializing new Chainlink Node:
     - `chainlink/tls/server.key`
     - `../web_app/packages/contracts/src/logs/contracts.json`
     - `../smart_contracts/hardhat/SROs`
+
 (Comment out the line `python3 utils/preload_adapter.py` in `adapter/entrypoint.sh` to ignore the requirements in the last two lines)
 - Required Chainlink environment variables to set in `chainlink/.env`:
     - `ETH_CHAIN_ID`: Chain ID for desired network (e.g. 42 for Kovan)

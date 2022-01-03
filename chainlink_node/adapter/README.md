@@ -58,4 +58,4 @@ When the adapter server starts up, it loads the local IPFS node with relevant co
 pipenv run python3 utils/preload_adapter.py
 ```
 
-Or you can disable this behavior by commenting our the first line (`python3 utils/preload_adapter.py`) in `adapter/entrypoint.sh`.
+Or you can disable this behavior by commenting out the first line (`python3 utils/preload_adapter.py`) in `adapter/entrypoint.sh`.

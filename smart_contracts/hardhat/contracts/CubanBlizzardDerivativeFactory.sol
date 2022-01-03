@@ -16,7 +16,7 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
     uint256 public constant COLLATERAL_PAYMENT = 250000 * 10**6;                                                // 250,000 * 1 USDC
     uint256 public constant PREMIUM_PAYMENT = 10000 * 10**6;                                                    // 10,000 * 1 USDC
     address public constant ORACLE_BANK = 0x69640770407A09B166AED26B778699045B304768;                           // address of LINK provider for oracle requests
-    address public constant COLLATERAL_ADDRESS = 0x3382d07e2736AC80f07D7288750F2442d187a7e3;                    // Arbol USDC wallet
+    address public constant COLLATERAL_ADDRESS = 0xbf417C41F3ab1e01BD6867fB540dA7b734EaeA95;                    // Arbol USDC wallet
     address public constant PREMIUM_ADDRESS = 0xa679c6154b8d4619Af9F83f0bF9a13A680e01eCf;                       // Buyer's wallet
     address public constant LINK_ADDRESS = 0xa36085F69e2889c224210F603D836748e7dC0088;                          // Link token address on Ethereum Kovan
     address public constant USDC_ADDRESS = 0xe8AA8A60C9417d8fD59EB4378687dDCEEd29c1B4;                          // USDC token address on Ethereum Kovan
@@ -86,76 +86,6 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
     }
 
     /**
-     * @notice Request payout evaluation for the snow protection contract
-     * @dev Sender must have access, owner must first approve this address to move LINK
-     */
-    function initiateContractEvaluation() 
-        external 
-        checkAccess 
-    {
-        LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);
-        uint256 oracle_mult = blizzardContract.getNumJobs();
-        require(link.transferFrom(ORACLE_BANK, address(blizzardContract), ORACLE_PAYMENT * oracle_mult), "unable to fund oracle request");
-        blizzardContract.requestPayoutEvaluation();
-    }
-
-    /**
-     * @notice Fulfill payout evaluation for the snow protection contract
-     * @dev Sender must have access
-     */
-    function fulfillContractEvaluation() 
-        external 
-        checkAccess 
-    {
-        LinkTokenInterface usdc = LinkTokenInterface(USDC_ADDRESS);
-        uint256 payout = blizzardContract.payout();
-        if (payout > 0) {
-            require(usdc.transfer(PREMIUM_ADDRESS, payout), "unable to payout to buyer");
-            require(usdc.transfer(COLLATERAL_ADDRESS, usdc.balanceOf(address(this))), "unable to return remaining balance to provider");
-
-        } else {
-            require(usdc.transfer(COLLATERAL_ADDRESS, usdc.balanceOf(address(this))), "unable to return balance to provider");
-        }
-        contractPaidOut = true;
-    }
-
-    /**
-     * @notice Returns the evaluation status of the snow protection contract
-     * @return bool evaluated
-     */
-    function getContractEvaluated()
-        external
-        view
-        returns (bool)
-    {
-        return blizzardContract.contractEvaluated();
-    }
-
-    /**
-     * @notice Returns the address of the contract for a given id
-     * @return address of deployed contract
-     */
-    function getContractAddress()
-        external
-        view
-        returns (address)
-    {
-        return address(blizzardContract);
-    }
-
-    /**
-     * @notice Returns the payout value for snow protection contract
-     * @return uint256 payout value
-     */
-    function getContractPayout()
-        external
-        view
-        returns (uint256)
-    {
-        return blizzardContract.payout();
-    }
-
-    /**
      * @notice Add a new node and associated job ID to the contract execution/evalution set
      * @dev Sender must have access
      * @param _oracle address of oracle contract for chainlink node
@@ -186,32 +116,89 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
     }
 
     /**
-     * @notice Get the ETH/matic/gas balance of the provider contract
-     * @dev Can only be called by the contract owner
-     * @return uint256 ETH baalance
+     * @notice Returns the address of the blizzard contract
+     * @return address of deployed contract
      */
-    function getETHBalance() 
-        external 
-        view 
-        onlyOwner
-        returns (uint256) 
+    function getContractAddress()
+        external
+        view
+        returns (address)
     {
-        return address(this).balance;
+        return address(blizzardContract);
     }
 
     /**
-     * @notice Get the LINK balance of the provider contract
-     * @dev Can only be called by the contract owner
-     * @return uint256 LINK baalance
+     * @notice Get the parameters for the blizzard contract
+     * @dev Sender must have access
+     * @return string[] contract terms
      */
-    function getLINKBalance() 
+    function getContractParameters() 
+        public 
+        checkAccess 
+        view
+        returns (string[] memory) 
+    {
+        return blizzardContract.getParameters();
+    }
+
+    /**
+     * @notice Request payout evaluation for the snow protection contract
+     * @dev Sender must have access, owner must first approve this address to move LINK
+     */
+    function initiateContractEvaluation() 
         external 
-        view 
-        onlyOwner
-        returns (uint256) 
+        checkAccess 
     {
         LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);
-        return link.balanceOf(address(this));
+        uint256 oracle_mult = blizzardContract.getNumJobs();
+        require(link.transferFrom(ORACLE_BANK, address(blizzardContract), ORACLE_PAYMENT * oracle_mult), "unable to fund oracle request");
+        blizzardContract.requestPayoutEvaluation();
+    }
+
+    /**
+     * @notice Returns the evaluation status of the snow protection contract
+     * @return bool evaluated
+     */
+    function getContractEvaluated()
+        external
+        view
+        returns (bool)
+    {
+        return blizzardContract.contractEvaluated();
+    }
+
+    /**
+     * @notice Returns the payout value for snow protection contract
+     * @return uint256 payout value
+     */
+    function getContractPayout()
+        external
+        view
+        returns (uint256)
+    {
+        return blizzardContract.payout();
+    }
+
+    /**
+     * @notice Fulfill payout evaluation for the snow protection contract
+     * @dev Sender must have access
+     */
+    function fulfillContractEvaluation() 
+        external 
+        checkAccess 
+    {
+        bool fulfillRequirement = blizzardContract.contractEvaluated();
+        require(fulfillRequirement, "unable to fulfill payout until contract is evaluated");
+        LinkTokenInterface usdc = LinkTokenInterface(USDC_ADDRESS);
+        uint256 payout = blizzardContract.payout();
+        if (payout > 0) {
+            require(usdc.transfer(PREMIUM_ADDRESS, payout), "unable to payout to buyer");
+            require(usdc.transfer(COLLATERAL_ADDRESS, usdc.balanceOf(address(this))), "unable to return remaining balance to provider");
+
+        } else {
+            require(usdc.transfer(COLLATERAL_ADDRESS, usdc.balanceOf(address(this))), "unable to return balance to provider");
+        }
+        contractPaidOut = true;
     }
 
     /**
@@ -249,35 +236,6 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
             _result := mload(add(_source, 32))
         }
     }
-
-    // /**
-    //  * @notice Development function to end provider contract, in case of bugs or needing to update logic etc
-    //  * @dev Can only be called by the contract owner
-    //  *
-    //  * REMOVE IN PRODUCTION
-    //  */
-    // function endProviderContract() 
-    //     external 
-    //     onlyOwner 
-    // {
-    //     LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);
-    //     LinkTokenInterface usdc = LinkTokenInterface(USDC_ADDRESS);
-    //     uint256 payout = blizzardContract.payout();
-    //     bool evaluated = blizzardContract.contractEvaluated();
-
-    //     if (evaluated) {
-    //         require(usdc.transfer(PREMIUM_ADDRESS, payout), "unable to transfer payout to buyer");
-    //         require(usdc.transfer(COLLATERAL_ADDRESS, usdc.balanceOf(address(this))), "unable to return remaining funds to provider");
-    //     } else {
-    //         require(usdc.transfer(PREMIUM_ADDRESS, PREMIUM_PAYMENT), "unable to return premium to buyer");
-    //         require(usdc.transfer(COLLATERAL_ADDRESS, COLLATERAL_PAYMENT), "unable to return collateral to provider");
-    //     }
-    //     blizzardContract.endContractInstance();
-    //     // transfer any remaining tokens held by this account before destroying
-    //     require(usdc.transfer(owner(), usdc.balanceOf(address(this))), "unable to transfer USDC");
-    //     require(link.transfer(ORACLE_BANK, link.balanceOf(address(this))), "unable to transfer LINK");
-    //     selfdestruct(payable(owner()));
-    // }
 }
 
 
@@ -295,7 +253,7 @@ contract CubanBlizzardOption is ChainlinkClient, ConfirmedOwner {
     bool public contractEvaluated;
     uint256 private requestsPending;
 
-    string[] public parameters;
+    string[] private parameters;
     uint256 public payout;
 
     event contractEnded(address _contract, uint256 _time);
@@ -339,6 +297,21 @@ contract CubanBlizzardOption is ChainlinkClient, ConfirmedOwner {
     {
         oraclePayment = _oraclePayment;
         setChainlinkToken(_link);
+    }
+
+    /**
+     * @notice Get the contract parameters
+     * @dev Can only be called by the contract owner
+     * @return string[] contract terms
+     */
+    function getParameters() 
+        public 
+        onlyOwner 
+        view
+        returns (string[] memory) 
+    {
+        string[] memory _parameters = parameters;
+        return _parameters;
     }
  
     /**
@@ -386,6 +359,18 @@ contract CubanBlizzardOption is ChainlinkClient, ConfirmedOwner {
     }
 
     /**
+     * @notice Get the number of contract jobs
+     * @return uint256 number of jobs
+     */
+    function getNumJobs() 
+        public 
+        view 
+        returns (uint256) 
+    {
+        return jobs.length;
+    }
+
+    /**
      * @notice Makes a chainlink oracle request to compute a payout evaluation for this contract
      * @dev Can only be called by the contract owner
      */
@@ -430,31 +415,4 @@ contract CubanBlizzardOption is ChainlinkClient, ConfirmedOwner {
         }
         emit evaluationRequestFulfilled(address(this), _result, block.timestamp);
     }
-
-    /**
-     * @notice Get the number of contract jobs
-     * @return uint256 number of jobs
-     */
-    function getNumJobs() 
-        public 
-        view 
-        returns (uint256) 
-    {
-        return jobs.length;
-    }
-
-//     /**
-//      * @notice Development function to end contract, in case of bugs or needing to update logic etc
-//      * @dev Can only be called by the contract owner
-//      *
-//      * REMOVE IN PRODUCTION
-//      */
-//     function endContractInstance() 
-//         public 
-//         onlyOwner 
-//     {
-//         LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
-//         require(link.transfer(owner(), link.balanceOf(address(this))), "Unable to transfer");
-//         selfdestruct(payable(owner()));
-//     }
 }

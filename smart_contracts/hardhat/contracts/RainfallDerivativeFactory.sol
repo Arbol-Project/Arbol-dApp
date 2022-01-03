@@ -59,69 +59,6 @@ contract RainfallDerivativeProvider is ConfirmedOwner {
     }
 
     /**
-     * @notice Request payout evaluation for a specified contract
-     * @dev Can only be called by the contract owner
-     * @param _id string contract ID
-     */
-    function initiateContractEvaluation(
-        string memory _id
-    ) 
-        external 
-        onlyOwner 
-    {
-        RainfallOption rainfallContract = contracts[_id];
-        LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);
-        uint256 oracle_mult = rainfallContract.getNumJobs();
-        require(link.transferFrom(ORACLE_BANK, address(rainfallContract), ORACLE_PAYMENT * oracle_mult), "Unable to fund deployed contract");
-        rainfallContract.requestPayoutEvaluation();
-    }
-
-    /**
-     * @notice Returns the evaluation status of the contract for a given id
-     * @param _id string contract ID
-     * @return bool evaluated
-     */
-    function getContractEvaluated(
-        string memory _id
-    )
-        external
-        view
-        returns (bool)
-    {
-        return contracts[_id].contractEvaluated();
-    }
-
-    /**
-     * @notice Returns the address of the contract for a given id
-     * @param _id string contract ID
-     * @return address of deployed contract
-     */
-    function getContractAddress(
-        string memory _id
-    )
-        external
-        view
-        returns (address)
-    {
-        return address(contracts[_id]);
-    }
-
-    /**
-     * @notice Returns the payout value for a specified contract
-     * @param _id string contract ID
-     * @return uint256 payout value
-     */
-    function getContractPayout(
-        string memory _id
-    )
-        external
-        view
-        returns (uint256)
-    {
-        return contracts[_id].payout();
-    }
-
-    /**
      * @notice Add a new node and associated job ID to the contract execution/evalution set
      * @dev Can only be called by the contract owner
      * @param _id string contract ID
@@ -156,32 +93,83 @@ contract RainfallDerivativeProvider is ConfirmedOwner {
     }
 
     /**
-     * @notice Get the ETH/matic/gas balance of the provider contract
-     * @dev Can only be called by the contract owner
-     * @return uint256 ETH balance
+     * @notice Returns the address of the contract for a given id
+     * @param _id string contract ID
+     * @return address of deployed contract
      */
-    function getETHBalance() 
-        external 
-        view 
-        onlyOwner
-        returns (uint256) 
+    function getContractAddress(
+        string memory _id
+    )
+        external
+        view
+        returns (address)
     {
-        return address(this).balance;
+        return address(contracts[_id]);
     }
 
     /**
-     * @notice Get the LINK balance of the provider contract
+     * @notice Get the parameters for the specified contract
      * @dev Can only be called by the contract owner
-     * @return uint256 LINK balance
+     * @param _id string contract ID
+     * @return string[] contract terms
      */
-    function getLINKBalance() 
-        external 
-        view 
-        onlyOwner
-        returns (uint256) 
+    function getContractParameters(
+        string memory _id
+    ) 
+        public 
+        onlyOwner 
+        view
+        returns (string[] memory) 
     {
+        return contracts[_id].getParameters();
+    }
+
+    /**
+     * @notice Request payout evaluation for a specified contract
+     * @dev Can only be called by the contract owner
+     * @param _id string contract ID
+     */
+    function initiateContractEvaluation(
+        string memory _id
+    ) 
+        external 
+        onlyOwner 
+    {
+        RainfallOption rainfallContract = contracts[_id];
         LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);
-        return link.balanceOf(address(this));
+        uint256 oracle_mult = rainfallContract.getNumJobs();
+        require(link.transferFrom(ORACLE_BANK, address(rainfallContract), ORACLE_PAYMENT * oracle_mult), "Unable to fund deployed contract");
+        rainfallContract.requestPayoutEvaluation();
+    }
+
+    /**
+     * @notice Returns the evaluation status of the contract for a given id
+     * @param _id string contract ID
+     * @return bool evaluated
+     */
+    function getContractEvaluated(
+        string memory _id
+    )
+        external
+        view
+        returns (bool)
+    {
+        return contracts[_id].contractEvaluated();
+    }
+
+    /**
+     * @notice Returns the payout value for a specified contract
+     * @param _id string contract ID
+     * @return uint256 payout value
+     */
+    function getContractPayout(
+        string memory _id
+    )
+        external
+        view
+        returns (uint256)
+    {
+        return contracts[_id].payout();
     }
 
     /**
@@ -206,37 +194,6 @@ contract RainfallDerivativeProvider is ConfirmedOwner {
             _result := mload(add(_source, 32))
         }
     }
-
-    // /**
-    //  * @notice Development function to end specified contract, in case of bugs or needing to update logic etc
-    //  * @dev Can only be called by the contract owner
-    //  * @param _id string contract ID
-    //  *
-    //  * REMOVE IN PRODUCTION
-    //  */
-    // function endContractInstance(
-    //     string memory _id
-    // ) 
-    //     external 
-    //     onlyOwner 
-    // {
-    //     contracts[_id].endContractInstance();
-    // }
-
-    // /**
-    //  * @notice Development function to end provider contract, in case of bugs or needing to update logic etc
-    //  * @dev Can only be called by the contract owner
-    //  *
-    //  * REMOVE IN PRODUCTION
-    //  */
-    // function endProviderContract() 
-    //     external 
-    //     onlyOwner 
-    // {
-    //     LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);
-    //     require(link.transfer(ORACLE_BANK, link.balanceOf(address(this))), "Unable to transfer");
-    //     selfdestruct(payable(owner()));
-    // }
 }
 
 
@@ -254,7 +211,7 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
     bool public contractEvaluated;
     uint256 private requestsPending;
 
-    string[] public parameters;
+    string[] private parameters;
     uint256 private end;
     uint256 public payout;
 
@@ -297,6 +254,21 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
         setChainlinkToken(_link);
         parameters = _parameters;
         end = _end;
+    }
+
+    /**
+     * @notice Get the contract parameters
+     * @dev Can only be called by the contract owner
+     * @return string[] contract terms
+     */
+    function getParameters() 
+        public 
+        onlyOwner 
+        view
+        returns (string[] memory) 
+    {
+        string[] memory _parameters = parameters;
+        return _parameters;
     }
 
     /**
@@ -344,6 +316,18 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
     }
 
     /**
+     * @notice Get the number of contract jobs
+     * @return uint256 number of jobs
+     */
+    function getNumJobs() 
+        public 
+        view 
+        returns (uint256) 
+    {
+        return jobs.length;
+    }
+
+    /**
      * @notice Makes a chainlink oracle request to compute a payout evaluation for this contract
      * @dev Can only be called by the contract owner
      */
@@ -388,45 +372,4 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
         }
         emit evaluationRequestFulfilled(address(this), _result, block.timestamp);
     }
-
-    /**
-     * @notice Get the number of contract jobs
-     * @return uint256 number of jobs
-     */
-    function getNumJobs() 
-        public 
-        view 
-        returns (uint256) 
-    {
-        return jobs.length;
-    }
-
-    /**
-     * @notice Get the LINK balance of the contract
-     * @dev Can only be called by the contract owner
-     * @return uint256 LINK balance
-     */
-    function getLINKBalance() 
-        external 
-        view 
-        returns (uint256) 
-    {
-        LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
-        return link.balanceOf(address(this));
-    }
-
-    // /**
-    //  * @notice Development function to end contract, in case of bugs or needing to update logic etc
-    //  * @dev Can only be called by the contract owner
-    //  *
-    //  * REMOVE IN PRODUCTION
-    //  */
-    // function endContractInstance() 
-    //     public 
-    //     onlyOwner 
-    // {
-    //     LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
-    //     require(link.transfer(owner(), link.balanceOf(address(this))), "Unable to transfer");
-    //     selfdestruct(payable(owner()));
-    // }
 }

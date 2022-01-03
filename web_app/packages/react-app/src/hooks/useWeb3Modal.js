@@ -2,9 +2,8 @@ import { Web3Provider } from "@ethersproject/providers";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Web3Modal from "web3modal";
-// import { ALCHEMY_TOKEN } from "../keys.js";
+// const ALCHEMY_TOKEN = process.env.ALCHEMY_TOKEN;
 const INFURA_ID = "";
-
 const NETWORK = "Kovan";
 
 function useWeb3Modal(config = {}) {

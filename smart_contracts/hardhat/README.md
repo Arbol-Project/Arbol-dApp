@@ -8,8 +8,8 @@ Scripts are available for the following actions:
 
 ```
 # in this dir
-npx hardhat run scripts/deploy-all.js # deploy all contractrs or replace with specific deployment script
-npx hardhat run scripts/verify-deployments.js # verify source codes for all deployed contracts
+npx hardhat run scripts/deploy-all.js           # deploy all contracts or replace with specific deployment script
+npx hardhat run scripts/verify-deployments.js   # verify source codes for all deployed contracts
 npx hardhat run scripts/evaluate-deployments.js # evaluate all deployed contracts with expired coverage periods
 ```
 

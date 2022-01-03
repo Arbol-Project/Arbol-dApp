@@ -31,16 +31,17 @@ class Adapter:
         if self.request_data is None or self.request_data == {}:
             self.request_error = 'request is empty'
             return False
-        params = self.request_data.get('params', None)
-        if params is None:
+        parameters = self.request_data.get('params', None)
+        if parameters is None:
             self.request_error = 'no parameters specified'
             return False
-        self.params = params
-        self.program = get_program(self.params)
+        parameters = {parameters[i]:parameters[i+1] for i in range(0, len(parameters), 2)}
+        self.parameters = parameters
+        self.program = get_program(self.parameters)
         if self.program is None:
             self.request_error = 'invalid program specified'
             return False
-        valid, self.request_error = self.program.validate_request(params)
+        valid, self.request_error = self.program.validate_request(parameters)
         return valid
 
     def execute_request(self):
@@ -48,7 +49,7 @@ class Adapter:
             contract should payout and if so then for how much
         '''
         try:
-            payout = self.program.serve_evaluation(self.params)
+            payout = self.program.serve_evaluation(self.parameters)
             self.request_data['result'] = payout
             self.result_success(payout)
         except Exception as e:

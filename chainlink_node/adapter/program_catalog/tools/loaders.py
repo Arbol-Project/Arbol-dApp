@@ -18,6 +18,8 @@ class dAppLoader:
                         imperial_units (bool), whether to use imperial units
                         kwargs (dict), additional request parameters
         '''
+        if isinstance(imperial_units, str):
+            imperial_units = ast.literal_eval(imperial_units)
         self._dataset_name = dataset_name
         self._request_params = {'use_imperial_units': imperial_units, **kwargs}
 
@@ -35,13 +37,13 @@ class GFDatasetLoader(dAppLoader):
         ''' On initialization each Loader instance sets the locations for which to
             get the historical weather data and the dataset to pull from
 
-            Parameters: locations (list), list of lat/lon coordinate pairs as strings
+            Parameters: locations (str), string of list of lat/lon coordinate pairs as strings
                         dataset_name (str), the name of the dataset on IPFS
                         imperial_units (bool), whether to use imperial units
                         kwargs (dict), additional request parameters
         '''
         super().__init__(dataset_name, imperial_units=imperial_units, **kwargs)
-        self._locations = [ast.literal_eval(location) for location in locations]
+        self._locations = ast.literal_eval(locations)
 
     def load(self):
         ''' Loads the weather data time series from IPFS for each specified
@@ -81,21 +83,21 @@ class GHCNDatasetLoader(dAppLoader):
     ''' Loader class for GHCN station datasets. Uses dWeather Python client
         to get historical GHCN data from IPFS for specified weather station
     '''
-    def __init__(self, dates, station_id, weather_variable, dataset_name='ghcnd', imperial_units=False, **kwargs):
+    def __init__(self, dates, station_id, weather_variable, dataset_name='ghcnd', imperial_units=True, **kwargs):
         ''' On initialization each Loader instance sets the locations for which to
             get the historical weather data and the dataset to pull from
 
-            Parameters: dates (list), list of covered dates for contract as strings
+            Parameters: dates (str), string of list of covered dates for contract as strings
                         station_id (str), id for weather station to get history from
                         weather_variable (str), the id for the weather condition to get history for 
                         dataset_name (str), name of dataset from which to get weather data
-                        imperial_units (bool), whether to use imperial units
+                        imperial_units (str), string of bool for whether to use imperial units
                         kwargs (dict), additional request parameters
         '''
         super().__init__(dataset_name, imperial_units=imperial_units, **kwargs)
         self._station_id = station_id
         self._weather_variable = weather_variable
-        self._dates = dates
+        self._dates = ast.literal_eval(dates)
 
     def load(self):
         ''' Loads the dataset history from IPFS for the specified station ID

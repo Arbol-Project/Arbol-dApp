@@ -75,25 +75,26 @@ async function main() {
         console.log("RainfallOption already deployed to:", Contracts[id].address);
         continue;
       } else {
-        var opt_type = contract.__config__.payouts.__config__.derivative.__config__.opt_type.toString();
-        var dataset = contract.__config__.payouts.__config__.index_distribution.__config__.index.__config__.loader.__config__.dataset_name.toString();
+        var opt_type = contract.__config__.payouts.__config__.derivative.__config__.opt_type;
+        var dataset = contract.__config__.payouts.__config__.index_distribution.__config__.index.__config__.loader.__config__.dataset_name;
         var strike = contract.__config__.payouts.__config__.derivative.__config__.strike;
         var limit = contract.__config__.payouts.__config__.derivative.__config__.limit;
         var tick = contract.__config__.payouts.__config__.derivative.__config__.tick;
-        var start_date = new Date(contract.__config__.payouts.__config__.index_distribution.__config__.index.__config__.start);
-        var start = parseInt(start_date.getTime() / 1000);
+        var start = contract.__config__.payouts.__config__.index_distribution.__config__.index.__config__.start;
+        var end = contract.__config__.payouts.__config__.index_distribution.__config__.index.__config__.end;
         var end_date = new Date(contract.__config__.payouts.__config__.index_distribution.__config__.index.__config__.end);
-        var end = parseInt(end_date.getTime() / 1000);
-        var parameters = [id, dataset, opt_type, start.toString(), end.toString(), strike.toString(), limit.toString(), tick.toString()]
+        var end_unix = parseInt(end_date.getTime() / 1000);
+
         var locations = [];
         for (const config of contract.__config__.payouts.__config__.index_distribution.__config__.index.__config__.loader.__config__.loaders) {
           var lat = config.__config__.lat;
           var lon = config.__config__.lon;
-          var location_str = "[" + lat.toString() + ", " + lon.toString() + "]";
-          locations.push(location_str);
+          locations.push([lat, lon])
         }
 
-        var tx = await derivative_provider.newContract(locations, parameters, end);
+        var parameters = ["id", id, "dataset", dataset, "opt_type", opt_type, "start", start, "end", end, "strike", strike.toString(), "limit", limit.toString(), "tick", tick.toString(), "locations", JSON.stringify(locations)]
+
+        var tx = await derivative_provider.newContract(parameters, end_unix);
         await tx.wait();
 
         var deployed_address = await derivative_provider.getContractAddress(id);

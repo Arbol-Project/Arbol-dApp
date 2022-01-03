@@ -1,0 +1,22 @@
+type = "directrequest"
+schemaVersion = 1
+name = "Get Contract Evaluation Kovan"
+contractAddress = "0x58935F97aB874Bc4181Bc1A3A85FDE2CA80885cd"
+maxTaskDuration = "30s"
+observationSource = """
+    decode_log   [type=ethabidecodelog
+                  abi="OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)"
+                  data="$(jobRun.logData)"
+                  topics="$(jobRun.logTopics)"]
+    decode_cbor  [type=cborparse data="$(decode_log.data)"]
+    arbol_dapp   [type="bridge" name="arbol-adapter" timeout="300s" requestData="{\\"data\\":{\\"params\\": $(decode_cbor.parameters)}}"]
+    parse        [type=jsonparse path="result" data="$(arbol_dapp)"]
+    encode_data  [type=ethabiencode abi="(uint256 value)" data="{ \\"value\\": $(parse) }"]
+    encode_tx    [type=ethabiencode
+                  abi="fulfillOracleRequest(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes32 data)"
+                  data="{\\"requestId\\": $(decode_log.requestId), \\"payment\\": $(decode_log.payment), \\"callbackAddress\\": $(decode_log.callbackAddr), \\"callbackFunctionId\\": $(decode_log.callbackFunctionId), \\"expiration\\": $(decode_log.cancelExpiration), \\"data\\": $(encode_data)}"
+                 ]
+    submit_tx    [type=ethtx to="0x58935F97aB874Bc4181Bc1A3A85FDE2CA80885cd" data="$(encode_tx)"]
+    decode_log -> decode_cbor -> arbol_dapp -> parse -> encode_data -> encode_tx -> submit_tx
+"""
+externalJobID = "63bb451d-3675-4aab-8495-77a73ce4eb7e"

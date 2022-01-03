@@ -10,13 +10,8 @@ class RainfallDerivative:
     '''
     _PROGRAM_PARAMETERS = ['dataset', 'locations', 'start', 'end', 'strike', 'limit', 'opt_type']
     _PARAMETER_OPTIONS = ['exhaust', 'tick']
-    _SOLIDITY_MULTIPLIERS = {
-        "strike" : 10**0,       # input
-        "limit" : 10**0,        # input
-        "exhaust" : 10**0,      # input
-        "tick" : 10**0,         # input
-        "payout": 10**2         # output (USD decimals)
-    }
+    _OUTPUT_MULTIPLER = 10**2
+
 
     @classmethod
     def validate_request(cls, params):
@@ -71,31 +66,32 @@ class RainfallDerivative:
         ''' Uses the provided contract parameters to calculate a payout and index
 
             Parameters: data (Pandas Series), weather data averaged over locations
-                        start (str), unix timestamp for start date of coverage period
-                        end (str), unix timestamp for end date of coverage period
+                        start (str), string for start date of coverage period
+                        end (str), string for end date of coverage period
                         opt_type (str), type of option contract, either PUT or CALL
-                        strike (str), 10^8 times the strike value for the payout (no floats in solidity)
-                        limit (str), 10^8 times the limit value for the payout (no floats in solidity)
-                        exhaust (str), 10^8 times the exhaust value for the payout (no floats in solidity)
+                        strike (str), string of num for strike value for the payout (no floats in solidity)
+                        limit (str), string of num for limit value for the payout (no floats in solidity)
+                        exhaust (str), string of num for exhaust value for the payout (no floats in solidity)
             or None if tick is not None
                         tick (str), tick value for payout or None if exhaust is not None
             Returns: int, generated payout times 10^8 (in order to report back to chain)
         '''
-        strike = float(strike) / cls._SOLIDITY_MULTIPLIERS['strike']
-        limit = float(limit) / cls._SOLIDITY_MULTIPLIERS['limit']
-        start_date = datetime.utcfromtimestamp(int(start)).strftime('%Y-%m-%d')
-        end_date = datetime.utcfromtimestamp(int(end)).strftime('%Y-%m-%d')
-        index_value = data.loc[start_date:end_date].sum()
+        strike = float(strike)
+        limit = float(limit)
+
+        index_value = data.loc[start:end].sum()
         opt_type = opt_type.lower()
         direction = 1 if opt_type == 'call' else -1
+
         if exhaust is not None:
-            exhaust = float(exhaust) / cls._SOLIDITY_MULTIPLIERS['exhaust']
+            exhaust = float(exhaust)
             tick = abs(limit / (strike - exhaust))
         else:
-            tick = float(tick) / cls._SOLIDITY_MULTIPLIERS['tick']
+            tick = float(tick)
+
         payout = (index_value - strike) * tick * direction
         if payout < 0:
             payout = 0
         if payout > limit:
             payout = limit
-        return int(float(round(payout, 2)) * cls._SOLIDITY_MULTIPLIERS['payout'])
+        return int(float(round(payout, 2)) * cls._OUTPUT_MULTIPLER)

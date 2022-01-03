@@ -19,7 +19,7 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
     address public constant COLLATERAL_ADDRESS = 0x3382d07e2736AC80f07D7288750F2442d187a7e3;                    // Arbol USDC wallet
     address public constant PREMIUM_ADDRESS = 0xa679c6154b8d4619Af9F83f0bF9a13A680e01eCf;                       // Buyer's wallet
     address public constant LINK_ADDRESS = 0xa36085F69e2889c224210F603D836748e7dC0088;                          // Link token address on Ethereum Kovan
-    address public constant USDC_ADDRESS = 0xe22da380ee6B445bb8273C81944ADEB6E8450422;                          // USDC token address on Ethereum Kovan
+    address public constant USDC_ADDRESS = 0xe8AA8A60C9417d8fD59EB4378687dDCEEd29c1B4;                          // USDC token address on Ethereum Kovan
 
     CubanBlizzardOption public blizzardContract;
     bool public collateralDeposited;
@@ -80,7 +80,7 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
             collateralDeposited = false;
             blizzardContract = new CubanBlizzardOption();
             blizzardContract.initialize(ORACLE_PAYMENT, LINK_ADDRESS);
-            blizzardContract.addOracleJob(0x58935F97aB874Bc4181Bc1A3A85FDE2CA80885cd, stringToBytes32("240af5b906f74ac6b83cbc42a235714f"));
+            blizzardContract.addOracleJob(0x58935F97aB874Bc4181Bc1A3A85FDE2CA80885cd, stringToBytes32("63bb451d36754aab849577a73ce4eb7e"));
             emit contractCreated(address(blizzardContract), "Dallas Mavs 2022-04-10 00:00:00");
         }
     }
@@ -250,34 +250,34 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
         }
     }
 
-    /**
-     * @notice Development function to end provider contract, in case of bugs or needing to update logic etc
-     * @dev Can only be called by the contract owner
-     *
-     * REMOVE IN PRODUCTION
-     */
-    function endProviderContract() 
-        external 
-        onlyOwner 
-    {
-        LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);
-        LinkTokenInterface usdc = LinkTokenInterface(USDC_ADDRESS);
-        uint256 payout = blizzardContract.payout();
-        bool evaluated = blizzardContract.contractEvaluated();
+    // /**
+    //  * @notice Development function to end provider contract, in case of bugs or needing to update logic etc
+    //  * @dev Can only be called by the contract owner
+    //  *
+    //  * REMOVE IN PRODUCTION
+    //  */
+    // function endProviderContract() 
+    //     external 
+    //     onlyOwner 
+    // {
+    //     LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);
+    //     LinkTokenInterface usdc = LinkTokenInterface(USDC_ADDRESS);
+    //     uint256 payout = blizzardContract.payout();
+    //     bool evaluated = blizzardContract.contractEvaluated();
 
-        if (evaluated) {
-            require(usdc.transfer(PREMIUM_ADDRESS, payout), "unable to transfer payout to buyer");
-            require(usdc.transfer(COLLATERAL_ADDRESS, usdc.balanceOf(address(this))), "unable to return remaining funds to provider");
-        } else {
-            require(usdc.transfer(PREMIUM_ADDRESS, PREMIUM_PAYMENT), "unable to return premium to buyer");
-            require(usdc.transfer(COLLATERAL_ADDRESS, COLLATERAL_PAYMENT), "unable to return collateral to provider");
-        }
-        blizzardContract.endContractInstance();
-        // transfer any remaining tokens held by this account before destroying
-        require(usdc.transfer(owner(), usdc.balanceOf(address(this))), "unable to transfer USDC");
-        require(link.transfer(ORACLE_BANK, link.balanceOf(address(this))), "unable to transfer LINK");
-        selfdestruct(payable(owner()));
-    }
+    //     if (evaluated) {
+    //         require(usdc.transfer(PREMIUM_ADDRESS, payout), "unable to transfer payout to buyer");
+    //         require(usdc.transfer(COLLATERAL_ADDRESS, usdc.balanceOf(address(this))), "unable to return remaining funds to provider");
+    //     } else {
+    //         require(usdc.transfer(PREMIUM_ADDRESS, PREMIUM_PAYMENT), "unable to return premium to buyer");
+    //         require(usdc.transfer(COLLATERAL_ADDRESS, COLLATERAL_PAYMENT), "unable to return collateral to provider");
+    //     }
+    //     blizzardContract.endContractInstance();
+    //     // transfer any remaining tokens held by this account before destroying
+    //     require(usdc.transfer(owner(), usdc.balanceOf(address(this))), "unable to transfer USDC");
+    //     require(link.transfer(ORACLE_BANK, link.balanceOf(address(this))), "unable to transfer LINK");
+    //     selfdestruct(payable(owner()));
+    // }
 }
 
 
@@ -295,7 +295,7 @@ contract CubanBlizzardOption is ChainlinkClient, ConfirmedOwner {
     bool public contractEvaluated;
     uint256 private requestsPending;
 
-    string[] public dates;
+    string[] public parameters;
     uint256 public payout;
 
     event contractEnded(address _contract, uint256 _time);
@@ -303,7 +303,7 @@ contract CubanBlizzardOption is ChainlinkClient, ConfirmedOwner {
     event evaluationRequestFulfilled(address _contract, uint256 _payout, uint256 _time);
 
     /**
-     * @notice Creates a new blizzard option contract
+     * @notice Creates a new blizzard option contract with the terms below
      * @dev Assigns caller address as contract ownert
      */
     constructor() 
@@ -311,8 +311,17 @@ contract CubanBlizzardOption is ChainlinkClient, ConfirmedOwner {
     {
         payout = 0;
         contractEvaluated = false;
-        // can't deserialize on node, have to give dates as input
-        dates = ["2021-10-06", "2021-10-08", "2021-10-26", "2021-10-28", "2021-10-31", "2021-11-02", "2021-11-06", "2021-11-08", "2021-11-15", "2021-11-27", "2021-11-29", "2021-12-03", "2021-12-04", "2021-12-07", "2021-12-13", "2021-12-15", "2021-12-21", "2021-12-23", "2022-01-03", "2022-01-05", "2022-01-09", "2022-01-15", "2022-01-17", "2022-01-19", "2022-01-20", "2022-01-23", "2022-01-29", "2022-02-02", "2022-02-04", "2022-02-06", "2022-02-08", "2022-02-10", "2022-02-12", "2022-03-03", "2022-03-05", "2022-03-07", "2022-03-09", "2022-03-21", "2022-03-23", "2022-03-27", "2022-03-29", "2022-04-08", "2022-04-10"];
+        parameters = ["station_id", "USW00003927", 
+            "weather_variable", "SNOW", 
+            "dataset", "ghcnd", 
+            "opt_type", "CALL", 
+            "strike", "0", 
+            "limit", "250000", 
+            "tick", "250000", 
+            "threshold", "6", 
+            "imperial_units", "True", 
+            "locations", '["2021-10-06", "2021-10-08", "2021-10-26", "2021-10-28", "2021-10-31", "2021-11-02", "2021-11-06", "2021-11-08", "2021-11-15", "2021-11-27", "2021-11-29", "2021-12-03", "2021-12-04", "2021-12-07", "2021-12-13", "2021-12-15", "2021-12-21", "2021-12-23", "2022-01-03", "2022-01-05", "2022-01-09", "2022-01-15", "2022-01-17", "2022-01-19", "2022-01-20", "2022-01-23", "2022-01-29", "2022-02-02", "2022-02-04", "2022-02-06", "2022-02-08", "2022-02-10", "2022-02-12", "2022-03-03", "2022-03-05", "2022-03-07", "2022-03-09", "2022-03-21", "2022-03-23", "2022-03-27", "2022-03-29", "2022-04-08", "2022-04-10"]'
+            ];
     }
 
     /**
@@ -362,15 +371,17 @@ contract CubanBlizzardOption is ChainlinkClient, ConfirmedOwner {
         onlyOwner
     {
         uint256 index = oracleMap[_job];
-        if (index == jobs.length - 1) {
-            oracles.pop();
-            jobs.pop();
-        } else {
-            oracles[index] = oracles[oracles.length - 1];
-            oracles.pop();
-            jobs[index] = jobs[jobs.length - 1];
-            jobs.pop();
-            oracleMap[jobs[index]] = index;
+        if (!(index == 0 && jobs[index] != _job)) {
+            if (index == jobs.length - 1) {
+                oracles.pop();
+                jobs.pop();
+            } else {
+                oracles[index] = oracles[oracles.length - 1];
+                oracles.pop();
+                jobs[index] = jobs[jobs.length - 1];
+                jobs.pop();
+                oracleMap[jobs[index]] = index;
+            }
         }
     }
 
@@ -388,20 +399,12 @@ contract CubanBlizzardOption is ChainlinkClient, ConfirmedOwner {
         uint256 _oraclePayment = oraclePayment;
         address[] memory _oracles = oracles;
         bytes32[] memory _jobs = jobs;
-        string[] memory _dates = dates;
+        string[] memory _parameters = parameters;
         uint256 requests = 0;
 
         for (uint256 i = 0; i != _oracles.length; i += 1) {
             Chainlink.Request memory req = buildChainlinkRequest(_jobs[i], address(this), this.fulfillPayoutEvaluation.selector);
-            req.addStringArray("dates", _dates);
-            req.add("station_id", "USW00003927");
-            req.add("weather_variable", "SNOW");
-            req.add("dataset", "ghcnd");
-            req.add("opt_type", "CALL");
-            req.addUint("strike", 0);
-            req.addUint("limit", 250000);
-            req.addUint("tick", 250000);
-            req.addUint("threshold", 6);
+            req.addStringArray("parameters", _parameters);
             bytes32 requestId = sendChainlinkRequestTo(_oracles[i], req, _oraclePayment);
             requests += 1;
             emit evaluationRequestSent(address(this), _oracles[i], requestId, block.timestamp);
@@ -440,18 +443,18 @@ contract CubanBlizzardOption is ChainlinkClient, ConfirmedOwner {
         return jobs.length;
     }
 
-    /**
-     * @notice Development function to end contract, in case of bugs or needing to update logic etc
-     * @dev Can only be called by the contract owner
-     *
-     * REMOVE IN PRODUCTION
-     */
-    function endContractInstance() 
-        public 
-        onlyOwner 
-    {
-        LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
-        require(link.transfer(owner(), link.balanceOf(address(this))), "Unable to transfer");
-        selfdestruct(payable(owner()));
-    }
+//     /**
+//      * @notice Development function to end contract, in case of bugs or needing to update logic etc
+//      * @dev Can only be called by the contract owner
+//      *
+//      * REMOVE IN PRODUCTION
+//      */
+//     function endContractInstance() 
+//         public 
+//         onlyOwner 
+//     {
+//         LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
+//         require(link.transfer(owner(), link.balanceOf(address(this))), "Unable to transfer");
+//         selfdestruct(payable(owner()));
+//     }
 }

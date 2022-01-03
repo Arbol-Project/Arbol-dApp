@@ -10,10 +10,8 @@ class CriticalSnowfallDerivative:
     '''
     _PROGRAM_PARAMETERS = ['dates', 'station_id', 'weather_variable', 'threshold', 'dataset', 'limit', 'opt_type']
     _PARAMETER_OPTIONS = ['strike', 'exhaust', 'tick']
-    _SOLIDITY_MULTIPLIERS = {
-        'limit' : 10**0,        # input
-        'payout': 10**6         # output (USDC decimals)
-    }
+    _OUTPUT_MULTIPLIER = 10**6
+
 
     @classmethod
     def validate_request(cls, params):
@@ -66,21 +64,23 @@ class CriticalSnowfallDerivative:
         ''' Uses the provided contract parameters to calculate a payout and index
 
             Parameters: data (Pandas Series), weather data for covered dates
-                        threshold (int), weather variable threshold in inches
+                        threshold (str), string of int for weather variable threshold in inches
                         opt_type (str), type of option contract, either PUT or CALL
-                        strike (int), strike value for the payout
-                        limit (int), limit value for the payout
-                        exhaust (int), exhaust value for the payout or None if tick is not None
-                        tick (number), tick value for payout or None if exhaust is not None
+                        strike (str), string of num for strike value for the payout
+                        limit (str), string of num for limit value for the payout
+                        exhaust (str), string of num for exhaust value for the payout or None if tick is not None
+                        tick (str), string of num for tick value for payout or None if exhaust is not None
             Returns: int, generated payout times 10^6 (in order to report back to chain in value of USDC)
         '''
-        limit = float(limit) / cls._SOLIDITY_MULTIPLIERS['limit']
+        limit = float(limit)
+
         index_value = data.max().value
         opt_type = opt_type.lower()
         direction = 1 if opt_type == 'call' else -1
+        
         payout = (index_value - float(threshold)) * direction
         if payout < 0:
             payout = 0
         if payout > 0:
             payout = limit
-        return int(payout * cls._SOLIDITY_MULTIPLIERS['payout'])
+        return int(payout * cls._OUTPUT_MULTIPLIER)

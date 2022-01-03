@@ -19,7 +19,7 @@ TODO when initializing new Chainlink Node:
     - `ETH_HTTP_URL`: HTTP node provider address (Infura, Alchemy, etc)
     - `TLS_CERT_PATH`: self-sign TLS certificates and move to `chainlink/tls`
     - `TLS_KEY_PATH`: self-sign TLS certificates and move to `chainlink/tls`
-    - `DATABASE_URL`: setup Postgres DB and set connection string
+    - `DATABASE_URL`: setup Postgres or use remote DB and set connection string
 - If deploying to a new chain for the first time, first deploy an [Oracle.sol](https://remix.ethereum.org/#url=https://docs.chain.link/samples/NodeOperators/Oracle.sol&optimize=false&runs=200&evmVersion=null) contract or an [Operator.sol](https://github.com/smartcontractkit/chainlink/blob/develop/contracts/src/v0.7/Operator.sol) contract for Multi-word requests and record the `Oracle` address
 - Start the app/node (run `docker compose up --build`) and sign into the Chainlink GUI
     - Add all desired jobs with `Oracle` address and save IDs and `Node` address

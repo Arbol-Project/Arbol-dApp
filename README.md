@@ -9,7 +9,7 @@ The frontend is a mostly-React app bootstrapped with [Create Eth App](https://gi
 ## Chainlink Node
 
 A [Docker Compose](https://docs.docker.com/compose/) project to launch an Arbol-Chainlink node on a new [AWS EC2](https://aws.amazon.com/ec2/) (Amazon Linux 2) instance. The project deploys containers for
-a [Chainlink](https://github.com/smartcontractkit/chainlink) node for fulfilling smart contract oracle requests, an [IPFS](https://github.com/ipfs/go-ipfs) daemon for retrieving Arbol weather data and listening to IPFS-HTTP requests, and a Gunicorn server running a Chainlink external adapter for serving requests using the [dClimate Python Client](https://github.com/dClimate/dWeather-Python-Client) and computing payout evaluations on retrieved data.
+a [Chainlink](https://github.com/smartcontractkit/chainlink) node for fulfilling smart contract oracle requests, an [IPFS](https://github.com/ipfs/go-ipfs) daemon for retrieving Arbol weather data and listening to IPFS-HTTP requests, and a [Gunicorn](https://gunicorn.org/)/[Flask](https://flask.palletsprojects.com/en/2.0.x/) server running a Chainlink external adapter for serving requests using the [dClimate Python Client](https://github.com/dClimate/dWeather-Python-Client) and computing payout evaluations on retrieved data.
 
 To launch a new node with new or imported credentials and contract data, run the following:
 

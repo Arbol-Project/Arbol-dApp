@@ -86,7 +86,8 @@ const columns = [
 
 
 function DataTable() {
-  const [rows, _] = useState([]);
+  const rowState = useState([]);
+  const rows = rowState[0];
   return (
     <div style={{ height: 200, width: '100%' }}>
       <DataGrid

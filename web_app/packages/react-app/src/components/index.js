@@ -44,7 +44,6 @@ export const Body = styled.div`
 
 export const Col = styled.div`
   align-items: center;
-  background-color: ${themeOptions.palette.background.default};;
   color: white;
   display: flex;
   flex-direction: column;
@@ -75,10 +74,9 @@ export const Title = styled.p`
 
 export const Text = styled.p`
   color: white;
-  margin-top: 8px;
-  margin-bottom: 8px;
-  font-size: calc(24px + 2vmin);
-  font-family: Inter;
+  padding: 0px 8px;
+  font-size: calc(4px + 2vmin);
+  font-family: Quicksand;
 `;
 
 export const Link = styled.a.attrs({

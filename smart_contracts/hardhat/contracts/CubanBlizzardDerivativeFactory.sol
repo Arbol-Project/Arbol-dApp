@@ -203,7 +203,7 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
 
     /**
      * @notice Get the USDC/stablecoin balance of the provider contract
-     * @return uint256 USDC baalance
+     * @return uint256 USDC balance
      */
     function getUSDCBalance() 
         external 

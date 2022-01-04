@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Web3Modal from "web3modal";
 // import Formatic from "formatic";
 // const ALCHEMY_TOKEN = process.env.ALCHEMY_TOKEN;
-const INFURA_ID = "";
+const INFURA_ID = "57683385d9284daea40fe2f6e42269f9";
 const NETWORK = "kovan";
 
 function useWeb3Modal(config = {}) {
@@ -17,7 +17,7 @@ function useWeb3Modal(config = {}) {
   const web3Modal = useMemo(() => {
     return new Web3Modal({
       network,
-      cacheProvider: false,
+      cacheProvider: true,
       providerOptions: {
         walletconnect: {
           package: WalletConnectProvider,

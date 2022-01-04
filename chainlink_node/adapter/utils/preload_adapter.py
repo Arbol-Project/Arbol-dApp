@@ -34,7 +34,7 @@ def parse_contract_data(contract, i):
         start = index['start']
         end = index['end']
 
-        if datetime.strptime(end, '%Y-%m-%d') > (datetime.now() + timedelta(days=2)):
+        if datetime.strptime(end, '%Y-%m-%d') > (datetime.now() - timedelta(days=7)):
             print(f'{name} data not available yet')
             return None
         

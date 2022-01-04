@@ -16,7 +16,9 @@ async function main() {
       
       for (const [cname, caddr] of Object.entries(pdata.contracts)) {
         // add two days to end to make sure data is there
-        if (caddr == Contracts[cname].address && (Contracts[cname].end + 60*60*24*2) < parseInt(Date.now() / 1000)) {
+        var end_date = new Date(Contracts[cname].end);
+        var end_time = end_date.getTime();
+        if (caddr == Contracts[cname].address && (end_time + 1000*60*60*24*2) < parseInt(Date.now())) {
           if (Contracts[cname].evaluated) {
             continue;
           }

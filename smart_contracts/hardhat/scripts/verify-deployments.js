@@ -75,7 +75,6 @@ async function main() {
     }
   }
 
-  console.log(abi_files);
   const source = path.join(process.cwd(), "/artifacts/contracts");
   const dest = path.join(process.cwd(), "../../web_app/packages/contracts/src/abis");
   for (const [file_path, file] of abi_files) {

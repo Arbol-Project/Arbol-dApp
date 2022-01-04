@@ -94,4 +94,4 @@ class RainfallDerivative:
             payout = 0
         if payout > limit:
             payout = limit
-        return int(float(round(payout, 2)) * cls._OUTPUT_MULTIPLER)
+        return int(float(round(payout, 2)) * cls._OUTPUT_MULTIPLIER)

@@ -1,12 +1,4 @@
 {
-    "CubanBlizzardDerivativeProvider": {
-        "address": "0x894526A02d3d2754aCa48a300D87e4762E04464d",
-        "types": {
-            "CubanBlizzardOption": false
-        },
-        "verified": true,
-        "contracts": {}
-    },
     "RainfallDerivativeProvider": {
         "address": "0xc47d6888c220C5bed07FB6Dc34Eb48d35043caA6",
         "types": {
@@ -48,5 +40,13 @@
             "Moung Ruessei PUT, limit: 955": "0xa54a7768200d949937502275b4C7D066D8A400bA",
             "Cambodia Rainfall December 21 - April 22": "0x0Eb4504690A378963163AB0939AA0DDcf1a8c175"
         }
+    },
+    "CubanBlizzardDerivativeProvider": {
+        "address": "0xe76be1733285165169aBe9193C4924803e0F1beB",
+        "types": {
+            "CubanBlizzardOption": false
+        },
+        "verified": true,
+        "contracts": {}
     }
 }

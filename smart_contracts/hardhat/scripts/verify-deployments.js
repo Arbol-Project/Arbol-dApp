@@ -10,7 +10,7 @@ const Contracts = require(ContractLogs);
 async function main() {
 
   var abi_files = [];
-  var need_write = false;
+  var need_write = true;
   for (const [name, data] of Object.entries(Providers)) {
     if (data.verified) {
       continue;
@@ -23,6 +23,11 @@ async function main() {
         var file_name = name + ".json";
         // slice off "Provider" from name to get base
         abi_files.push([name.slice(0, -8) + "Factory.sol/" + file_name, file_name]);
+        for (const [tname, _] of Object.entries(data.types)) {
+          file_name = tname + ".json";
+          // slice off "Option" from type and add Derivative to get base
+          abi_files.push([tname.slice(0, -6) + "DerivativeFactory.sol/" + file_name, file_name]);
+        }
         need_write = true;
         console.log(name.toString() + " source code verified");
       } catch (error) {
@@ -46,9 +51,6 @@ async function main() {
         });
         data.verified = true;
         Providers[data.provider].types[data.type] = true;
-        var file_name = data.type + ".json";
-        // slice off "Option" from type and add Derivative to get base
-        abi_files.push([data.type.slice(0, -6) + "DerivativeFactory.sol/" + file_name, file_name]);
         need_write = true;
         console.log(name.toString() + " source code verified");
       } catch (error) {
@@ -73,6 +75,7 @@ async function main() {
     }
   }
 
+  console.log(abi_files);
   const source = path.join(process.cwd(), "/artifacts/contracts");
   const dest = path.join(process.cwd(), "../../web_app/packages/contracts/src/abis");
   for (const [file_path, file] of abi_files) {

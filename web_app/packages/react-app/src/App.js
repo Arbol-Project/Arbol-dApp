@@ -56,7 +56,7 @@ async function depositUSDC(provider, rows, setRows) {
       tx = await CubanMainContract.depositPremium();
       await tx.wait();
       console.log("Contract purchased");
-      transactions.push([{"time": Date.now() / 1000, "action": "Deposit Collateral", "tx_hash": tx}]);
+      transactions.push([{"time": Date.now() / 1000, "action": "Purchase Contract", "tx_hash": tx}]);
     } else if (configs[defaultAddress].type === "admin") {
       tx = await CubanMainContract.depositCollateral();
       await tx.wait();
@@ -65,7 +65,9 @@ async function depositUSDC(provider, rows, setRows) {
       tx = await CubanMainContract.depositPremium();
       await tx.wait();
       console.log("Contract purchased");
-      transactions.push([{"time": Date.now() / 1000, "action": "Deposit Collateral", "tx_hash": tx}]);
+      transactions.push([{"time": Date.now() / 1000, "action": "Purchase Contract", "tx_hash": tx}]);
+
+      // const deployedAddress = await CubanMainContract.getContractAddress();
     }
     console.log(transactions);
     setRows(rows.concat(transactions));

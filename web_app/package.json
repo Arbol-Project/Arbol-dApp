@@ -23,5 +23,12 @@
     "packages": [
       "packages/*"
     ]
+  },
+  "dependencies": {
+    "@emotion/react": "^11.7.1",
+    "@emotion/styled": "^11.6.0",
+    "@material-ui/core": "^4.12.3",
+    "formatic": "^2.2.0",
+    "material-ui": "^0.20.2"
   }
 }

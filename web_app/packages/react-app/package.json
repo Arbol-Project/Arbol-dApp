@@ -15,6 +15,7 @@
     ]
   },
   "dependencies": {
+    "@mui/material": "^5.2.0",
     "@project/contracts": "^1.0.0",
     "@apollo/react-hooks": "^4.0.0",
     "@ethersproject/contracts": "^5.3.0",

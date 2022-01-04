@@ -1,18 +1,38 @@
 import styled from "styled-components";
+// import { ThemeOptions } from '@material-ui/core/styles/createMuiTheme';
+
+export const themeOptions = {
+  palette: {
+    type: 'dark',
+    primary: {
+      main: '#124125',
+    },
+    secondary: {
+      main: '#ffc400',
+    },
+    background: {
+      default: '#0c180c',
+      paper: '#303939',
+    },
+    text: {
+      primary: '#ffffff',
+    },
+  },
+};
 
 export const Header = styled.header`
-  background-color: white;
+  background-color: ${themeOptions.palette.primary.main};
   min-height: 70px;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  color: #3c3c3c;
+  color: white;
 `;
 
 export const Body = styled.div`
   align-items: center;
-  background-color: #3c3c3c;
+  background-color: ${themeOptions.palette.background.default};
   color: white;
   display: flex;
   flex-direction: row;
@@ -24,7 +44,7 @@ export const Body = styled.div`
 
 export const Col = styled.div`
   align-items: center;
-  background-color: #3c3c3c;
+  background-color: ${themeOptions.palette.background.default};;
   color: white;
   display: flex;
   flex-direction: column;
@@ -40,16 +60,17 @@ export const Image = styled.img`
   height: 30vmin;
   margin-top: 24px;
   margin-bottom: 8px;
+  margins: 4px 0px
   pointer-events: none;
 `;
 
 export const Title = styled.p`
-  color: #30A804;
+  color: ${themeOptions.palette.secondary.main};
   margin-top: 8px;
   margin-bottom: 8px;
   margin-left: 8px;
-  font-size: calc(18px + 2vmin);
-  font-family: "Montserrat";
+  font-size: calc(12px + 2vmin);
+  font-family: 'Press Start 2P';
 `;
 
 export const Text = styled.p`
@@ -64,7 +85,7 @@ export const Link = styled.a.attrs({
   target: "_blank",
   rel: "noopener noreferrer",
 })`
-  color: #30A804;
+  color: ${themeOptions.palette.secondary.main};
   margin-top: 8px;
   margin-bottom: 8px;
   font-size: 10px;
@@ -72,7 +93,7 @@ export const Link = styled.a.attrs({
 `;
 
 export const Button = styled.button`
-  background-color: #ea5f44;
+  background-color: ${themeOptions.palette.primary.main};
   border: none;
   border-radius: 8px;
   color: white;

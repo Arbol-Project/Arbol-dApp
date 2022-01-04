@@ -2,26 +2,27 @@ import { Web3Provider } from "@ethersproject/providers";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Web3Modal from "web3modal";
+// import Formatic from "formatic";
 // const ALCHEMY_TOKEN = process.env.ALCHEMY_TOKEN;
 const INFURA_ID = "";
-const NETWORK = "Kovan";
+const NETWORK = "kovan";
 
 function useWeb3Modal(config = {}) {
   const [provider, setProvider] = useState();
   const [autoLoaded, setAutoLoaded] = useState(false);
-  const { autoLoad = true, providerID = INFURA_ID, network = NETWORK } = config;
+  const { autoLoad = false, providerID = INFURA_ID, network = NETWORK } = config;
 
   // Web3Modal also supports many other wallets.
   // You can see other options at https://github.com/Web3Modal/web3modal
   const web3Modal = useMemo(() => {
     return new Web3Modal({
       network,
-      cacheProvider: true,
+      cacheProvider: false,
       providerOptions: {
         walletconnect: {
           package: WalletConnectProvider,
           options: {
-            providerID,
+            infuraid: providerID
           },
         },
       },
@@ -45,6 +46,7 @@ function useWeb3Modal(config = {}) {
   // If autoLoad is enabled and the the wallet had been loaded before, load it automatically now.
   useEffect(() => {
     if (autoLoad && !autoLoaded && web3Modal.cachedProvider) {
+      console.log("auto");
       loadWeb3Modal();
       setAutoLoaded(true);
     }

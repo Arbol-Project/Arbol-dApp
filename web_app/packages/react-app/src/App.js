@@ -1,14 +1,15 @@
 import { Contract } from "@ethersproject/contracts";
 import React, { useEffect, useState } from "react";
 
-import { Body, Image, Text, Link, Title, Col, themeOptions } from "./components";
+import { Body, Image, Text, Link, Col, themeOptions } from "./components";
 import logo from "./Arbol_logo.png";
 import useWeb3Modal from "./hooks/useWeb3Modal";
 import { addresses, abis } from "@project/contracts";
 
-import { Grid, Paper, Button, AppBar, Box, Toolbar } from '@mui/material';
+import { Grid, Button, AppBar, Box, Toolbar } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { DataGrid } from '@mui/x-data-grid';
+
 
 export const theme = createTheme(themeOptions);
 
@@ -25,96 +26,6 @@ const configs = {
     "type": "admin",
     "due": 10000000000000,
   }
-}
-
-
-async function depositUSDC(provider, rows, setRows) {
-  const defaultSigner = provider.getSigner();
-  const defaultAddress = await defaultSigner.getAddress();
-  console.log(defaultAddress);
-  if (defaultAddress in configs) {
-    var transactions = [];
-
-    var amount = configs[defaultAddress].due;
-    const usdc = new Contract(addresses.USDC, abis.erc20, defaultSigner);
-
-    var tx = await usdc.approve(addresses.CubanBlizzardDerivativeProvider, amount);
-    await tx.wait();
-    transactions.push([{"time": Date.now() / 1000, "action": "Approve USDC spender", "tx_hash": tx}]);
-
-    var allowance = await usdc.allowance(defaultAddress, addresses.CubanBlizzardDerivativeProvider);
-    console.log("Contract USDC allowance:", allowance);
-
-    const CubanMainContract = new Contract(addresses.CubanBlizzardDerivativeProvider, abis.CubanBlizzardDerivativeProvider, defaultSigner);
-
-    if (configs[defaultAddress].type === "provider") {
-      tx = await CubanMainContract.depositCollateral();
-      await tx.wait();
-      console.log("Collateral deposited");
-      transactions.push([{"time": Date.now() / 1000, "action": "Deposit Collateral", "tx_hash": tx}]);
-    } else if (configs[defaultAddress].type === "purchaser") {
-      tx = await CubanMainContract.depositPremium();
-      await tx.wait();
-      console.log("Contract purchased");
-      transactions.push([{"time": Date.now() / 1000, "action": "Purchase Contract", "tx_hash": tx}]);
-    } else if (configs[defaultAddress].type === "admin") {
-      tx = await CubanMainContract.depositCollateral();
-      await tx.wait();
-      console.log("Collateral deposited");
-      transactions.push([{"time": Date.now() / 1000, "action": "Deposit Collateral", "tx_hash": tx}]);
-      tx = await CubanMainContract.depositPremium();
-      await tx.wait();
-      console.log("Contract purchased");
-      transactions.push([{"time": Date.now() / 1000, "action": "Purchase Contract", "tx_hash": tx}]);
-
-      // const deployedAddress = await CubanMainContract.getContractAddress();
-    }
-    console.log(transactions);
-    setRows(rows.concat(transactions));
-
-    var balance = await CubanMainContract.getUSDCBalance();
-    console.log("Contract USDC balance:", balance);
-  } else {
-    console.log('address not recognized');
-  }
-}
-
-
-const columns = [
-  { field: 'time', headerName: 'Time', width: 80 },
-  { field: 'action', headerName: 'Action', width: 80 },
-  { field: 'tx_hash', headerName: 'Tx Hash', width: 80 },
-];
-
-
-function DataTable() {
-  const rowState = useState([]);
-  const rows = rowState[0];
-  return (
-    <div style={{ height: 200, width: '100%' }}>
-      <DataGrid
-        rows={rows}
-        columns={columns}
-        pageSize={5}
-        rowsPerPageOptions={[5]}
-      />
-    </div>
-  );
-}
-
-function ButtonAppBar({ provider, loadWeb3Modal, logoutOfWeb3Modal}) {
-  return (
-    <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static">
-        <Toolbar sx={{"justifyContent": "space-between", 'boxShadow': '0 3px 5px 2px rgba(0, 0, 0, .3)'}}>
-          <Title sx={{ flexGrow: 1 }}>
-              ARBOL-dAPP PORTAL
-            </Title>
-            <WalletButton provider={provider} loadWeb3Modal={loadWeb3Modal} logoutOfWeb3Modal={logoutOfWeb3Modal} />
-        </Toolbar>
-      </AppBar>
-    </Box>
-  );
 }
 
 
@@ -181,6 +92,65 @@ function App() {
   // const { loading, error, data } = useQuery(GET_TRANSFERS);
   const [provider, loadWeb3Modal, logoutOfWeb3Modal] = useWeb3Modal();
   const [rows, setRows] = useState([]);
+  const columns = [
+    { field: 'id', headerName: 'Tx Hash', width: 160 },
+    { field: 'sender', headerName: 'Sender', width: 160 },
+    { field: 'action', headerName: 'Action', width: 120 },
+    { field: 'explorer', headerName: 'Tx Link', width: 320 },
+    { field: 'time', headerName: 'Time', width: 120 },
+  ];
+
+  async function depositUSDC(_provider) {
+    const defaultSigner = _provider.getSigner();
+    const defaultAddress = await defaultSigner.getAddress();
+    var transactions = [];
+    if (defaultAddress in configs) {
+      
+      var amount = configs[defaultAddress].due;
+      const usdc = new Contract(addresses.USDC, abis.erc20, defaultSigner);
+  
+      var tx = await usdc.approve(addresses.CubanBlizzardDerivativeProvider, amount);
+      await tx.wait();
+      transactions.push({id: tx.hash,  sender: defaultAddress, action: "Approve USDC spender", explorer: "https://kovan.etherscan.io/tx/" + tx.hash, time: Date.now() / 1000});
+  
+      var allowance = await usdc.allowance(defaultAddress, addresses.CubanBlizzardDerivativeProvider);
+      console.log("Contract USDC allowance:", allowance);
+  
+      const CubanMainContract = new Contract(addresses.CubanBlizzardDerivativeProvider, abis.CubanBlizzardDerivativeProvider, defaultSigner);
+  
+      if (configs[defaultAddress].type === "provider") {
+        tx = await CubanMainContract.depositCollateral();
+        await tx.wait();
+        console.log("Collateral deposited");
+        transactions.push([{"id": tx.hash,  "sender": defaultAddress, "action": "Deposit Collateral", "explorer": "https://kovan.etherscan.io/address/" + tx.hash, "time": Date.now() / 1000}]);
+      } else if (configs[defaultAddress].type === "purchaser") {
+        tx = await CubanMainContract.depositPremium();
+        await tx.wait();
+        console.log("Contract purchased");
+        transactions.push([{"id": tx.hash,  "sender": defaultAddress, "action": "Purchase Contract", "explorer": "https://kovan.etherscan.io/address/" + tx.hash, "time": Date.now() / 1000}]);
+      } 
+      else if (configs[defaultAddress].type === "admin") {
+        tx = await CubanMainContract.depositCollateral();
+        await tx.wait();
+        console.log("Collateral deposited");
+        transactions.push([{"time": Date.now() / 1000, "action": "Deposit Collateral", "tx_hash": tx}]);
+        tx = await CubanMainContract.depositPremium();
+        await tx.wait();
+        console.log("Contract purchased");
+        transactions.push([{"time": Date.now() / 1000, "action": "Purchase Contract", "tx_hash": tx}]);
+  
+        const deployedAddress = await CubanMainContract.getContractAddress();
+        console.log("Deployed contract address:", deployedAddress);
+      }
+  
+      var balance = await CubanMainContract.getUSDCBalance();
+      console.log("Contract USDC balance:", balance);
+    } else {
+      console.log('address not recognized');
+    }
+    console.log(transactions);
+    setRows(transactions);
+  }
 
   // React.useEffect(() => {
   //   if (!loading && !error && data && data.transfers) {
@@ -191,78 +161,80 @@ function App() {
   return (
       <div>
         <ThemeProvider theme={theme}>
-        <ButtonAppBar provider={provider} loadWeb3Modal={loadWeb3Modal} logoutOfWeb3Modal={logoutOfWeb3Modal} />
+        <Box sx={{ flexGrow: 1 }}>
+          <AppBar position="static">
+            <Toolbar sx={{"justifyContent": "space-between", 'boxShadow': '0 3px 5px 2px rgba(0, 0, 0, .3)'}}>
+              <Link href="https://www.arbolmarket.com/" style={{ textDecoration: 'none', marginTop: "8px", fontSize: "calc(12px + 2vmin)" }}> {'ARBOL-dAPP PORTAL'} </Link>
+                <WalletButton provider={provider} loadWeb3Modal={loadWeb3Modal} logoutOfWeb3Modal={logoutOfWeb3Modal} />
+            </Toolbar>
+          </AppBar>
+        </Box>
           <Body>
           <Grid
             container
             direction="row"
             justifyContent="space-around"
-            alignItems="stretch"
+            alignItems='stretch'
           >
-            <Grid item xs={4}>
-              <Paper elevation={3} sx={{"background": themeOptions.palette.primary.main, "margin": "18px 18px"}}> 
+            <Grid item xs={6}>
                 <Col>
-                  <Title>
-                    ABOUT
-                  </Title>
+                <Image src={logo} alt="react-logo" />
                   <Text> 
                     The Arbol-dApp Portal provides an endpoint for interacting with Arbol's deployed Weather Derivative Provider smart contracts. 
-                    Selecting an action first executes a transaction to approve the Derivative Provider smart contract to move the user's funds.
-                    Deployment transaction details are logged as they are confirmed on chain.
                   </Text>
+                  <Text>
+                    The Escrow Collateral option approves the Derivative Provider smart contract to transfer the collateral cost in USDC from the caller's wallet, then executes the actual transfer. Collateral must be deposited before contract purchase.
+                  </Text><Text>
+                  The Purchase Contract option approves the smart contract to transfer the premium cost in USDC from the caller's wallet, then executes the actual transfer and instantiates a new Option contract.
+                    Deployment transaction details are logged below as they are confirmed on chain.
+                    </Text>
                 </Col>
-              </Paper>
             </Grid>
-            <Grid item xs={4}>
-              <Paper elevation={3} sx={{ "background": themeOptions.palette.primary.main, "margin": "18px 18px" }}> 
-                <Col>
-                  <Image src={logo} alt="react-logo" />
-                  <Link href="https://kovan.etherscan.io/address/0xe76be1733285165169aBe9193C4924803e0F1beB#code#F1#L1" style={{ marginTop: "8px" }}> etherscan </Link>
-                  <Link href="https://github.com/Arbol-Project/Arbol-dApp" style={{ marginTop: "8px" }}> github </Link>
-                </Col>
-              </Paper>
-            </Grid>
-            <Grid item xs={4}>
-              <Paper elevation={3} sx={{ "background": themeOptions.palette.primary.main, "margin": "18px 18px" }}> 
-                <Col>
-                  <Text> 
-                    Provider
-                    </Text>
-                  <Button 
-                    variant="contained" 
-                    sx={{
-                      "margin": "8px 4px",
-                      'background': 'linear-gradient(45deg, #EF5350 30%, #EA6A6A 90%)',
-                      'border': 0,
-                      'borderRadius': 3,
-                      'boxShadow': '0 3px 5px 2px rgba(0, 0, 0, .3)',
-                      'color': 'white',
-                    }} 
-                    onClick={() => depositUSDC(provider, rows, setRows)}>
-                    ESCROW COLLATERAL
-                  </Button>
-                  <Text> 
-                    Purchaser
-                    </Text>
-                  <Button 
-                    variant="contained" 
-                    sx={{
-                      "margin": "8px 4px",
-                      'background': 'linear-gradient(45deg, #EF5350 30%, #EA6A6A 90%)',
-                      'border': 0,
-                      'borderRadius': 3,
-                      'boxShadow': '0 3px 5px 2px rgba(0, 0, 0, .3)',
-                      'color': 'white',
-                    }} 
-                    onClick={() => depositUSDC(provider, rows, setRows)}>
-                    PURCHASE CONTRACT
-                  </Button>
-                  <Text> 
-                    Transactions
-                    </Text>
-                  <DataTable />
-                </Col>
-              </Paper>
+            <Grid item xs={6}>
+              <Col>
+                <Text> 
+                  Provider
+                </Text>
+                <Button 
+                  variant="contained" 
+                  sx={{
+                    "margin": "8px 4px",
+                    'background': 'linear-gradient(45deg, #EF5350 30%, #EA6A6A 90%)',
+                    'border': 0,
+                    'borderRadius': 3,
+                    'boxShadow': '0 3px 5px 2px rgba(255, 255, 255, .3)',
+                    'color': 'white',
+                  }} 
+                  onClick={() => depositUSDC(provider)}>
+                  ESCROW COLLATERAL
+                </Button>
+                <Text> 
+                  Purchaser
+                </Text>
+                <Button 
+                  variant="contained" 
+                  sx={{
+                    "margin": "8px 4px",
+                    'background': 'linear-gradient(45deg, #EF5350 30%, #EA6A6A 90%)',
+                    'border': 0,
+                    'borderRadius': 3,
+                    'boxShadow': '0 3px 5px 2px rgba(255, 255, 255, .3)',
+                    'color': 'white',
+                  }} 
+                  onClick={() => depositUSDC(provider)}>
+                  PURCHASE CONTRACT
+                </Button>
+                <div style={{ height: 300, width: '100%', marginTop: "50px", marginBottom: "20px"}}>
+                  <DataGrid
+                    rows={rows}
+                    columns={columns}
+                    pageSize={5}
+                    rowsPerPageOptions={[5]}
+                  />
+                </div>
+                <Link href={"https://kovan.etherscan.io/address/" + addresses.CubanBlizzardDerivativeProvider + "#code#F1#L1"} style={{ marginTop: "8px" }}> etherscan </Link>
+                <Link href="https://github.com/Arbol-Project/Arbol-dApp" style={{ marginTop: "8px" }}> github </Link>
+              </Col>
             </Grid>
           </Grid>
           </Body>

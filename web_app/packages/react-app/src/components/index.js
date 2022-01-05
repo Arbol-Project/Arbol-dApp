@@ -38,7 +38,7 @@ export const Body = styled.div`
   flex-direction: row;
   font-size: calc(10px + 2vmin);
   justify-content: center;
-  min-height: calc(100vh - 70px);
+  min-height: calc(70vh);
   font-family: Inter;
 `;
 
@@ -49,7 +49,7 @@ export const Col = styled.div`
   flex-direction: column;
   font-size: calc(10px + 2vmin);
   justify-content: center;
-  min-height: calc(100vh - 70px);
+  min-height: calc(100vh);
   font-family: Inter;
   margin-left: 8px;
   margin-right: 8px;

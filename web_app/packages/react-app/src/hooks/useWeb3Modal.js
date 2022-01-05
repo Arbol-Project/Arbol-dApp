@@ -10,7 +10,7 @@ const NETWORK = "kovan";
 function useWeb3Modal(config = {}) {
   const [provider, setProvider] = useState();
   const [autoLoaded, setAutoLoaded] = useState(false);
-  const { autoLoad = false, providerID = INFURA_ID, network = NETWORK } = config;
+  const { autoLoad = true, providerID = INFURA_ID, network = NETWORK } = config;
 
   // Web3Modal also supports many other wallets.
   // You can see other options at https://github.com/Web3Modal/web3modal

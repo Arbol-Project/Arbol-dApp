@@ -29,7 +29,7 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
     /**
      * @dev Event to log when a contract is created
      */
-    event contractCreated(address _contract, string _id);
+    event contractCreated(address _contract, string _id, string[] _params);
     
     /**
      * @dev Sets deploying address as owner, owner must approve this address to move LINK
@@ -80,8 +80,9 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
             collateralDeposited = false;
             blizzardContract = new CubanBlizzardOption();
             blizzardContract.initialize(ORACLE_PAYMENT, LINK_ADDRESS);
-            blizzardContract.addOracleJob(0x58935F97aB874Bc4181Bc1A3A85FDE2CA80885cd, stringToBytes32("63bb451d36754aab849577a73ce4eb7e"));
-            emit contractCreated(address(blizzardContract), "Dallas Mavs 2022-04-10 00:00:00");
+            blizzardContract.addOracleJob(0x58935F97aB874Bc4181Bc1A3A85FDE2CA80885cd, bytes32("63bb451d36754aab849577a73ce4eb7e"));
+            string[] memory params = blizzardContract.getParameters();
+            emit contractCreated(address(blizzardContract), "Dallas Mavs 2022-04-10 00:00:00", params);
         }
     }
 
@@ -256,10 +257,6 @@ contract CubanBlizzardOption is ChainlinkClient, ConfirmedOwner {
     string[] private parameters;
     uint256 public payout;
 
-    event contractEnded(address _contract, uint256 _time);
-    event evaluationRequestSent(address _contract, address _oracle, bytes32 _request, uint256 _time);
-    event evaluationRequestFulfilled(address _contract, uint256 _payout, uint256 _time);
-
     /**
      * @notice Creates a new blizzard option contract with the terms below
      * @dev Assigns caller address as contract ownert
@@ -379,7 +376,6 @@ contract CubanBlizzardOption is ChainlinkClient, ConfirmedOwner {
         onlyOwner 
     {
         require(1649649600 < block.timestamp, "unable to call until coverage period has ended");
-        emit contractEnded(address(this), block.timestamp);
         // do all looped reads from memory instead of storage
         uint256 _oraclePayment = oraclePayment;
         address[] memory _oracles = oracles;
@@ -390,9 +386,8 @@ contract CubanBlizzardOption is ChainlinkClient, ConfirmedOwner {
         for (uint256 i = 0; i != _oracles.length; i += 1) {
             Chainlink.Request memory req = buildChainlinkRequest(_jobs[i], address(this), this.fulfillPayoutEvaluation.selector);
             req.addStringArray("parameters", _parameters);
-            bytes32 requestId = sendChainlinkRequestTo(_oracles[i], req, _oraclePayment);
+            sendChainlinkRequestTo(_oracles[i], req, _oraclePayment);
             requests += 1;
-            emit evaluationRequestSent(address(this), _oracles[i], requestId, block.timestamp);
             }
         requestsPending = requests;
     }
@@ -413,6 +408,5 @@ contract CubanBlizzardOption is ChainlinkClient, ConfirmedOwner {
             LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
             require(link.transfer(owner(), link.balanceOf(address(this))), "Unable to transfer remaining LINK tokens");
         }
-        emit evaluationRequestFulfilled(address(this), _result, block.timestamp);
     }
 }

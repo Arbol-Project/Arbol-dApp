@@ -25,4 +25,3 @@ packages/subgraph
 packages/subgraph/build/
 packages/subgraph/src/types/
 packages/react-app/src/graphql
-Procfile

@@ -93,17 +93,36 @@ function App() {
   const [provider, loadWeb3Modal, logoutOfWeb3Modal] = useWeb3Modal();
   const [rows, setRows] = useState([]);
   const columns = [
-    { field: 'id', headerName: 'Tx Hash', width: 160 },
-    { field: 'sender', headerName: 'Sender', width: 160 },
-    { field: 'action', headerName: 'Action', width: 120 },
-    { field: 'explorer', headerName: 'Tx Link', width: 320 },
-    { field: 'time', headerName: 'Time', width: 120 },
+    { field: 'id', headerName: 'Tx Hash', width: 280 },
+    { field: 'from', headerName: 'Caller', width: 280 },
+    // { field: 'action', headerName: 'Action', width: 120 },
+    // { field: 'explorer', headerName: 'Tx Link', width: 320 },
+    { field: 'timeStamp', headerName: 'Time', width: 120 },
   ];
+
+  useEffect(() => {
+    fetch("https://api-kovan.etherscan.io/api?module=account&action=txlist&address="+addresses.CubanBlizzardDerivativeProvider+"&startblock=0&endblock=99999999&sort=asc&apikey="+process.env.REACT_APP_ETHERSCAN_KEY)
+    .then(resp => resp.json())
+    .then(data => {
+      console.log(data)
+      dataSetter(data.result)})
+  }, []);
+
+  async function dataSetter(data) {
+    var new_rows = []
+    for (const row of data) {
+      row["id"] = row["hash"];
+      delete row["hash"];
+      new_rows.push(row);
+    }
+
+    setRows(new_rows);
+  }
 
   async function depositUSDC(_provider) {
     const defaultSigner = _provider.getSigner();
     const defaultAddress = await defaultSigner.getAddress();
-    var transactions = [];
+    // var transactions = [];
     if (defaultAddress in configs) {
       
       var amount = configs[defaultAddress].due;
@@ -111,7 +130,7 @@ function App() {
   
       var tx = await usdc.approve(addresses.CubanBlizzardDerivativeProvider, amount);
       await tx.wait();
-      transactions.push({id: tx.hash,  sender: defaultAddress, action: "Approve USDC spender", explorer: "https://kovan.etherscan.io/tx/" + tx.hash, time: Date.now() / 1000});
+      // transactions.push({id: tx.hash,  sender: defaultAddress, action: "Approve USDC spender", explorer: "https://kovan.etherscan.io/tx/" + tx.hash, time: Date.now() / 1000});
   
       var allowance = await usdc.allowance(defaultAddress, addresses.CubanBlizzardDerivativeProvider);
       console.log("Contract USDC allowance:", allowance);
@@ -122,22 +141,22 @@ function App() {
         tx = await CubanMainContract.depositCollateral();
         await tx.wait();
         console.log("Collateral deposited");
-        transactions.push([{"id": tx.hash,  "sender": defaultAddress, "action": "Deposit Collateral", "explorer": "https://kovan.etherscan.io/address/" + tx.hash, "time": Date.now() / 1000}]);
+        // transactions.push([{"id": tx.hash,  "sender": defaultAddress, "action": "Deposit Collateral", "explorer": "https://kovan.etherscan.io/address/" + tx.hash, "time": Date.now() / 1000}]);
       } else if (configs[defaultAddress].type === "purchaser") {
         tx = await CubanMainContract.depositPremium();
         await tx.wait();
         console.log("Contract purchased");
-        transactions.push([{"id": tx.hash,  "sender": defaultAddress, "action": "Purchase Contract", "explorer": "https://kovan.etherscan.io/address/" + tx.hash, "time": Date.now() / 1000}]);
+        // transactions.push([{"id": tx.hash,  "sender": defaultAddress, "action": "Purchase Contract", "explorer": "https://kovan.etherscan.io/address/" + tx.hash, "time": Date.now() / 1000}]);
       } 
       else if (configs[defaultAddress].type === "admin") {
         tx = await CubanMainContract.depositCollateral();
         await tx.wait();
         console.log("Collateral deposited");
-        transactions.push([{"time": Date.now() / 1000, "action": "Deposit Collateral", "tx_hash": tx}]);
+        // transactions.push([{"time": Date.now() / 1000, "action": "Deposit Collateral", "tx_hash": tx}]);
         tx = await CubanMainContract.depositPremium();
         await tx.wait();
         console.log("Contract purchased");
-        transactions.push([{"time": Date.now() / 1000, "action": "Purchase Contract", "tx_hash": tx}]);
+        // transactions.push([{"time": Date.now() / 1000, "action": "Purchase Contract", "tx_hash": tx}]);
   
         const deployedAddress = await CubanMainContract.getContractAddress();
         console.log("Deployed contract address:", deployedAddress);
@@ -148,8 +167,8 @@ function App() {
     } else {
       console.log('address not recognized');
     }
-    console.log(transactions);
-    setRows(transactions);
+    // console.log(transactions);
+    // setRows(transactions);
   }
 
   // React.useEffect(() => {
@@ -185,8 +204,8 @@ function App() {
                   <Text>
                     The Escrow Collateral option approves the Derivative Provider smart contract to transfer the collateral cost in USDC from the caller's wallet, then executes the actual transfer. Collateral must be deposited before contract purchase.
                   </Text><Text>
-                  The Purchase Contract option approves the smart contract to transfer the premium cost in USDC from the caller's wallet, then executes the actual transfer and instantiates a new Option contract.
-                    Deployment transaction details are logged below as they are confirmed.
+                    The Purchase Contract option approves the smart contract to transfer the premium cost in USDC from the caller's wallet, then executes the actual transfer and instantiates a new Option contract.
+                    Details of transactions executed by the Derivative Provider contract are logged below.
                     </Text>
                 </Col>
             </Grid>

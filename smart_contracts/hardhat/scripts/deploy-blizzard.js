@@ -7,18 +7,18 @@ const Providers = require(ProviderLogs);
 
 async function main() {
 
-  const CubanBlizzardDerivativeProvider = await hre.ethers.getContractFactory("CubanBlizzardDerivativeProvider");
+  const BlizzardDerivativeProvider = await hre.ethers.getContractFactory("BlizzardDerivativeProvider");
   var derivative_provider = null;
 
-  if ("CubanBlizzardDerivativeProvider" in Providers) {
-    provider = Providers.CubanBlizzardDerivativeProvider;
-    derivative_provider = await CubanBlizzardDerivativeProvider.attach(provider.address);
-    console.log("CubanBlizzardDerivativeProvider already deployed to:", provider.address);
+  if ("BlizzardDerivativeProvider" in Providers) {
+    provider = Providers.BlizzardDerivativeProvider;
+    derivative_provider = await BlizzardDerivativeProvider.attach(provider.address);
+    console.log("BlizzardDerivativeProvider already deployed to:", provider.address);
   } else {
-    derivative_provider = await CubanBlizzardDerivativeProvider.deploy();
+    derivative_provider = await BlizzardDerivativeProvider.deploy();
     await derivative_provider.deployed();
     var address = derivative_provider.address;
-    console.log("CubanBlizzardDerivativeProvider deployed to:", address);
+    console.log("BlizzardDerivativeProvider deployed to:", address);
 
     var owner = await derivative_provider.owner();
     console.log("Owner:", owner);
@@ -42,7 +42,7 @@ async function main() {
     var access = await derivative_provider.hasAccess(premium, 64);
     console.log("Access granted:", access);
 
-    Providers["CubanBlizzardDerivativeProvider"] = {"address": address, "types": {"CubanBlizzardOption": false},  "verified": false, "contracts": {}};
+    Providers["BlizzardDerivativeProvider"] = {"address": address, "types": {"BlizzardOption": false},  "verified": false, "contracts": {}};
     var deployment_content = JSON.stringify(Providers);
     try {
       fs.writeFileSync(ProviderLogs, deployment_content)

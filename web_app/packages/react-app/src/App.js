@@ -100,24 +100,24 @@ function App() {
     { field: 'timeStamp', headerName: 'Time', width: 120 },
   ];
 
-  useEffect(() => {
-    fetch("https://api-kovan.etherscan.io/api?module=account&action=txlist&address="+addresses.CubanBlizzardDerivativeProvider+"&startblock=0&endblock=99999999&sort=asc&apikey="+process.env.REACT_APP_ETHERSCAN_KEY)
-    .then(resp => resp.json())
-    .then(data => {
-      console.log(data)
-      dataSetter(data.result)})
-  }, []);
+  // useEffect(() => {
+  //   fetch("https://api-kovan.etherscan.io/api?module=account&action=txlist&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=99999999&sort=asc&apikey="+process.env.REACT_APP_ETHERSCAN_KEY)
+  //   .then(resp => resp.json())
+  //   .then(data => {
+  //     console.log(data)
+  //     dataSetter(data.result)})
+  // }, []);
 
-  async function dataSetter(data) {
-    var new_rows = []
-    for (const row of data) {
-      row["id"] = row["hash"];
-      delete row["hash"];
-      new_rows.push(row);
-    }
+  // async function dataSetter(data) {
+  //   var new_rows = []
+  //   for (const row of data) {
+  //     row["id"] = row["hash"];
+  //     delete row["hash"];
+  //     new_rows.push(row);
+  //   }
 
-    setRows(new_rows);
-  }
+  //   setRows(new_rows);
+  // }
 
   async function depositUSDC(_provider) {
     const defaultSigner = _provider.getSigner();
@@ -128,41 +128,41 @@ function App() {
       var amount = configs[defaultAddress].due;
       const usdc = new Contract(addresses.USDC, abis.erc20, defaultSigner);
   
-      var tx = await usdc.approve(addresses.CubanBlizzardDerivativeProvider, amount);
+      var tx = await usdc.approve(addresses.BlizzardDerivativeProvider, amount);
       await tx.wait();
       // transactions.push({id: tx.hash,  sender: defaultAddress, action: "Approve USDC spender", explorer: "https://kovan.etherscan.io/tx/" + tx.hash, time: Date.now() / 1000});
   
-      var allowance = await usdc.allowance(defaultAddress, addresses.CubanBlizzardDerivativeProvider);
+      var allowance = await usdc.allowance(defaultAddress, addresses.BlizzardDerivativeProvider);
       console.log("Contract USDC allowance:", allowance);
   
-      const CubanMainContract = new Contract(addresses.CubanBlizzardDerivativeProvider, abis.CubanBlizzardDerivativeProvider, defaultSigner);
+      const MainContract = new Contract(addresses.BlizzardDerivativeProvider, abis.BlizzardDerivativeProvider, defaultSigner);
   
       if (configs[defaultAddress].type === "provider") {
-        tx = await CubanMainContract.depositCollateral();
+        tx = await MainContract.depositCollateral();
         await tx.wait();
         console.log("Collateral deposited");
         // transactions.push([{"id": tx.hash,  "sender": defaultAddress, "action": "Deposit Collateral", "explorer": "https://kovan.etherscan.io/address/" + tx.hash, "time": Date.now() / 1000}]);
       } else if (configs[defaultAddress].type === "purchaser") {
-        tx = await CubanMainContract.depositPremium();
+        tx = await MainContract.depositPremium();
         await tx.wait();
         console.log("Contract purchased");
         // transactions.push([{"id": tx.hash,  "sender": defaultAddress, "action": "Purchase Contract", "explorer": "https://kovan.etherscan.io/address/" + tx.hash, "time": Date.now() / 1000}]);
       } 
       else if (configs[defaultAddress].type === "admin") {
-        tx = await CubanMainContract.depositCollateral();
+        tx = await MainContract.depositCollateral();
         await tx.wait();
         console.log("Collateral deposited");
         // transactions.push([{"time": Date.now() / 1000, "action": "Deposit Collateral", "tx_hash": tx}]);
-        tx = await CubanMainContract.depositPremium();
+        tx = await MainContract.depositPremium();
         await tx.wait();
         console.log("Contract purchased");
         // transactions.push([{"time": Date.now() / 1000, "action": "Purchase Contract", "tx_hash": tx}]);
   
-        const deployedAddress = await CubanMainContract.getContractAddress();
+        const deployedAddress = await MainContract.getContractAddress();
         console.log("Deployed contract address:", deployedAddress);
       }
   
-      var balance = await CubanMainContract.getUSDCBalance();
+      var balance = await MainContract.getUSDCBalance();
       console.log("Contract USDC balance:", balance);
     } else {
       console.log('address not recognized');
@@ -251,7 +251,7 @@ function App() {
                     rowsPerPageOptions={[5]}
                   />
                 </div>
-                <Link href={"https://kovan.etherscan.io/address/" + addresses.CubanBlizzardDerivativeProvider + "#code#F1#L1"} style={{ marginTop: "8px" }}> etherscan </Link>
+                <Link href={"https://kovan.etherscan.io/address/" + addresses.BlizzardDerivativeProvider + "#code#F1#L1"} style={{ marginTop: "8px" }}> etherscan </Link>
                 <Link href="https://github.com/Arbol-Project/Arbol-dApp" style={{ marginTop: "8px" }}> github </Link>
               </Col>
             </Grid>

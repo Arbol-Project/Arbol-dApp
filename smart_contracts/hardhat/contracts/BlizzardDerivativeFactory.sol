@@ -8,7 +8,7 @@ import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@chainlink/contracts/src/v0.8/SimpleWriteAccessController.sol";
 
 
-contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
+contract BlizzardDerivativeProvider is SimpleWriteAccessController {
     /**
      * @dev BlizzardDerivativeProvider contract for Dallas Snow Protection 21-22 Season
      */
@@ -21,7 +21,7 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
     address public constant LINK_ADDRESS = 0xa36085F69e2889c224210F603D836748e7dC0088;                          // Link token address on Ethereum Kovan
     address public constant USDC_ADDRESS = 0xe8AA8A60C9417d8fD59EB4378687dDCEEd29c1B4;                          // USDC token address on Ethereum Kovan
 
-    CubanBlizzardOption public blizzardContract;
+    BlizzardOption public blizzardContract;
     bool public collateralDeposited;
     bool public premiumDeposited;
     bool public contractPaidOut;
@@ -78,7 +78,7 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
         if (premiumDeposited && collateralDeposited) {
             // prevents function from allowing more than one round of collateral/premium/purchases
             collateralDeposited = false;
-            blizzardContract = new CubanBlizzardOption();
+            blizzardContract = new BlizzardOption();
             blizzardContract.initialize(ORACLE_PAYMENT, LINK_ADDRESS);
             blizzardContract.addOracleJob(0x58935F97aB874Bc4181Bc1A3A85FDE2CA80885cd, bytes32("63bb451d36754aab849577a73ce4eb7e"));
             string[] memory params = blizzardContract.getParameters();
@@ -240,7 +240,7 @@ contract CubanBlizzardDerivativeProvider is SimpleWriteAccessController {
 }
 
 
-contract CubanBlizzardOption is ChainlinkClient, ConfirmedOwner {
+contract BlizzardOption is ChainlinkClient, ConfirmedOwner {
     /**
      * @dev BlizzardOption contract for Dallas Snow Protection 21-22 Season
      */

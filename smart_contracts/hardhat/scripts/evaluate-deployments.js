@@ -27,7 +27,7 @@ async function main() {
             var tx = await derivative_provider.initiateContractEvaluation(cname);
             console.log("waiting...");
             await tx.wait();
-          } else if (pname == "CubanBlizzardDerivativeProvider") {
+          } else if (pname == "BlizzardDerivativeProvider") {
             var tx = await derivative_provider.initiateContractEvaluation();
             console.log("Waiting...");
             await tx.wait();

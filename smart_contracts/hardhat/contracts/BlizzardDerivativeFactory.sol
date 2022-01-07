@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.4;
 
 // need to set LINK_ADDRESS, USDC_ADDRESS, and oracles/jobs depending on network
 // also need to set LINK buffer back to 2x
@@ -12,7 +12,6 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
     /**
      * @dev BlizzardDerivativeProvider contract for Dallas Snow Protection 21-22 Season
      */
-    uint256 private constant ORACLE_PAYMENT = 1 * 10**14;                                                       // 0.0001 LINK
     uint256 public constant COLLATERAL_PAYMENT = 250000 * 10**6;                                                // 250,000 * 1 USDC
     uint256 public constant PREMIUM_PAYMENT = 10000 * 10**6;                                                    // 10,000 * 1 USDC
     address public constant ORACLE_BANK = 0x69640770407A09B166AED26B778699045B304768;                           // address of LINK provider for oracle requests
@@ -79,8 +78,6 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
             // prevents function from allowing more than one round of collateral/premium/purchases
             collateralDeposited = false;
             blizzardContract = new BlizzardOption();
-            blizzardContract.initialize(ORACLE_PAYMENT, LINK_ADDRESS);
-            blizzardContract.addOracleJob(0x58935F97aB874Bc4181Bc1A3A85FDE2CA80885cd, bytes32("63bb451d36754aab849577a73ce4eb7e"));
             string[] memory params = blizzardContract.getParameters();
             emit contractCreated(address(blizzardContract), "Dallas Mavs 2022-04-10 00:00:00", params);
         }
@@ -151,8 +148,8 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
         checkAccess 
     {
         LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);
-        uint256 oracle_mult = blizzardContract.getNumJobs();
-        require(link.transferFrom(ORACLE_BANK, address(blizzardContract), ORACLE_PAYMENT * oracle_mult), "unable to fund oracle request");
+        uint256 oracle_payment = blizzardContract.getOraclePayment();
+        require(link.transferFrom(ORACLE_BANK, address(blizzardContract), oracle_payment), "unable to fund oracle request");
         blizzardContract.requestPayoutEvaluation();
     }
 
@@ -246,7 +243,9 @@ contract BlizzardOption is ChainlinkClient, ConfirmedOwner {
      */
     using Chainlink for Chainlink.Request;
 
-    uint256 private oraclePayment;
+    uint256 private constant ORACLE_PAYMENT = 1 * 10**14;                                                       // 0.0001 LINK
+    address public constant LINK_ADDRESS = 0xa36085F69e2889c224210F603D836748e7dC0088;                          // Link token address on Ethereum Kovan
+
     mapping(bytes32 => uint256) public oracleMap;
     address[] public oracles;
     bytes32[] public jobs;
@@ -277,23 +276,9 @@ contract BlizzardOption is ChainlinkClient, ConfirmedOwner {
             "imperial_units", "True", 
             "dates", '["2021-10-06", "2021-10-08", "2021-10-26", "2021-10-28", "2021-10-31", "2021-11-02", "2021-11-06", "2021-11-08", "2021-11-15", "2021-11-27", "2021-11-29", "2021-12-03", "2021-12-04", "2021-12-07", "2021-12-13", "2021-12-15", "2021-12-21", "2021-12-23", "2022-01-03", "2022-01-05", "2022-01-09", "2022-01-15", "2022-01-17", "2022-01-19", "2022-01-20", "2022-01-23", "2022-01-29", "2022-02-02", "2022-02-04", "2022-02-06", "2022-02-08", "2022-02-10", "2022-02-12", "2022-03-03", "2022-03-05", "2022-03-07", "2022-03-09", "2022-03-21", "2022-03-23", "2022-03-27", "2022-03-29", "2022-04-08", "2022-04-10"]'
             ];
-    }
-
-    /**
-     * @notice Initializes blizzard contract terms
-     * @dev Can only be called by the contract owner
-     * @param _oraclePayment uint256 oracle payment amount
-     * @param _link address of LINK token on deployed network
-     */
-    function initialize(
-        uint256 _oraclePayment,
-        address _link
-    ) 
-        public 
-        onlyOwner 
-    {
-        oraclePayment = _oraclePayment;
-        setChainlinkToken(_link);
+        setChainlinkToken(LINK_ADDRESS);
+        oracles.push(0x58935F97aB874Bc4181Bc1A3A85FDE2CA80885cd);
+        jobs.push(bytes32("63bb451d36754aab849577a73ce4eb7e"));
     }
 
     /**
@@ -356,15 +341,15 @@ contract BlizzardOption is ChainlinkClient, ConfirmedOwner {
     }
 
     /**
-     * @notice Get the number of contract jobs
-     * @return uint256 number of jobs
+     * @notice Get the oracle payment (number of contract jobs * payment amount)
+     * @return uint256 total oracle payment value
      */
-    function getNumJobs() 
+    function getOraclePayment() 
         public 
         view 
         returns (uint256) 
     {
-        return jobs.length;
+        return ORACLE_PAYMENT * jobs.length;
     }
 
     /**
@@ -377,7 +362,6 @@ contract BlizzardOption is ChainlinkClient, ConfirmedOwner {
     {
         require(1649649600 < block.timestamp, "unable to call until coverage period has ended");
         // do all looped reads from memory instead of storage
-        uint256 _oraclePayment = oraclePayment;
         address[] memory _oracles = oracles;
         bytes32[] memory _jobs = jobs;
         string[] memory _parameters = parameters;
@@ -386,7 +370,7 @@ contract BlizzardOption is ChainlinkClient, ConfirmedOwner {
         for (uint256 i = 0; i != _oracles.length; i += 1) {
             Chainlink.Request memory req = buildChainlinkRequest(_jobs[i], address(this), this.fulfillPayoutEvaluation.selector);
             req.addStringArray("parameters", _parameters);
-            sendChainlinkRequestTo(_oracles[i], req, _oraclePayment);
+            sendChainlinkRequestTo(_oracles[i], req, ORACLE_PAYMENT);
             requests += 1;
             }
         requestsPending = requests;

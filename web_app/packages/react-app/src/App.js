@@ -100,24 +100,24 @@ function App() {
     { field: 'timeStamp', headerName: 'Time', width: 120 },
   ];
 
-  // useEffect(() => {
-  //   fetch("https://api-kovan.etherscan.io/api?module=account&action=txlist&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=99999999&sort=asc&apikey="+process.env.REACT_APP_ETHERSCAN_KEY)
-  //   .then(resp => resp.json())
-  //   .then(data => {
-  //     console.log(data)
-  //     dataSetter(data.result)})
-  // }, []);
+  useEffect(() => {
+    fetch("https://api-kovan.etherscan.io/api?module=account&action=txlist&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=99999999&sort=asc&apikey="+process.env.REACT_APP_ETHERSCAN_KEY)
+    .then(resp => resp.json())
+    .then(data => {
+      console.log(data)
+      dataSetter(data.result)})
+  }, []);
 
-  // async function dataSetter(data) {
-  //   var new_rows = []
-  //   for (const row of data) {
-  //     row["id"] = row["hash"];
-  //     delete row["hash"];
-  //     new_rows.push(row);
-  //   }
+  async function dataSetter(data) {
+    var new_rows = []
+    for (const row of data) {
+      row["id"] = row["hash"];
+      delete row["hash"];
+      new_rows.push(row);
+    }
 
-  //   setRows(new_rows);
-  // }
+    setRows(new_rows);
+  }
 
   async function depositUSDC(_provider) {
     const defaultSigner = _provider.getSigner();
@@ -158,11 +158,11 @@ function App() {
         console.log("Contract purchased");
         // transactions.push([{"time": Date.now() / 1000, "action": "Purchase Contract", "tx_hash": tx}]);
   
-        const deployedAddress = await MainContract.getContractAddress();
+        const deployedAddress = await MainContract.blizzardContract();
         console.log("Deployed contract address:", deployedAddress);
       }
   
-      var balance = await MainContract.getUSDCBalance();
+      var balance = await usdc.balanceOf(MainContract.address);
       console.log("Contract USDC balance:", balance);
     } else {
       console.log('address not recognized');

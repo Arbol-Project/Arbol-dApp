@@ -1315,6 +1315,10 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
 
     BlizzardOption public blizzardContract;
 
+
+    uint256 public echidna_init_provider_balance;
+    uint256 public echidna_init_purchaser_balance;
+
     /**
      * @dev Event to log when a contract is created
      */
@@ -1327,6 +1331,11 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
         collateralDeposited = false;
         premiumDeposited = false;
         contractPaidOut = false;
+
+        LinkTokenInterface stablecoin = LinkTokenInterface(STABLECOIN_ADDRESS);  
+        echidna_init_provider_balance = stablecoin.balanceOf(COLLATERAL_ADDRESS);
+        echidna_init_purchaser_balance = stablecoin.balanceOf(PREMIUM_ADDRESS);
+
     }
 
     /**
@@ -1511,12 +1520,15 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
             return !premiumDeposited && !contractPaidOut;
         }
         if (!premiumDeposited) {
-            return !contractPaidOut && stablecoin.balanceOf(address(this)) >= COLLATERAL_PAYMENT;
+            return !contractPaidOut && stablecoin.balanceOf(address(this)) == COLLATERAL_PAYMENT;
         }
         if (!contractPaidOut) {
-            return stablecoin.balanceOf(address(this)) >= COLLATERAL_PAYMENT + PREMIUM_PAYMENT;   
+            return stablecoin.balanceOf(address(this)) == COLLATERAL_PAYMENT + PREMIUM_PAYMENT;   
         } 
-        return stablecoin.balanceOf(address(this)) == 0;
+        if (payout > 0) {
+          return stablecoin.balanceOf(PREMIUM_ADDRESS) == echidna_init_purchaser_balance + payout && stablecoin.balanceOf(PROVIDER_ADDRESS) == echidna_init_provider_balance + COLLATERAL_PAYMENT + PREMIUM_PAYMENT - payout;
+        }
+        return stablecoin.balanceOf(address(this)) == 0 && stablecoin.balanceOf(PROVIDER_ADDRESS) == echidna_init_provider_balance + COLLATERAL_PAYMENT + PREMIUM_PAYMENT;
     }
 
 

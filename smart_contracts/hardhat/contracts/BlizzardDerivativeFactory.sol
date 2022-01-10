@@ -54,8 +54,8 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
     {
         require(!premiumDeposited && !collateralDeposited, "unable to deposit premium more than once");
         LinkTokenInterface stablecoin = LinkTokenInterface(STABLECOIN_ADDRESS);  
-        require(stablecoin.transferFrom(msg.sender, address(this), COLLATERAL_PAYMENT), "unable to deposit collateral");
         collateralDeposited = true;
+        require(stablecoin.transferFrom(msg.sender, address(this), COLLATERAL_PAYMENT), "unable to deposit collateral");
     }
 
     /**
@@ -68,8 +68,8 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
     {
         require(!premiumDeposited && collateralDeposited, "unable to deposit premium until collateral has been deposited");
         LinkTokenInterface stablecoin = LinkTokenInterface(STABLECOIN_ADDRESS);
-        require(stablecoin.transferFrom(msg.sender, address(this), PREMIUM_PAYMENT), "unable to deposit premium");
         premiumDeposited = true;
+        require(stablecoin.transferFrom(msg.sender, address(this), PREMIUM_PAYMENT), "unable to deposit premium");
         newContract();
     }
 
@@ -101,11 +101,11 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
         require(evalStatus && !contractPaidOut, "unable to fulfill payout before contract is evaluated or after contract is paid out");
         LinkTokenInterface stablecoin = LinkTokenInterface(STABLECOIN_ADDRESS);
         uint256 payout = blizzardContract.payout();
+        contractPaidOut = true;
         if (payout > 0) {
             require(stablecoin.transfer(PREMIUM_ADDRESS, payout), "unable to payout to buyer");
         }
         require(stablecoin.transfer(COLLATERAL_ADDRESS, stablecoin.balanceOf(address(this))), "unable to return final balance to provider");
-        contractPaidOut = true;
     }
 
     /**

@@ -205,7 +205,7 @@ function App() {
                     The Escrow Collateral option approves the Derivative Provider smart contract to transfer the collateral cost in USDC from the caller's wallet, then executes the actual transfer. Collateral must be deposited before contract purchase.
                   </Text><Text>
                     The Purchase Contract option approves the smart contract to transfer the premium cost in USDC from the caller's wallet, then executes the actual transfer and instantiates a new Option contract.
-                    Details of transactions executed by the Derivative Provider contract are logged below.
+                    Derivative Provider transaction history is logged below, refresh to see updates.
                     </Text>
                 </Col>
             </Grid>

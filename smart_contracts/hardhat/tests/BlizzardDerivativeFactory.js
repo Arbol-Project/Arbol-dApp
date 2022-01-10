@@ -7,11 +7,15 @@
 // 0 payout job : "235c23a24e7c4d729f89bbccdeb83fa5"
 // 250000000 payout job : "c649e935faec47c9be868580a1df4889"
 
-const { abis } = require(path.join(process.cwd(), "../../web_app/packages/contracts/src/abis.js"));
-const { addresses } = require(path.join(process.cwd(), "../../web_app/packages/contracts/src/addresses.js"));
+// tests are meant to be run on Kovan
 
+
+const delay = ms => new Promise(res => setTimeout(res, ms));
+const path = require("path");
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
+const ERC20ABI = require(path.join(process.cwd(), "../../web_app/packages/contracts/src/abis/erc20.json"));
+
 
 describe("BlizzardDerivativeFactory Tests", function () {
 
@@ -27,8 +31,11 @@ describe("BlizzardDerivativeFactory Tests", function () {
   before(async function () {
     // get interfaces for LINK token and stable coin to approve transfers
     [ admin ] = await ethers.getSigners();
-    LinkToken = await ethers.getContractAt(addresses.LINK, abis.erc20, admin);
-    StableCoin = await ethers.getContractAt(addresses.USDC, abis.erc20, admin);
+    LinkToken = new ethers.Contract("0xa36085F69e2889c224210F603D836748e7dC0088", ERC20ABI, admin);
+
+    // 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+
+    StableCoin = new ethers.Contract("0xe8AA8A60C9417d8fD59EB4378687dDCEEd29c1B4", ERC20ABI, admin);
   });
 
   beforeEach(async function () {
@@ -37,34 +44,57 @@ describe("BlizzardDerivativeFactory Tests", function () {
     ProviderContract = await BlizzardDerivativeProvider.deploy();
     await ProviderContract.deployed();
 
-    collateral = await BlizzardDerivativeProvider.COLLATERAL_PAYMENT();
-    premium = await BlizzardDerivativeProvider.PREMIUM_PAYMENT();
-    var tx = await StableCoin.approve(BlizzardDerivativeProvider.address, collateral + premium);
+    provider = await ProviderContract.COLLATERAL_ADDRESS();
+    purchaser = await ProviderContract.PREMIUM_ADDRESS();
+    collateral = await ProviderContract.COLLATERAL_PAYMENT();
+    premium = await ProviderContract.PREMIUM_PAYMENT();
+
+    var tx = await StableCoin.approve(ProviderContract.address, collateral.add(premium));
     await tx.wait();
 
-    tx = await LinkToken.approve(BlizzardDerivativeProvider.address, 1000);
+    tx = await LinkToken.approve(ProviderContract.address, 1000);
     await tx.wait();
-
-    provider = BlizzardDerivativeProvider.COLLATERAL_ADDRESS();
-    purchaser = BlizzardDerivativeProvider.PREMIUM_ADDRESS();
   });
 
   describe("Unit", function () {
-  
+
     describe("Deployment State", function () {
 
       it("Should have correct parameters", async function () {
-        expect(ProviderContract.getContractParameters()).to.equal(params);
+
+        tx = await ProviderContract.addAccess(admin.address);
+        await tx.wait();
+
+        var access = await ProviderContract.hasAccess(admin.address, 64);
+        expect(access).to.equal(true);
+
+        tx = await ProviderContract.depositCollateral();
+        await tx.wait();
+
+        tx = await ProviderContract.depositPremium();
+        await tx.wait();
+
+        var parameters = await ProviderContract.getContractParameters();
+        for (var i = 0; i < parameters.length; i++) {
+          expect(parameters[i]).to.equal(params[i]);
+        }
       });
 
-      it("Should have access enabled and grant access to appropriate parties", async function () {
+      it("Should have access enabled and need to grant access to appropriate parties", async function () {
 
-        expect(ProviderContract.checkEnabled()).to.equal(true);
-        expect(ProviderContract.hasAccess(admin)).to.equal(false);
-        expect(ProviderContract.hasAccess(purchaser)).to.equal(false);
-        expect(ProviderContract.hasAccess(provider)).to.equal(false);
+        var accessCheckEnabled = await ProviderContract.checkEnabled();
+        expect(accessCheckEnabled).to.equal(true);
 
-        tx = await ProviderContract.addAccess(admin);
+        var adminAccess = await ProviderContract.hasAccess(admin.address, 64);
+        expect(adminAccess).to.equal(false);
+
+        var purchaserAccess = await ProviderContract.hasAccess(purchaser, 64);
+        expect(purchaserAccess).to.equal(false);
+
+        var providerAccess = await ProviderContract.hasAccess(provider, 64);
+        expect(providerAccess).to.equal(false);
+
+        tx = await ProviderContract.addAccess(admin.address);
         await tx.wait();
           
         tx = await ProviderContract.addAccess(provider);
@@ -73,76 +103,103 @@ describe("BlizzardDerivativeFactory Tests", function () {
         tx = await ProviderContract.addAccess(purchaser);
         await tx.wait();
 
-        expect(ProviderContract.hasAccess(admin)).to.equal(true);
-        expect(ProviderContract.hasAccess(purchaser)).to.equal(true);
-        expect(ProviderContract.hasAccess(provider)).to.equal(true);
+        adminAccess = await ProviderContract.hasAccess(admin.address, 64);
+        expect(adminAccess).to.equal(true);
+
+        purchaserAccess = await ProviderContract.hasAccess(purchaser, 64);
+        expect(purchaserAccess).to.equal(true);
+
+        providerAccess = await ProviderContract.hasAccess(provider, 64);
+        expect(providerAccess).to.equal(true);
       });
     });
 
     describe("Call Ordering", function () {
 
-      it("Should only allow (once) depositCollateral => depositPremium => initiateContractEvaluation => fulfillContractEvaluation", async function () {
-
-        tx = await ProviderContract.addAccess(admin);
-        await tx.wait();
+      it("Should only allow depositCollateral => depositPremium => initiateContractEvaluation => fulfillContractEvaluation and only once", async function () {
         
-        expect(ProviderContract.depositPremium()).to.be.reverted;
-        expect(ProviderContract.initiateContractEvaluation()).to.be.reverted;
-        expect(ProviderContract.fulfillcontractEvaluation()).to.be.reverted;
+        expect(_ => errCall(ProviderContract.depositCollateral())).to.throw();
+        expect(_ => errCall(ProviderContract.depositPremium())).to.throw();
+        expect(_ => errCall(ProviderContract.initiateContractEvaluation())).to.throw();
+        expect(_ => errCall(ProviderContract.fulfillContractEvaluation())).to.throw();
 
-        expect(ProviderContract.collateralDeposited()).to.equal(false);
-        var tx = await ProviderContract.depositCollateral();
+        tx = await ProviderContract.addAccess(admin.address);
         await tx.wait();
-        expect(ProviderContract.collateralDeposited()).to.equal(true);
 
-        expect(ProviderContract.depositCollateral()).to.be.reverted;
-        expect(ProviderContract.initiateContractEvaluation()).to.be.reverted;
-        expect(ProviderContract.fulfillcontractEvaluation()).to.be.reverted;
+        expect(_ => errCall(ProviderContract.depositPremium())).to.throw();
+        expect(_ => errCall(ProviderContract.initiateContractEvaluation())).to.throw();
+        expect(_ => errCall(ProviderContract.fulfillContractEvaluation())).to.throw();
 
-        expect(ProviderContract.premiumDeposited()).to.equal(false);
+        var collateralDeposited = await ProviderContract.collateralDeposited();
+        expect(collateralDeposited).to.equal(false);
+        tx = await ProviderContract.depositCollateral();
+        await tx.wait();
+        collateralDeposited = await ProviderContract.collateralDeposited();
+        expect(collateralDeposited).to.equal(true);
+
+        expect(_ => errCall(ProviderContract.depositCollateral())).to.throw();
+        expect(_ => errCall(ProviderContract.initiateContractEvaluation())).to.throw();
+        expect(_ => errCall(ProviderContract.fulfillContractEvaluation())).to.throw();
+
+        var premiumDeposited = await ProviderContract.premiumDeposited();
+        expect(premiumDeposited).to.equal(false);
         tx = await ProviderContract.depositPremium();
         await tx.wait();
-        expect(ProviderContract.premiumDeposited()).to.equal(true);
+        premiumDeposited = await ProviderContract.premiumDeposited();
+        expect(premiumDeposited).to.equal(true);
 
-        expect(ProviderContract.depositCollateral()).to.be.reverted;
-        expect(ProviderContract.depositPremium()).to.be.reverted;
-        expect(ProviderContract.fulfillcontractEvaluation()).to.be.reverted;
+        expect(_ => errCall(ProviderContract.depositCollateral())).to.throw();
+        expect(_ => errCall(ProviderContract.depositPremium())).to.throw();
+        expect(_ => errCall(ProviderContract.fulfillContractEvaluation())).to.throw();
 
-        expect(ProviderContract.getContractEvaluated()).to.equal(false);
+        var contractEvaluated = await ProviderContract.getContractEvaluated();
+        expect(contractEvaluated).to.equal(false);
         tx = await ProviderContract.initiateContractEvaluation();
         await tx.wait();
-        expect(ProviderContract.getContractEvaluated()).to.equal(true);
+        await delay(30*1000);
+        contractEvaluated = await ProviderContract.getContractEvaluated();
+        expect(contractEvaluated).to.equal(true);
 
-        expect(ProviderContract.depositCollateral()).to.be.reverted;
-        expect(ProviderContract.depositPremium()).to.be.reverted;
-        expect(ProviderContract.initiateContractEvaluation()).to.be.reverted;
+        expect(_ => errCall(ProviderContract.depositCollateral())).to.throw();
+        expect(_ => errCall(ProviderContract.depositPremium())).to.throw();
+        expect(_ => errCall(ProviderContract.initiateContractEvaluation())).to.throw();
 
-        expect(ProviderContract.contractPaidOut()).to.equal(false);
-        tx = await ProviderContract.fulfillcontractEvaluation();
+        var contractPaidOut = await ProviderContract.contractPaidOut();
+        expect(contractPaidOut).to.equal(false);
+        tx = await ProviderContract.fulfillContractEvaluation();
         await tx.wait();
-        expect(ProviderContract.contractPaidOut()).to.equal(true);
-
-        expect(ProviderContract.depositCollateral()).to.be.reverted;
-        expect(ProviderContract.depositPremium()).to.be.reverted;
-        expect(ProviderContract.initiateContractEvaluation()).to.be.reverted;
-        expect(ProviderContract.fulfillcontractEvaluation()).to.be.reverted;
+        contractPaidOut = await ProviderContract.contractPaidOut();
+        expect(contractPaidOut).to.equal(true);
+        
+        expect(_ => errCall(ProviderContract.depositCollateral())).to.throw();
+        expect(_ => errCall(ProviderContract.depositPremium())).to.throw();
+        expect(_ => errCall(ProviderContract.initiateContractEvaluation())).to.throw();
+        expect(_ => errCall(ProviderContract.fulfillContractEvaluation())).to.throw();
       });
     });
   });
   
   describe("Integration", function () {
 
-    it("Should have appropriate LINK and stable coin allowances and 0 initial balance", async function () {
-      expect(StableCoin.balanceOf(ProviderContract.address)).to.equal(0);
-      expect(StableCoin.allowance(ProviderContract.address)).to.equal(collateral + premium);
-      expect(LinkToken.allowance(ProviderContract.address)).to.equal(1000);
+    describe("Initial Balances", async function () {
+
+      it("Should have appropriate LINK and stable coin allowances and 0 initial balance", async function () {
+        var providerBalance = await StableCoin.balanceOf(ProviderContract.address);
+        expect(providerBalance.toString()).to.equal(new ethers.BigNumber.from(0).toString());
+
+        var StableAllowance = await StableCoin.allowance(admin.address, ProviderContract.address);
+        expect(StableAllowance.toString()).to.equal(collateral.add(premium).toString());
+
+        var LinkAllowance = await LinkToken.allowance(admin.address, ProviderContract.address);
+        expect(LinkAllowance.toString()).to.equal(new ethers.BigNumber.from(1000).toString());
+      });
     });
 
     describe("Payout Scenario", function () {
 
       it('Should transfer collateral to purchaser and premium to provider', async () => {
 
-        tx = await ProviderContract.addAccess(admin);
+        tx = await ProviderContract.addAccess(admin.address);
         await tx.wait();
 
         var prevProviderBalance = await StableCoin.balanceOf(provider);
@@ -160,13 +217,22 @@ describe("BlizzardDerivativeFactory Tests", function () {
 
         tx = await ProviderContract.initiateContractEvaluation();
         await tx.wait();
-        tx = await ProviderContract.fulfillcontractEvaluation();
+        await delay(30*1000);
+
+        var payout = await ProviderContract.getContractPayout();
+        expect(payout.toString()).to.equal(collateral.toString());
+
+        tx = await ProviderContract.fulfillContractEvaluation();
         await tx.wait();
 
-        expect(ProviderContract.getContractPayout()).to.equal(collateral);
-        expect(StableCoin.balanceOf(provider)).to.equal(prevProviderBalance + premium);
-        expect(StableCoin.balanceOf(purchaser)).to.equal(prevPurchaserBalance + collateral);
-        expect(StableCoin.balanceOf(ProviderContract.address)).to.equal(0);
+        var providerBalance = await StableCoin.balanceOf(provider);
+        expect(providerBalance.toString()).to.equal(prevProviderBalance.add(premium).toString());
+
+        var purchaserBalance = await StableCoin.balanceOf(purchaser);
+        expect(purchaserBalance.toString()).to.equal(collateral.add(prevPurchaserBalance).toString());
+
+        var contractBalance = await StableCoin.balanceOf(ProviderContract.address);
+        expect(contractBalance.toString()).to.equal(new ethers.BigNumber.from(0).toString());
       });
     });
 
@@ -174,7 +240,7 @@ describe("BlizzardDerivativeFactory Tests", function () {
 
       it('Should transfer all funds to provider', async () => {
 
-        tx = await ProviderContract.addAccess(admin);
+        tx = await ProviderContract.addAccess(admin.address);
         await tx.wait();
 
         var prevProviderBalance = await StableCoin.balanceOf(provider);
@@ -192,13 +258,22 @@ describe("BlizzardDerivativeFactory Tests", function () {
 
         tx = await ProviderContract.initiateContractEvaluation();
         await tx.wait();
-        tx = await ProviderContract.fulfillcontractEvaluation();
+        await delay(30*1000);
+
+        var payout = await ProviderContract.getContractPayout();
+        expect(payout.toString()).to.equal(new ethers.BigNumber.from(0).toString());
+
+        tx = await ProviderContract.fulfillContractEvaluation();
         await tx.wait();
 
-        expect(ProviderContract.getContractPayout()).to.equal(0);
-        expect(StableCoin.balanceOf(provider)).to.equal(prevProviderBalance + collateral + premium);
-        expect(StableCoin.balanceOf(purchaser)).to.equal(prevPurchaserBalance);
-        expect(StableCoin.balanceOf(ProviderContract.address)).to.equal(0);
+        var providerBalance = await StableCoin.balanceOf(provider);
+        expect(providerBalance.toString()).to.equal(collateral.add(premium.add(prevProviderBalance).toString()));
+
+        var purchaserBalance = await StableCoin.balanceOf(purchaser);
+        expect(purchaserBalance.toString()).to.equal(prevPurchaserBalance.toString());
+
+        var contractBalance = await StableCoin.balanceOf(ProviderContract.address);
+        expect(contractBalance.toString()).to.equal(new ethers.BigNumber.from(0).toString());
       });
     });
   });

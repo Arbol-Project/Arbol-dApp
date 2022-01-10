@@ -14,7 +14,7 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
     /**
      * @dev BlizzardDerivativeProvider contract for Dallas Snow Protection 21-22 Season
      */
-    uint256 private constant DECIMALS = 0;                                                                       // Decimals for chosen stablecoin
+    uint256 private constant DECIMALS = 3;                                                                       // Decimals for chosen stablecoin
     address private constant LINK_ADDRESS = 0xa36085F69e2889c224210F603D836748e7dC0088;                          // Link token address on Ethereum Kovan
     address private constant STABLECOIN_ADDRESS = 0xe8AA8A60C9417d8fD59EB4378687dDCEEd29c1B4;                    // Stablecoin/USDC token address on Ethereum Kovan
     

@@ -1494,6 +1494,45 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
             _result := mload(add(_source, 32))
         }
     }
+
+
+
+
+
+
+
+
+
+
+
+    function echidna_state_balances() public view returns(bool) {
+        LinkTokenInterface stablecoin = LinkTokenInterface(STABLECOIN_ADDRESS);
+        if (!collateralDeposited) {
+            return !premiumDeposited && !contractPaidOut;
+        }
+        if (!premiumDeposited) {
+            return !contractPaidOut && stablecoin.balanceOf(address(this)) >= COLLATERAL_PAYMENT;
+        }
+        if (!contractPaidOut) {
+            return stablecoin.balanceOf(address(this)) >= COLLATERAL_PAYMENT + PREMIUM_PAYMENT;   
+        } 
+        return stablecoin.balanceOf(address(this)) == 0;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
 
@@ -1656,25 +1695,5 @@ contract BlizzardOption is ChainlinkClient, ConfirmedOwner {
         returns (uint256) 
     {
         return ORACLE_PAYMENT * jobs.length;
-    }
-}
-
-
-contract FuzzProvider is BlizzardDerivativeProvider {
-    function echidna_state_balances() public view returns(bool) {
-        LinkTokenInterface stablecoin = LinkTokenInterface(STABLECOIN_ADDRESS);
-        if (!collateralDeposited) {
-            return !premiumDeposited && !contractEvaluated && !contractPaidOut && stablecoin.balanceOf(address(this)) <= COLLATERAL_PAYMENT;
-        }
-        if (!premiumDeposited) {
-            return !contractEvaluated && !contractPaidOut && stablecoin.balanceOf(address(this)) >= COLLATERAL_PAYMENT;
-        }
-        if (!contractEvaluated) {
-            return !contractPaidOut && stablecoin.balanceOf(address(this)) >= COLLATERAL_PAYMENT + PREMIUM_PAYMENT;
-        }
-        if (!contractPaidOut) {
-            return stablecoin.balanceOf(address(this)) >= COLLATERAL_PAYMENT + PREMIUM_PAYMENT;   
-        } 
-        return stablecoin.balanceOf(address(this)) == 0;
     }
 }

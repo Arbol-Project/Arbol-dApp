@@ -1501,16 +1501,6 @@ contract BlizzardDerivativeProviderFlatFuzz is SimpleWriteAccessController {
         }
     }
 
-
-
-
-
-
-
-
-
-
-
     function echidna_state_balances() public view returns(bool) {
         LinkTokenInterface stablecoin = LinkTokenInterface(STABLECOIN_ADDRESS);
         if (!collateralDeposited) {
@@ -1527,21 +1517,6 @@ contract BlizzardDerivativeProviderFlatFuzz is SimpleWriteAccessController {
         }
         return stablecoin.balanceOf(address(this)) == 0 && stablecoin.balanceOf(COLLATERAL_ADDRESS) == _init_provider_balance + COLLATERAL_PAYMENT + PREMIUM_PAYMENT;
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
 
 

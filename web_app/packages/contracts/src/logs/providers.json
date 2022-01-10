@@ -42,11 +42,13 @@
         }
     },
     "BlizzardDerivativeProvider": {
-        "address": "0xBaDC207d07b53D21812e27d50d5976463b455dA5",
+        "address": "0xBbe181942dd02F0Bf549c8543D9f91bCe64e63a8",
         "types": {
-            "BlizzardOption": false
+            "BlizzardOption": true
         },
         "verified": true,
-        "contracts": {}
+        "contracts": {
+            "BlizzardOptionTest": "0x323CAE7397ABA727C37eC8221E4a4616c6e17972"
+        }
     }
 }

@@ -29,6 +29,7 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
     bool public contractPaidOut;
 
     BlizzardOption public blizzardContract;
+    BlizzardOption private testContract;
 
     /**
      * @dev Event to log when a contract is created
@@ -42,6 +43,29 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
         collateralDeposited = false;
         premiumDeposited = false;
         contractPaidOut = false;
+    }
+
+    /**
+     * @dev Deploy test option contract for verification purposes
+     */
+    function deployVerificationContract()
+        external
+        onlyOwner
+    {
+        testContract = new BlizzardOption();
+    }
+
+    /**
+     * @dev Get address of deployed test contract for verification
+     * @return address of contract
+     */
+    function getVerificationAddress()
+        external
+        onlyOwner
+        view
+        returns (address)
+    {
+        return address(testContract);
     }
 
     /**

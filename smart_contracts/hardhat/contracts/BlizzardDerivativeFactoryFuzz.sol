@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
+
 // File: @chainlink/contracts/src/v0.8/interfaces/AccessControllerInterface.sol
 
 
@@ -1655,5 +1656,25 @@ contract BlizzardOption is ChainlinkClient, ConfirmedOwner {
         returns (uint256) 
     {
         return ORACLE_PAYMENT * jobs.length;
+    }
+}
+
+
+contract FuzzProvider is BlizzardDerivativeProvider {
+    function echidna_state_balances() public view returns(bool) {
+        LinkTokenInterface stablecoin = LinkTokenInterface(STABLECOIN_ADDRESS);
+        if (!collateralDeposited) {
+            return !premiumDeposited && !contractEvaluated && !contractPaidOut && stablecoin.balanceOf(address(this)) <= COLLATERAL_PAYMENT;
+        }
+        if (!premiumDeposited) {
+            return !contractEvaluated && !contractPaidOut && stablecoin.balanceOf(address(this)) >= COLLATERAL_PAYMENT;
+        }
+        if (!contractEvaluated) {
+            return !contractPaidOut && stablecoin.balanceOf(address(this)) >= COLLATERAL_PAYMENT + PREMIUM_PAYMENT;
+        }
+        if (!contractPaidOut) {
+            return stablecoin.balanceOf(address(this)) >= COLLATERAL_PAYMENT + PREMIUM_PAYMENT;   
+        } 
+        return stablecoin.balanceOf(address(this)) == 0;
     }
 }

@@ -1295,7 +1295,7 @@ pragma solidity ^0.8.4;
 
 
 
-contract BlizzardDerivativeProvider is SimpleWriteAccessController {
+contract BlizzardDerivativeProviderFlatFuzz is SimpleWriteAccessController {
     /**
      * @dev BlizzardDerivativeProvider contract for Dallas Snow Protection 21-22 Season
      */
@@ -1313,11 +1313,11 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
     bool public premiumDeposited;
     bool public contractPaidOut;
 
-    BlizzardOption public blizzardContract;
+    BlizzardOptionFlatFuzz public blizzardContract;
 
 
-    uint256 public echidna_init_provider_balance;
-    uint256 public echidna_init_purchaser_balance;
+    uint256 public _init_provider_balance;
+    uint256 public _init_purchaser_balance;
 
     /**
      * @dev Event to log when a contract is created
@@ -1331,11 +1331,6 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
         collateralDeposited = false;
         premiumDeposited = false;
         contractPaidOut = false;
-
-        LinkTokenInterface stablecoin = LinkTokenInterface(STABLECOIN_ADDRESS);  
-        echidna_init_provider_balance = stablecoin.balanceOf(COLLATERAL_ADDRESS);
-        echidna_init_purchaser_balance = stablecoin.balanceOf(PREMIUM_ADDRESS);
-
     }
 
     /**
@@ -1346,8 +1341,10 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
         external
         checkAccess
     {
-        require(!premiumDeposited && !collateralDeposited, "unable to deposit premium more than once");
         LinkTokenInterface stablecoin = LinkTokenInterface(STABLECOIN_ADDRESS);  
+        _init_provider_balance = stablecoin.balanceOf(COLLATERAL_ADDRESS);
+        _init_purchaser_balance = stablecoin.balanceOf(PREMIUM_ADDRESS);
+        require(!premiumDeposited && !collateralDeposited, "unable to deposit premium more than once");
         collateralDeposited = true;
         require(stablecoin.transferFrom(msg.sender, address(this), COLLATERAL_PAYMENT), "unable to deposit collateral");
     }
@@ -1438,7 +1435,7 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
     function newContract() 
         private
     {
-        blizzardContract = new BlizzardOption();
+        blizzardContract = new BlizzardOptionFlatFuzz();
         string[] memory params = blizzardContract.getParameters();
         emit contractCreated(address(blizzardContract), "Dallas Mavs 2022-04-10 00:00:00", params);
     }
@@ -1525,10 +1522,10 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
         if (!contractPaidOut) {
             return stablecoin.balanceOf(address(this)) == COLLATERAL_PAYMENT + PREMIUM_PAYMENT;   
         } 
-        if (payout > 0) {
-          return stablecoin.balanceOf(PREMIUM_ADDRESS) == echidna_init_purchaser_balance + payout && stablecoin.balanceOf(PROVIDER_ADDRESS) == echidna_init_provider_balance + COLLATERAL_PAYMENT + PREMIUM_PAYMENT - payout;
+        if (blizzardContract.payout() > 0) {
+          return stablecoin.balanceOf(PREMIUM_ADDRESS) == _init_purchaser_balance + blizzardContract.payout() && stablecoin.balanceOf(COLLATERAL_ADDRESS) == _init_provider_balance + COLLATERAL_PAYMENT + PREMIUM_PAYMENT - blizzardContract.payout();
         }
-        return stablecoin.balanceOf(address(this)) == 0 && stablecoin.balanceOf(PROVIDER_ADDRESS) == echidna_init_provider_balance + COLLATERAL_PAYMENT + PREMIUM_PAYMENT;
+        return stablecoin.balanceOf(address(this)) == 0 && stablecoin.balanceOf(COLLATERAL_ADDRESS) == _init_provider_balance + COLLATERAL_PAYMENT + PREMIUM_PAYMENT;
     }
 
 
@@ -1548,7 +1545,7 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
 }
 
 
-contract BlizzardOption is ChainlinkClient, ConfirmedOwner {
+contract BlizzardOptionFlatFuzz is ChainlinkClient, ConfirmedOwner {
     /**
      * @dev BlizzardOption contract for Dallas Snow Protection 21-22 Season
      */

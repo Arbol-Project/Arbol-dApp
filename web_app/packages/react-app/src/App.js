@@ -10,23 +10,25 @@ import { Grid, Button, AppBar, Box, Toolbar } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { DataGrid } from '@mui/x-data-grid';
 
+// import hre from "hardhat";
+
 
 export const theme = createTheme(themeOptions);
 
-const configs = {
-  "0xbf417C41F3ab1e01BD6867fB540dA7b734EaeA95": {
-    "type": "provider",
-    "due": 250000, 
-  },
-  "0xa679c6154b8d4619Af9F83f0bF9a13A680e01eCf": {
-    "type": "purchaser",
-    "due": 10000,
-  },
-  "0x69640770407A09B166AED26B778699045B304768": {
-    "type": "admin",
-    "due": 10000000000000,
-  }
-}
+// const configs = {
+//   "0xbf417C41F3ab1e01BD6867fB540dA7b734EaeA95": {
+//     "type": "provider",
+//     "due": 250000 * 10**DECIMALS, 
+//   },
+//   "0xa679c6154b8d4619Af9F83f0bF9a13A680e01eCf": {
+//     "type": "purchaser",
+//     "due": 10000 * 10**DECIMALS,
+//   },
+//   "0x69640770407A09B166AED26B778699045B304768": {
+//     "type": "admin",
+//     "due": 10000000000000,
+//   }
+// }
 
 
 function WalletButton({ provider, loadWeb3Modal, logoutOfWeb3Modal }) {
@@ -104,7 +106,7 @@ function App() {
     fetch("https://api-kovan.etherscan.io/api?module=account&action=txlist&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=99999999&sort=asc&apikey="+process.env.REACT_APP_ETHERSCAN_KEY)
     .then(resp => resp.json())
     .then(data => {
-      console.log(data)
+      // console.log(data)
       dataSetter(data.result)})
   }, []);
 
@@ -122,53 +124,53 @@ function App() {
   async function depositUSDC(_provider) {
     const defaultSigner = _provider.getSigner();
     const defaultAddress = await defaultSigner.getAddress();
-    // var transactions = [];
-    if (defaultAddress in configs) {
-      
-      var amount = configs[defaultAddress].due;
-      const usdc = new Contract(addresses.USDC, abis.erc20, defaultSigner);
-  
-      var tx = await usdc.approve(addresses.BlizzardDerivativeProvider, amount);
+    const MainContract = new Contract(addresses.BlizzardDerivativeProvider, abis.BlizzardDerivativeProvider, defaultSigner);
+    const usdc = new Contract(addresses.USDC, abis.erc20, defaultSigner);
+
+    var oracleBank = await MainContract.ORACLE_BANK();
+    var collateralAddress = await MainContract.COLLATERAL_ADDRESS();
+    var premiumAddress = await MainContract.PREMIUM_ADDRESS();
+    var collateralAmount = await MainContract.COLLATERAL_PAYMENT();
+    var premiumAmount = await MainContract.PREMIUM_PAYMENT();
+
+    if (defaultAddress === collateralAddress) {
+
+      var tx = await usdc.approve(addresses.BlizzardDerivativeProvider, collateralAmount);
       await tx.wait();
-      // transactions.push({id: tx.hash,  sender: defaultAddress, action: "Approve USDC spender", explorer: "https://kovan.etherscan.io/tx/" + tx.hash, time: Date.now() / 1000});
-  
-      var allowance = await usdc.allowance(defaultAddress, addresses.BlizzardDerivativeProvider);
-      console.log("Contract USDC allowance:", allowance);
-  
-      const MainContract = new Contract(addresses.BlizzardDerivativeProvider, abis.BlizzardDerivativeProvider, defaultSigner);
-  
-      if (configs[defaultAddress].type === "provider") {
-        tx = await MainContract.depositCollateral();
-        await tx.wait();
-        console.log("Collateral deposited");
-        // transactions.push([{"id": tx.hash,  "sender": defaultAddress, "action": "Deposit Collateral", "explorer": "https://kovan.etherscan.io/address/" + tx.hash, "time": Date.now() / 1000}]);
-      } else if (configs[defaultAddress].type === "purchaser") {
-        tx = await MainContract.depositPremium();
-        await tx.wait();
-        console.log("Contract purchased");
-        // transactions.push([{"id": tx.hash,  "sender": defaultAddress, "action": "Purchase Contract", "explorer": "https://kovan.etherscan.io/address/" + tx.hash, "time": Date.now() / 1000}]);
-      } 
-      else if (configs[defaultAddress].type === "admin") {
-        tx = await MainContract.depositCollateral();
-        await tx.wait();
-        console.log("Collateral deposited");
-        // transactions.push([{"time": Date.now() / 1000, "action": "Deposit Collateral", "tx_hash": tx}]);
-        tx = await MainContract.depositPremium();
-        await tx.wait();
-        console.log("Contract purchased");
-        // transactions.push([{"time": Date.now() / 1000, "action": "Purchase Contract", "tx_hash": tx}]);
-  
-        const deployedAddress = await MainContract.blizzardContract();
-        console.log("Deployed contract address:", deployedAddress);
-      }
-  
-      var balance = await usdc.balanceOf(MainContract.address);
-      console.log("Contract USDC balance:", balance);
-    } else {
-      console.log('address not recognized');
+
+      tx = await MainContract.depositCollateral();
+      await tx.wait();
+    } else if (defaultAddress === premiumAddress) {
+
+      tx = await usdc.approve(addresses.BlizzardDerivativeProvider, premiumAmount);
+      await tx.wait();
+
+      tx = await MainContract.depositPremium();
+      await tx.wait();
+
+      const deployedAddress = await MainContract.blizzardContract();
+      console.log(deployedAddress);
+    } else if (defaultAddress === oracleBank) {
+
+      tx = await usdc.approve(addresses.BlizzardDerivativeProvider, collateralAmount + premiumAmount);
+      await tx.wait();
+
+      tx = await MainContract.depositCollateral();
+      await tx.wait();
+      tx = await MainContract.depositPremium();
+      await tx.wait();
+
+      const deployedAddress = await MainContract.blizzardContract();
+      console.log(deployedAddress);
+
+      // try {
+      //   await hre.run("verify:verify", {
+      //     address: deployedAddress,
+      //   });
+      // } catch {
+      //   console.log("could not verify");
+      // }
     }
-    // console.log(transactions);
-    // setRows(transactions);
   }
 
   // React.useEffect(() => {

@@ -32,9 +32,6 @@ describe("BlizzardDerivativeFactory Tests", function () {
     // get interfaces for LINK token and stable coin to approve transfers
     [ admin ] = await ethers.getSigners();
     LinkToken = new ethers.Contract("0xa36085F69e2889c224210F603D836748e7dC0088", ERC20ABI, admin);
-
-    // 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
-
     StableCoin = new ethers.Contract("0xe8AA8A60C9417d8fD59EB4378687dDCEEd29c1B4", ERC20ABI, admin);
   });
 
@@ -126,6 +123,8 @@ describe("BlizzardDerivativeFactory Tests", function () {
         tx = await ProviderContract.addAccess(admin.address);
         await tx.wait();
 
+        // console.log("access");
+
         expect(_ => errCall(ProviderContract.depositPremium())).to.throw();
         expect(_ => errCall(ProviderContract.initiateContractEvaluation())).to.throw();
         expect(_ => errCall(ProviderContract.fulfillContractEvaluation())).to.throw();
@@ -136,6 +135,8 @@ describe("BlizzardDerivativeFactory Tests", function () {
         await tx.wait();
         collateralDeposited = await ProviderContract.collateralDeposited();
         expect(collateralDeposited).to.equal(true);
+
+        // console.log("collateral");
 
         expect(_ => errCall(ProviderContract.depositCollateral())).to.throw();
         expect(_ => errCall(ProviderContract.initiateContractEvaluation())).to.throw();
@@ -148,6 +149,8 @@ describe("BlizzardDerivativeFactory Tests", function () {
         premiumDeposited = await ProviderContract.premiumDeposited();
         expect(premiumDeposited).to.equal(true);
 
+        // console.log("premium");
+
         expect(_ => errCall(ProviderContract.depositCollateral())).to.throw();
         expect(_ => errCall(ProviderContract.depositPremium())).to.throw();
         expect(_ => errCall(ProviderContract.fulfillContractEvaluation())).to.throw();
@@ -156,9 +159,11 @@ describe("BlizzardDerivativeFactory Tests", function () {
         expect(contractEvaluated).to.equal(false);
         tx = await ProviderContract.initiateContractEvaluation();
         await tx.wait();
-        await delay(30*1000);
+        await delay(30*1000); // wait for oracle request to be fulfilled
         contractEvaluated = await ProviderContract.getContractEvaluated();
         expect(contractEvaluated).to.equal(true);
+
+        // console.log("evaluation");
 
         expect(_ => errCall(ProviderContract.depositCollateral())).to.throw();
         expect(_ => errCall(ProviderContract.depositPremium())).to.throw();
@@ -170,6 +175,8 @@ describe("BlizzardDerivativeFactory Tests", function () {
         await tx.wait();
         contractPaidOut = await ProviderContract.contractPaidOut();
         expect(contractPaidOut).to.equal(true);
+        
+        // console.log("payout");
         
         expect(_ => errCall(ProviderContract.depositCollateral())).to.throw();
         expect(_ => errCall(ProviderContract.depositPremium())).to.throw();
@@ -209,6 +216,7 @@ describe("BlizzardDerivativeFactory Tests", function () {
         await tx.wait();
         tx = await ProviderContract.depositPremium();
         await tx.wait();
+        await delay(30*1000);
 
         tx = await ProviderContract.addContractJob("0x58935F97aB874Bc4181Bc1A3A85FDE2CA80885cd", "c649e935faec47c9be868580a1df4889");
         await tx.wait();
@@ -217,7 +225,7 @@ describe("BlizzardDerivativeFactory Tests", function () {
 
         tx = await ProviderContract.initiateContractEvaluation();
         await tx.wait();
-        await delay(30*1000);
+        await delay(30*1000); // wait for oracle request to be fulfilled
 
         var payout = await ProviderContract.getContractPayout();
         expect(payout.toString()).to.equal(collateral.toString());
@@ -250,6 +258,7 @@ describe("BlizzardDerivativeFactory Tests", function () {
         await tx.wait();
         tx = await ProviderContract.depositPremium();
         await tx.wait();
+        await delay(30*1000);
 
         tx = await ProviderContract.removeContractJob("63bb451d36754aab849577a73ce4eb7e");
         await tx.wait();
@@ -258,7 +267,7 @@ describe("BlizzardDerivativeFactory Tests", function () {
 
         tx = await ProviderContract.initiateContractEvaluation();
         await tx.wait();
-        await delay(30*1000);
+        await delay(30*1000); // wait for oracle request to be fulfilled
 
         var payout = await ProviderContract.getContractPayout();
         expect(payout.toString()).to.equal(new ethers.BigNumber.from(0).toString());

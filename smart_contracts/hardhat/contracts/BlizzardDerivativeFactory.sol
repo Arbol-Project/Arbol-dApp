@@ -106,7 +106,7 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
         checkAccess 
     {
         bool evalStatus = blizzardContract.contractEvaluated();
-        require(!evalStatus, "no reason to initiate contract evaluation after contract has been evaluated");
+        require(collateralDeposited && premiumDeposited && !evalStatus, "no reason to initiate contract evaluation after contract has been evaluated");
         LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);
         uint256 oracle_payment = blizzardContract.getOraclePayment();
         require(link.transferFrom(ORACLE_BANK, address(blizzardContract), oracle_payment), "unable to fund oracle request");
@@ -122,7 +122,7 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
         checkAccess 
     {
         bool evalStatus = blizzardContract.contractEvaluated();
-        require(evalStatus && !contractPaidOut, "unable to fulfill payout before contract is evaluated or after contract is paid out");
+        require(collateralDeposited && premiumDeposited && evalStatus && !contractPaidOut, "unable to fulfill payout before contract is evaluated or after contract is paid out");
         LinkTokenInterface stablecoin = LinkTokenInterface(STABLECOIN_ADDRESS);
         uint256 payout = blizzardContract.payout();
         contractPaidOut = true;
@@ -242,8 +242,8 @@ contract BlizzardOption is ChainlinkClient, ConfirmedOwner {
      */
     using Chainlink for Chainlink.Request;
 
-    uint256 private constant END = 1649649600;                                                                  // Timestamp of end of contract + data source update delay
-    // uint256 private constant END = 0;                                                                           // Timestamp of end of contract + data source update delay
+    // uint256 private constant END = 1649649600;                                                                  // Timestamp of end of contract + data source update delay
+    uint256 private constant END = 0;                                                                           // Timestamp of end of contract + data source update delay
     uint256 private constant ORACLE_PAYMENT = 1 * 10**2;                                                        // 0.0000000000000001 LINK
     address private constant LINK_ADDRESS = 0xa36085F69e2889c224210F603D836748e7dC0088;                         // Link token address on Ethereum Kovan
     address private constant ARBOL_ORACLE = 0x58935F97aB874Bc4181Bc1A3A85FDE2CA80885cd;                         // address of Arbol Chainlink Node oracle/operator contract
@@ -276,8 +276,8 @@ contract BlizzardOption is ChainlinkClient, ConfirmedOwner {
             "tick", "250000", 
             "threshold", "6", 
             "imperial_units", "True", 
-            // "dates", '["2021-10-06", "2021-10-08", "2021-10-26", "2021-10-28", "2021-10-31", "2021-11-02", "2021-11-06", "2021-11-08", "2021-11-15", "2021-11-27", "2021-11-29", "2021-12-03", "2021-12-04", "2021-12-07", "2021-12-13", "2021-12-15", "2021-12-21", "2021-12-23"]'
-            "dates", '["2021-10-06", "2021-10-08", "2021-10-26", "2021-10-28", "2021-10-31", "2021-11-02", "2021-11-06", "2021-11-08", "2021-11-15", "2021-11-27", "2021-11-29", "2021-12-03", "2021-12-04", "2021-12-07", "2021-12-13", "2021-12-15", "2021-12-21", "2021-12-23", "2022-01-03", "2022-01-05", "2022-01-09", "2022-01-15", "2022-01-17", "2022-01-19", "2022-01-20", "2022-01-23", "2022-01-29", "2022-02-02", "2022-02-04", "2022-02-06", "2022-02-08", "2022-02-10", "2022-02-12", "2022-03-03", "2022-03-05", "2022-03-07", "2022-03-09", "2022-03-21", "2022-03-23", "2022-03-27", "2022-03-29", "2022-04-08", "2022-04-10"]'
+            "dates", '["2021-10-06", "2021-10-08", "2021-10-26", "2021-10-28", "2021-10-31", "2021-11-02", "2021-11-06", "2021-11-08", "2021-11-15", "2021-11-27", "2021-11-29", "2021-12-03", "2021-12-04", "2021-12-07", "2021-12-13", "2021-12-15", "2021-12-21", "2021-12-23"]'
+            // "dates", '["2021-10-06", "2021-10-08", "2021-10-26", "2021-10-28", "2021-10-31", "2021-11-02", "2021-11-06", "2021-11-08", "2021-11-15", "2021-11-27", "2021-11-29", "2021-12-03", "2021-12-04", "2021-12-07", "2021-12-13", "2021-12-15", "2021-12-21", "2021-12-23", "2022-01-03", "2022-01-05", "2022-01-09", "2022-01-15", "2022-01-17", "2022-01-19", "2022-01-20", "2022-01-23", "2022-01-29", "2022-02-02", "2022-02-04", "2022-02-06", "2022-02-08", "2022-02-10", "2022-02-12", "2022-03-03", "2022-03-05", "2022-03-07", "2022-03-09", "2022-03-21", "2022-03-23", "2022-03-27", "2022-03-29", "2022-04-08", "2022-04-10"]'
             ];
         setChainlinkToken(LINK_ADDRESS);
         oracles.push(ARBOL_ORACLE);

@@ -1292,16 +1292,13 @@ pragma solidity ^0.8.4;
 // set ORACLE_PAYMENT to 1 on mainnet
 // set END based on update delay to IPFS of weather data source
 
-
-
-
 contract BlizzardDerivativeProviderFlatFuzz is SimpleWriteAccessController {
     /**
      * @dev BlizzardDerivativeProvider contract for Dallas Snow Protection 21-22 Season
      */
-    uint256 private constant DECIMALS = 3;                                                                       // Decimals for chosen stablecoin
-    address private constant LINK_ADDRESS = 0xa36085F69e2889c224210F603D836748e7dC0088;                          // Link token address on Ethereum Kovan
-    address private constant STABLECOIN_ADDRESS = 0xe8AA8A60C9417d8fD59EB4378687dDCEEd29c1B4;                    // Stablecoin/USDC token address on Ethereum Kovan
+    uint256 private constant DECIMALS = 3;                                                                      // Decimals for chosen stablecoin
+    address private constant LINK_ADDRESS = 0xa36085F69e2889c224210F603D836748e7dC0088;                         // Link token address on Ethereum Kovan
+    address private constant STABLECOIN_ADDRESS = 0xe8AA8A60C9417d8fD59EB4378687dDCEEd29c1B4;                   // Stablecoin/USDC token address on Ethereum Kovan
     
     uint256 public constant COLLATERAL_PAYMENT = 250000 * 10**DECIMALS;                                         // 250,000 * 1 USDC
     uint256 public constant PREMIUM_PAYMENT = 10000 * 10**DECIMALS;                                             // 10,000 * 1 USDC
@@ -1314,8 +1311,7 @@ contract BlizzardDerivativeProviderFlatFuzz is SimpleWriteAccessController {
     bool public contractPaidOut;
 
     BlizzardOptionFlatFuzz public blizzardContract;
-
-
+    BlizzardOptionFlatFuzz private testContract;
     uint256 public _init_provider_balance;
     uint256 public _init_purchaser_balance;
 
@@ -1331,6 +1327,29 @@ contract BlizzardDerivativeProviderFlatFuzz is SimpleWriteAccessController {
         collateralDeposited = false;
         premiumDeposited = false;
         contractPaidOut = false;
+    }
+
+    /**
+     * @dev Deploy test option contract for verification purposes
+     */
+    function deployVerificationContract()
+        external
+        onlyOwner
+    {
+        testContract = new BlizzardOptionFlatFuzz();
+    }
+
+    /**
+     * @dev Get address of deployed test contract for verification
+     * @return address of contract
+     */
+    function getVerificationAddress()
+        external
+        onlyOwner
+        view
+        returns (address)
+    {
+        return address(testContract);
     }
 
     /**
@@ -1526,8 +1545,8 @@ contract BlizzardOptionFlatFuzz is ChainlinkClient, ConfirmedOwner {
      */
     using Chainlink for Chainlink.Request;
 
-    // uint256 private constant END = 1649649600;                                                                  // Timestamp of end of contract + data source update delay
-    uint256 private constant END = 0;                                                                  // Timestamp of end of contract + data source update delay
+    uint256 private constant END = 1649649600;                                                                  // Timestamp of end of contract + data source update delay
+    // uint256 private constant END = 0;                                                                           // Timestamp of end of contract + data source update delay
     uint256 private constant ORACLE_PAYMENT = 1 * 10**2;                                                        // 0.0000000000000001 LINK
     address private constant LINK_ADDRESS = 0xa36085F69e2889c224210F603D836748e7dC0088;                         // Link token address on Ethereum Kovan
     address private constant ARBOL_ORACLE = 0x58935F97aB874Bc4181Bc1A3A85FDE2CA80885cd;                         // address of Arbol Chainlink Node oracle/operator contract
@@ -1560,8 +1579,8 @@ contract BlizzardOptionFlatFuzz is ChainlinkClient, ConfirmedOwner {
             "tick", "250000", 
             "threshold", "6", 
             "imperial_units", "True", 
-            "dates", '["2021-10-06", "2021-10-08", "2021-10-26", "2021-10-28", "2021-10-31", "2021-11-02", "2021-11-06", "2021-11-08", "2021-11-15", "2021-11-27", "2021-11-29", "2021-12-03", "2021-12-04", "2021-12-07", "2021-12-13", "2021-12-15", "2021-12-21", "2021-12-23"]'
-            // "dates", '["2021-10-06", "2021-10-08", "2021-10-26", "2021-10-28", "2021-10-31", "2021-11-02", "2021-11-06", "2021-11-08", "2021-11-15", "2021-11-27", "2021-11-29", "2021-12-03", "2021-12-04", "2021-12-07", "2021-12-13", "2021-12-15", "2021-12-21", "2021-12-23", "2022-01-03", "2022-01-05", "2022-01-09", "2022-01-15", "2022-01-17", "2022-01-19", "2022-01-20", "2022-01-23", "2022-01-29", "2022-02-02", "2022-02-04", "2022-02-06", "2022-02-08", "2022-02-10", "2022-02-12", "2022-03-03", "2022-03-05", "2022-03-07", "2022-03-09", "2022-03-21", "2022-03-23", "2022-03-27", "2022-03-29", "2022-04-08", "2022-04-10"]'
+            // "dates", '["2021-10-06", "2021-10-08", "2021-10-26", "2021-10-28", "2021-10-31", "2021-11-02", "2021-11-06", "2021-11-08", "2021-11-15", "2021-11-27", "2021-11-29", "2021-12-03", "2021-12-04", "2021-12-07", "2021-12-13", "2021-12-15", "2021-12-21", "2021-12-23"]'
+            "dates", '["2021-10-06", "2021-10-08", "2021-10-26", "2021-10-28", "2021-10-31", "2021-11-02", "2021-11-06", "2021-11-08", "2021-11-15", "2021-11-27", "2021-11-29", "2021-12-03", "2021-12-04", "2021-12-07", "2021-12-13", "2021-12-15", "2021-12-21", "2021-12-23", "2022-01-03", "2022-01-05", "2022-01-09", "2022-01-15", "2022-01-17", "2022-01-19", "2022-01-20", "2022-01-23", "2022-01-29", "2022-02-02", "2022-02-04", "2022-02-06", "2022-02-08", "2022-02-10", "2022-02-12", "2022-03-03", "2022-03-05", "2022-03-07", "2022-03-09", "2022-03-21", "2022-03-23", "2022-03-27", "2022-03-29", "2022-04-08", "2022-04-10"]'
             ];
         setChainlinkToken(LINK_ADDRESS);
         oracles.push(ARBOL_ORACLE);

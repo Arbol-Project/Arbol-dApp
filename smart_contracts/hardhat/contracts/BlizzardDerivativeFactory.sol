@@ -293,10 +293,9 @@ contract BlizzardOption is ChainlinkClient, ConfirmedOwner {
         public 
         onlyOwner 
     {
+        require(END < block.timestamp, "unable to call until coverage period has ended");
         // do all looped reads from memory instead of storage
         address[] memory _oracles = oracles;
-        require(_oracles.length > 0, "unable to call unless an oracle job is added");
-        require(END < block.timestamp, "unable to call until coverage period has ended");
         bytes32[] memory _jobs = jobs;
         string[] memory _parameters = parameters;
         uint256 requests = 0;

@@ -159,7 +159,7 @@ describe("BlizzardDerivativeFactory Tests", function () {
         expect(contractEvaluated).to.equal(false);
         tx = await ProviderContract.initiateContractEvaluation();
         await tx.wait();
-        await delay(30*1000); // wait for oracle request to be fulfilled
+        await delay(45*1000); // wait for oracle request to be fulfilled
         contractEvaluated = await ProviderContract.getContractEvaluated();
         expect(contractEvaluated).to.equal(true);
 
@@ -209,6 +209,8 @@ describe("BlizzardDerivativeFactory Tests", function () {
         tx = await ProviderContract.addAccess(admin.address);
         await tx.wait();
 
+        // console.log("access");
+
         var prevProviderBalance = await StableCoin.balanceOf(provider);
         var prevPurchaserBalance = await StableCoin.balanceOf(purchaser);
         
@@ -216,22 +218,29 @@ describe("BlizzardDerivativeFactory Tests", function () {
         await tx.wait();
         tx = await ProviderContract.depositPremium();
         await tx.wait();
-        await delay(30*1000);
+
+        // console.log("contract");
 
         tx = await ProviderContract.addContractJob("0x58935F97aB874Bc4181Bc1A3A85FDE2CA80885cd", "c649e935faec47c9be868580a1df4889");
         await tx.wait();
         tx = await ProviderContract.removeContractJob("63bb451d36754aab849577a73ce4eb7e");
         await tx.wait();
 
+        // console.log("job");
+
         tx = await ProviderContract.initiateContractEvaluation();
         await tx.wait();
-        await delay(30*1000); // wait for oracle request to be fulfilled
+        await delay(45*1000); // wait for oracle request to be fulfilled
+
+        // console.log("evaluation");
 
         var payout = await ProviderContract.getContractPayout();
         expect(payout.toString()).to.equal(collateral.toString());
 
         tx = await ProviderContract.fulfillContractEvaluation();
         await tx.wait();
+
+        // console.log("payout");
 
         var providerBalance = await StableCoin.balanceOf(provider);
         expect(providerBalance.toString()).to.equal(prevProviderBalance.add(premium).toString());
@@ -251,6 +260,8 @@ describe("BlizzardDerivativeFactory Tests", function () {
         tx = await ProviderContract.addAccess(admin.address);
         await tx.wait();
 
+        // console.log("access");
+
         var prevProviderBalance = await StableCoin.balanceOf(provider);
         var prevPurchaserBalance = await StableCoin.balanceOf(purchaser);
         
@@ -258,22 +269,29 @@ describe("BlizzardDerivativeFactory Tests", function () {
         await tx.wait();
         tx = await ProviderContract.depositPremium();
         await tx.wait();
-        await delay(30*1000);
+
+        // console.log("contract");
 
         tx = await ProviderContract.removeContractJob("63bb451d36754aab849577a73ce4eb7e");
         await tx.wait();
         tx = await ProviderContract.addContractJob("0x58935F97aB874Bc4181Bc1A3A85FDE2CA80885cd", "235c23a24e7c4d729f89bbccdeb83fa5");
         await tx.wait();
 
+        // console.log("job");
+
         tx = await ProviderContract.initiateContractEvaluation();
         await tx.wait();
-        await delay(30*1000); // wait for oracle request to be fulfilled
+        await delay(45*1000); // wait for oracle request to be fulfilled
+
+        // console.log("evaluation");
 
         var payout = await ProviderContract.getContractPayout();
         expect(payout.toString()).to.equal(new ethers.BigNumber.from(0).toString());
 
         tx = await ProviderContract.fulfillContractEvaluation();
         await tx.wait();
+
+        // console.log("payout");
 
         var providerBalance = await StableCoin.balanceOf(provider);
         expect(providerBalance.toString()).to.equal(collateral.add(premium.add(prevProviderBalance).toString()));

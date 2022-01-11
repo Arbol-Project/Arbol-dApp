@@ -236,6 +236,7 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
 }
 
 
+// set END to 0 and dates to the shorter array if running tests
 contract BlizzardOption is ChainlinkClient, ConfirmedOwner {
     /**
      * @dev BlizzardOption contract for Dallas Snow Protection 21-22 Season
@@ -292,9 +293,10 @@ contract BlizzardOption is ChainlinkClient, ConfirmedOwner {
         public 
         onlyOwner 
     {
-        require(END < block.timestamp, "unable to call until coverage period has ended");
         // do all looped reads from memory instead of storage
         address[] memory _oracles = oracles;
+        require(_oracles.length > 0, "unable to call unless an oracle job is added");
+        require(END < block.timestamp, "unable to call until coverage period has ended");
         bytes32[] memory _jobs = jobs;
         string[] memory _parameters = parameters;
         uint256 requests = 0;
@@ -339,9 +341,18 @@ contract BlizzardOption is ChainlinkClient, ConfirmedOwner {
         public 
         onlyOwner
     {
-        oracles.push(_oracle);
-        jobs.push(_job);
-        oracleMap[_job] = oracles.length - 1;
+        uint256 index = oracleMap[_job];
+        if (jobs.length == 0) {
+            oracles.push(_oracle);
+            jobs.push(_job);
+            oracleMap[_job] = oracles.length - 1;
+        } else {
+            if (jobs[index] != _job) {
+                oracles.push(_oracle);
+                jobs.push(_job);
+                oracleMap[_job] = oracles.length - 1;
+            }
+        }
     }
 
     /**

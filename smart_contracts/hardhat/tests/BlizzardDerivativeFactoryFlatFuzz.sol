@@ -1311,9 +1311,12 @@ contract BlizzardDerivativeProviderFlatFuzz is SimpleWriteAccessController {
     bool public contractPaidOut;
 
     BlizzardOptionFlatFuzz public blizzardContract;
+    
+    uint256 private _init_provider_balance;
+    uint256 private _init_purchaser_balance;
+    uint256 private _init_contract_balance;
+
     BlizzardOptionFlatFuzz private testContract;
-    uint256 public _init_provider_balance;
-    uint256 public _init_purchaser_balance;
 
     /**
      * @dev Event to log when a contract is created
@@ -1361,12 +1364,11 @@ contract BlizzardDerivativeProviderFlatFuzz is SimpleWriteAccessController {
         checkAccess
     {
         LinkTokenInterface stablecoin = LinkTokenInterface(STABLECOIN_ADDRESS);  
-        _init_provider_balance = stablecoin.balanceOf(COLLATERAL_ADDRESS);
-        _init_purchaser_balance = stablecoin.balanceOf(PREMIUM_ADDRESS);
+        _init_contract_balance = stablecoin.balanceOf(address(this));
         require(!premiumDeposited && !collateralDeposited, "unable to deposit premium more than once");
         collateralDeposited = true;
         require(stablecoin.transferFrom(msg.sender, address(this), COLLATERAL_PAYMENT), "unable to deposit collateral");
-    }
+    }        
 
     /**
      * @notice Deposit premium and purchase new options contract (must first approve smart contract to move USDC!)
@@ -1407,9 +1409,11 @@ contract BlizzardDerivativeProviderFlatFuzz is SimpleWriteAccessController {
         external 
         checkAccess 
     {
+        LinkTokenInterface stablecoin = LinkTokenInterface(STABLECOIN_ADDRESS);
+        _init_provider_balance = stablecoin.balanceOf(COLLATERAL_ADDRESS);
+        _init_purchaser_balance = stablecoin.balanceOf(PREMIUM_ADDRESS);
         bool evalStatus = blizzardContract.contractEvaluated();
         require(evalStatus && !contractPaidOut, "unable to fulfill payout before contract is evaluated or after contract is paid out");
-        LinkTokenInterface stablecoin = LinkTokenInterface(STABLECOIN_ADDRESS);
         uint256 payout = blizzardContract.payout();
         contractPaidOut = true;
         if (payout > 0) {
@@ -1521,20 +1525,30 @@ contract BlizzardDerivativeProviderFlatFuzz is SimpleWriteAccessController {
     }
 
     function echidna_state_balances() public view returns(bool) {
-        LinkTokenInterface stablecoin = LinkTokenInterface(STABLECOIN_ADDRESS);
-        if (!collateralDeposited) {
-            return !premiumDeposited && !contractPaidOut;
-        }
-        if (!premiumDeposited) {
-            return !contractPaidOut && stablecoin.balanceOf(address(this)) == COLLATERAL_PAYMENT;
-        }
-        if (!contractPaidOut) {
-            return stablecoin.balanceOf(address(this)) == COLLATERAL_PAYMENT + PREMIUM_PAYMENT;   
-        } 
-        if (blizzardContract.payout() > 0) {
-          return stablecoin.balanceOf(PREMIUM_ADDRESS) == _init_purchaser_balance + blizzardContract.payout() && stablecoin.balanceOf(COLLATERAL_ADDRESS) == _init_provider_balance + COLLATERAL_PAYMENT + PREMIUM_PAYMENT - blizzardContract.payout();
-        }
-        return stablecoin.balanceOf(address(this)) == 0 && stablecoin.balanceOf(COLLATERAL_ADDRESS) == _init_provider_balance + COLLATERAL_PAYMENT + PREMIUM_PAYMENT;
+      bool providerBalanceCorrect;
+      bool purchaserBalanceCorrect;
+      bool contractBalanceCorrect;
+      LinkTokenInterface stablecoin = LinkTokenInterface(STABLECOIN_ADDRESS);
+      if (!collateralDeposited) {
+        return !premiumDeposited && !contractPaidOut;
+      }
+      if (!premiumDeposited) {
+        contractBalanceCorrect = stablecoin.balanceOf(address(this)) == _init_contract_balance + COLLATERAL_PAYMENT;
+        return !contractPaidOut && contractBalanceCorrect;
+      }
+      if (!contractPaidOut) {
+        contractBalanceCorrect = stablecoin.balanceOf(address(this)) == _init_contract_balance + COLLATERAL_PAYMENT + PREMIUM_PAYMENT;
+        return contractBalanceCorrect;
+      } 
+      if (blizzardContract.payout() > 0) {
+        purchaserBalanceCorrect = stablecoin.balanceOf(PREMIUM_ADDRESS) == _init_purchaser_balance + COLLATERAL_PAYMENT;
+        providerBalanceCorrect = stablecoin.balanceOf(COLLATERAL_ADDRESS) == _init_provider_balance + PREMIUM_PAYMENT;
+        contractBalanceCorrect = stablecoin.balanceOf(address(this)) == _init_contract_balance;
+        return purchaserBalanceCorrect && providerBalanceCorrect && contractBalanceCorrect;
+      }
+      providerBalanceCorrect = stablecoin.balanceOf(COLLATERAL_ADDRESS) == _init_provider_balance + COLLATERAL_PAYMENT + PREMIUM_PAYMENT;
+      contractBalanceCorrect = stablecoin.balanceOf(address(this)) == _init_contract_balance;
+      return providerBalanceCorrect && contractBalanceCorrect;
     }
 }
 
@@ -1560,6 +1574,8 @@ contract BlizzardOptionFlatFuzz is ChainlinkClient, ConfirmedOwner {
     bool public contractEvaluated;
     uint256 private requestsPending;
     string[] private parameters;
+
+    bool private _requestingPayout;
 
     /**
      * @notice Creates a new blizzard option contract with the terms below
@@ -1595,9 +1611,11 @@ contract BlizzardOptionFlatFuzz is ChainlinkClient, ConfirmedOwner {
         public 
         onlyOwner 
     {
-        require(END < block.timestamp, "unable to call until coverage period has ended");
         // do all looped reads from memory instead of storage
+        _requestingPayout = true;
         address[] memory _oracles = oracles;
+        require(_oracles.length > 0, "unable to call unless an oracle job is added");
+        require(END < block.timestamp, "unable to call until coverage period has ended");
         bytes32[] memory _jobs = jobs;
         string[] memory _parameters = parameters;
         uint256 requests = 0;
@@ -1621,6 +1639,7 @@ contract BlizzardOptionFlatFuzz is ChainlinkClient, ConfirmedOwner {
         payout += _result;
         requestsPending -= 1;
         if (requestsPending == 0) {
+            _requestingPayout = false;
             payout /= oracles.length;
             contractEvaluated = true;
 
@@ -1642,9 +1661,18 @@ contract BlizzardOptionFlatFuzz is ChainlinkClient, ConfirmedOwner {
         public 
         onlyOwner
     {
-        oracles.push(_oracle);
-        jobs.push(_job);
-        oracleMap[_job] = oracles.length - 1;
+        uint256 index = oracleMap[_job];
+        if (jobs.length == 0) {
+          oracles.push(_oracle);
+          jobs.push(_job);
+          oracleMap[_job] = oracles.length - 1;
+        } else {
+          if (jobs[index] != _job) {
+            oracles.push(_oracle);
+            jobs.push(_job);
+            oracleMap[_job] = oracles.length - 1;
+          }
+        }
     }
 
     /**
@@ -1698,5 +1726,19 @@ contract BlizzardOptionFlatFuzz is ChainlinkClient, ConfirmedOwner {
         returns (uint256) 
     {
         return ORACLE_PAYMENT * jobs.length;
+    }
+
+    function echidna_oralce_requests() public view returns(bool) {
+      bool numRequestsCorrect = requestsPending <= jobs.length;
+      bool oracleMapCorrect = true;
+      for (uint256 i = 0; i != jobs.length; i += 1) { 
+        oracleMapCorrect = oracleMapCorrect && oracleMap[jobs[i]] == i;
+      }
+      bool oracleListCorrect = jobs.length == oracles.length;
+      bool requestStateCorrect = true;
+      if (jobs.length == 0) {
+        requestStateCorrect = !_requestingPayout;
+      }
+      return numRequestsCorrect && oracleMapCorrect && oracleListCorrect && requestStateCorrect;
     }
 }

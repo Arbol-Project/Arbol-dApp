@@ -159,7 +159,7 @@ describe("BlizzardDerivativeFactory Tests", function () {
         expect(contractEvaluated).to.equal(false);
         tx = await ProviderContract.initiateContractEvaluation();
         await tx.wait();
-        await delay(45*1000); // wait for oracle request to be fulfilled
+        await delay(60*1000); // wait for oracle request to be fulfilled
         contractEvaluated = await ProviderContract.getContractEvaluated();
         expect(contractEvaluated).to.equal(true);
 
@@ -230,7 +230,7 @@ describe("BlizzardDerivativeFactory Tests", function () {
 
         tx = await ProviderContract.initiateContractEvaluation();
         await tx.wait();
-        await delay(45*1000); // wait for oracle request to be fulfilled
+        await delay(60*1000); // wait for oracle request to be fulfilled
 
         // console.log("evaluation");
 
@@ -281,7 +281,7 @@ describe("BlizzardDerivativeFactory Tests", function () {
 
         tx = await ProviderContract.initiateContractEvaluation();
         await tx.wait();
-        await delay(45*1000); // wait for oracle request to be fulfilled
+        await delay(60*1000); // wait for oracle request to be fulfilled
 
         // console.log("evaluation");
 

@@ -247,8 +247,10 @@ contract BlizzardOption is ChainlinkClient, ConfirmedOwner {
     uint256 private constant END = 0;                                                                           // Timestamp of end of contract + data source update delay
     uint256 private constant ORACLE_PAYMENT = 1 * 10**2;                                                        // 0.0000000000000001 LINK
     address private constant LINK_ADDRESS = 0xa36085F69e2889c224210F603D836748e7dC0088;                         // Link token address on Ethereum Kovan
-    address private constant ARBOL_ORACLE = 0x58935F97aB874Bc4181Bc1A3A85FDE2CA80885cd;                         // address of Arbol Chainlink Node oracle/operator contract
-    bytes32 private constant EVALUATION_JOB = "63bb451d36754aab849577a73ce4eb7e";                               // general Get Contract Evaluation job ID
+    // address private constant ARBOL_ORACLE = 0x58935F97aB874Bc4181Bc1A3A85FDE2CA80885cd;                         // address of Arbol Chainlink Node oracle contract
+    address private constant ARBOL_ORACLE = 0x2bD976e4AB857eE553f461E6934d06c086a25D7e;                         // address of Arbol Chainlink Node operator contract
+    // bytes32 private constant EVALUATION_JOB = "63bb451d36754aab849577a73ce4eb7e";                               // general Get Contract Evaluation job ID for oracle contract
+    bytes32 private constant EVALUATION_JOB = "c9a0bbc14f5e47d09010e32cf1e6d569";                               // general Get Contract Evaluation job ID for oracle contract
 
     mapping(bytes32 => uint256) public oracleMap;
     address[] public oracles;

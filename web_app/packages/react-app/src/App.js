@@ -10,25 +10,7 @@ import { Grid, Button, AppBar, Box, Toolbar } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { DataGrid } from '@mui/x-data-grid';
 
-// import hre from "hardhat";
-
-
 export const theme = createTheme(themeOptions);
-
-// const configs = {
-//   "0xbf417C41F3ab1e01BD6867fB540dA7b734EaeA95": {
-//     "type": "provider",
-//     "due": 250000 * 10**DECIMALS, 
-//   },
-//   "0xa679c6154b8d4619Af9F83f0bF9a13A680e01eCf": {
-//     "type": "purchaser",
-//     "due": 10000 * 10**DECIMALS,
-//   },
-//   "0x69640770407A09B166AED26B778699045B304768": {
-//     "type": "admin",
-//     "due": 10000000000000,
-//   }
-// }
 
 
 function WalletButton({ provider, loadWeb3Modal, logoutOfWeb3Modal }) {
@@ -103,12 +85,20 @@ function App() {
   ];
 
   useEffect(() => {
+
+
+
+
     fetch("https://api-kovan.etherscan.io/api?module=account&action=txlist&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=99999999&sort=asc&apikey="+process.env.REACT_APP_ETHERSCAN_KEY)
     .then(resp => resp.json())
     .then(data => {
       // console.log(data)
       dataSetter(data.result)})
-  }, []);
+  
+  
+  
+  
+    }, []);
 
   async function dataSetter(data) {
     var new_rows = []
@@ -162,14 +152,6 @@ function App() {
 
       const deployedAddress = await MainContract.blizzardContract();
       console.log(deployedAddress);
-
-      // try {
-      //   await hre.run("verify:verify", {
-      //     address: deployedAddress,
-      //   });
-      // } catch {
-      //   console.log("could not verify");
-      // }
     }
   }
 
@@ -249,8 +231,8 @@ function App() {
                   <DataGrid
                     rows={rows}
                     columns={columns}
-                    pageSize={5}
-                    rowsPerPageOptions={[5]}
+                    pageSize={8}
+                    rowsPerPageOptions={[8]}
                   />
                 </div>
                 <Link href={"https://kovan.etherscan.io/address/" + addresses.BlizzardDerivativeProvider + "#code#F1#L1"} style={{ marginTop: "8px" }}> etherscan </Link>

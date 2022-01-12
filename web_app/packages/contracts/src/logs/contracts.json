@@ -295,14 +295,5 @@
         "end": "2022-04-01",
         "evaluated": false,
         "payout": "0"
-    },
-    "BlizzardOptionTest": {
-        "type": "BlizzardOption",
-        "address": "0x323CAE7397ABA727C37eC8221E4a4616c6e17972",
-        "verified": true,
-        "provider": "BlizzardDerivativeProvider",
-        "end": "2022-01-01",
-        "evaluated": true,
-        "payout": "0"
     }
 }

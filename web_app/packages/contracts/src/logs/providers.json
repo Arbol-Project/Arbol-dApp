@@ -40,15 +40,5 @@
             "Moung Ruessei PUT, limit: 955": "0xa54a7768200d949937502275b4C7D066D8A400bA",
             "Cambodia Rainfall December 21 - April 22": "0x0Eb4504690A378963163AB0939AA0DDcf1a8c175"
         }
-    },
-    "BlizzardDerivativeProvider": {
-        "address": "0xBbe181942dd02F0Bf549c8543D9f91bCe64e63a8",
-        "types": {
-            "BlizzardOption": true
-        },
-        "verified": true,
-        "contracts": {
-            "BlizzardOptionTest": "0x323CAE7397ABA727C37eC8221E4a4616c6e17972"
-        }
     }
 }

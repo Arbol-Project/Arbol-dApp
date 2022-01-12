@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.4;
 
 // Constants that need to be set before deploying:
 // set DECIMALS, LINK_ADDRESS (in both contracts), STABLECOIN_ADDRESS, ARBOL_ORACLE, and EVALUATION_JOB depending on network

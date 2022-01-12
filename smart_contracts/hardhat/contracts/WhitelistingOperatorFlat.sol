@@ -1,15 +1,747 @@
 // SPDX-License-Identifier: MIT
+
+// File: @chainlink/contracts/src/v0.7/vendor/SafeMathChainlink.sol
+
+
+pragma solidity ^0.7.6;
+
+/**
+ * @dev Wrappers over Solidity's arithmetic operations with added overflow
+ * checks.
+ *
+ * Arithmetic operations in Solidity wrap on overflow. This can easily result
+ * in bugs, because programmers usually assume that an overflow raises an
+ * error, which is the standard behavior in high level programming languages.
+ * `SafeMath` restores this intuition by reverting the transaction when an
+ * operation overflows.
+ *
+ * Using this library instead of the unchecked operations eliminates an entire
+ * class of bugs, so it's recommended to use it always.
+ */
+library SafeMathChainlink {
+  /**
+   * @dev Returns the addition of two unsigned integers, reverting on
+   * overflow.
+   *
+   * Counterpart to Solidity's `+` operator.
+   *
+   * Requirements:
+   * - Addition cannot overflow.
+   */
+  function add(uint256 a, uint256 b) internal pure returns (uint256) {
+    uint256 c = a + b;
+    require(c >= a, "SafeMath: addition overflow");
+
+    return c;
+  }
+
+  /**
+   * @dev Returns the subtraction of two unsigned integers, reverting on
+   * overflow (when the result is negative).
+   *
+   * Counterpart to Solidity's `-` operator.
+   *
+   * Requirements:
+   * - Subtraction cannot overflow.
+   */
+  function sub(uint256 a, uint256 b) internal pure returns (uint256) {
+    require(b <= a, "SafeMath: subtraction overflow");
+    uint256 c = a - b;
+
+    return c;
+  }
+
+  /**
+   * @dev Returns the multiplication of two unsigned integers, reverting on
+   * overflow.
+   *
+   * Counterpart to Solidity's `*` operator.
+   *
+   * Requirements:
+   * - Multiplication cannot overflow.
+   */
+  function mul(uint256 a, uint256 b) internal pure returns (uint256) {
+    // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
+    // benefit is lost if 'b' is also tested.
+    // See: https://github.com/OpenZeppelin/openzeppelin-solidity/pull/522
+    if (a == 0) {
+      return 0;
+    }
+
+    uint256 c = a * b;
+    require(c / a == b, "SafeMath: multiplication overflow");
+
+    return c;
+  }
+
+  /**
+   * @dev Returns the integer division of two unsigned integers. Reverts on
+   * division by zero. The result is rounded towards zero.
+   *
+   * Counterpart to Solidity's `/` operator. Note: this function uses a
+   * `revert` opcode (which leaves remaining gas untouched) while Solidity
+   * uses an invalid opcode to revert (consuming all remaining gas).
+   *
+   * Requirements:
+   * - The divisor cannot be zero.
+   */
+  function div(uint256 a, uint256 b) internal pure returns (uint256) {
+    // Solidity only automatically asserts when dividing by 0
+    require(b > 0, "SafeMath: division by zero");
+    uint256 c = a / b;
+    // assert(a == b * c + a % b); // There is no case in which this doesn't hold
+
+    return c;
+  }
+
+  /**
+   * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
+   * Reverts when dividing by zero.
+   *
+   * Counterpart to Solidity's `%` operator. This function uses a `revert`
+   * opcode (which leaves remaining gas untouched) while Solidity uses an
+   * invalid opcode to revert (consuming all remaining gas).
+   *
+   * Requirements:
+   * - The divisor cannot be zero.
+   */
+  function mod(uint256 a, uint256 b) internal pure returns (uint256) {
+    require(b != 0, "SafeMath: modulo by zero");
+    return a % b;
+  }
+}
+
+// File: @chainlink/contracts/src/v0.7/vendor/Address.sol
+
+
+// From https://github.com/OpenZeppelin/openzeppelin-contracts v3.4.0(fa64a1ced0b70ab89073d5d0b6e01b0778f7e7d6)
+
+pragma solidity >=0.6.2 <0.8.0;
+
+/**
+ * @dev Collection of functions related to the address type
+ */
+library Address {
+  /**
+   * @dev Returns true if `account` is a contract.
+   *
+   * [IMPORTANT]
+   * ====
+   * It is unsafe to assume that an address for which this function returns
+   * false is an externally-owned account (EOA) and not a contract.
+   *
+   * Among others, `isContract` will return false for the following
+   * types of addresses:
+   *
+   *  - an externally-owned account
+   *  - a contract in construction
+   *  - an address where a contract will be created
+   *  - an address where a contract lived, but was destroyed
+   * ====
+   */
+  function isContract(address account) internal view returns (bool) {
+    // This method relies on extcodesize, which returns 0 for contracts in
+    // construction, since the code is only stored at the end of the
+    // constructor execution.
+
+    uint256 size;
+    // solhint-disable-next-line no-inline-assembly
+    assembly {
+      size := extcodesize(account)
+    }
+    return size > 0;
+  }
+
+  /**
+   * @dev Replacement for Solidity's `transfer`: sends `amount` wei to
+   * `recipient`, forwarding all available gas and reverting on errors.
+   *
+   * https://eips.ethereum.org/EIPS/eip-1884[EIP1884] increases the gas cost
+   * of certain opcodes, possibly making contracts go over the 2300 gas limit
+   * imposed by `transfer`, making them unable to receive funds via
+   * `transfer`. {sendValue} removes this limitation.
+   *
+   * https://diligence.consensys.net/posts/2019/09/stop-using-soliditys-transfer-now/[Learn more].
+   *
+   * IMPORTANT: because control is transferred to `recipient`, care must be
+   * taken to not create reentrancy vulnerabilities. Consider using
+   * {ReentrancyGuard} or the
+   * https://solidity.readthedocs.io/en/v0.5.11/security-considerations.html#use-the-checks-effects-interactions-pattern[checks-effects-interactions pattern].
+   */
+  function sendValue(address payable recipient, uint256 amount) internal {
+    require(address(this).balance >= amount, "Address: insufficient balance");
+
+    // solhint-disable-next-line avoid-low-level-calls, avoid-call-value
+    (bool success, ) = recipient.call{value: amount}("");
+    require(success, "Address: unable to send value, recipient may have reverted");
+  }
+
+  /**
+   * @dev Performs a Solidity function call using a low level `call`. A
+   * plain`call` is an unsafe replacement for a function call: use this
+   * function instead.
+   *
+   * If `target` reverts with a revert reason, it is bubbled up by this
+   * function (like regular Solidity function calls).
+   *
+   * Returns the raw returned data. To convert to the expected return value,
+   * use https://solidity.readthedocs.io/en/latest/units-and-global-variables.html?highlight=abi.decode#abi-encoding-and-decoding-functions[`abi.decode`].
+   *
+   * Requirements:
+   *
+   * - `target` must be a contract.
+   * - calling `target` with `data` must not revert.
+   *
+   * _Available since v3.1._
+   */
+  function functionCall(address target, bytes memory data) internal returns (bytes memory) {
+    return functionCall(target, data, "Address: low-level call failed");
+  }
+
+  /**
+   * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`], but with
+   * `errorMessage` as a fallback revert reason when `target` reverts.
+   *
+   * _Available since v3.1._
+   */
+  function functionCall(
+    address target,
+    bytes memory data,
+    string memory errorMessage
+  ) internal returns (bytes memory) {
+    return functionCallWithValue(target, data, 0, errorMessage);
+  }
+
+  /**
+   * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],
+   * but also transferring `value` wei to `target`.
+   *
+   * Requirements:
+   *
+   * - the calling contract must have an ETH balance of at least `value`.
+   * - the called Solidity function must be `payable`.
+   *
+   * _Available since v3.1._
+   */
+  function functionCallWithValue(
+    address target,
+    bytes memory data,
+    uint256 value
+  ) internal returns (bytes memory) {
+    return functionCallWithValue(target, data, value, "Address: low-level call with value failed");
+  }
+
+  /**
+   * @dev Same as {xref-Address-functionCallWithValue-address-bytes-uint256-}[`functionCallWithValue`], but
+   * with `errorMessage` as a fallback revert reason when `target` reverts.
+   *
+   * _Available since v3.1._
+   */
+  function functionCallWithValue(
+    address target,
+    bytes memory data,
+    uint256 value,
+    string memory errorMessage
+  ) internal returns (bytes memory) {
+    require(address(this).balance >= value, "Address: insufficient balance for call");
+    require(isContract(target), "Address: call to non-contract");
+
+    // solhint-disable-next-line avoid-low-level-calls
+    (bool success, bytes memory returndata) = target.call{value: value}(data);
+    return _verifyCallResult(success, returndata, errorMessage);
+  }
+
+  /**
+   * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],
+   * but performing a static call.
+   *
+   * _Available since v3.3._
+   */
+  function functionStaticCall(address target, bytes memory data) internal view returns (bytes memory) {
+    return functionStaticCall(target, data, "Address: low-level static call failed");
+  }
+
+  /**
+   * @dev Same as {xref-Address-functionCall-address-bytes-string-}[`functionCall`],
+   * but performing a static call.
+   *
+   * _Available since v3.3._
+   */
+  function functionStaticCall(
+    address target,
+    bytes memory data,
+    string memory errorMessage
+  ) internal view returns (bytes memory) {
+    require(isContract(target), "Address: static call to non-contract");
+
+    // solhint-disable-next-line avoid-low-level-calls
+    (bool success, bytes memory returndata) = target.staticcall(data);
+    return _verifyCallResult(success, returndata, errorMessage);
+  }
+
+  /**
+   * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],
+   * but performing a delegate call.
+   *
+   * _Available since v3.4._
+   */
+  function functionDelegateCall(address target, bytes memory data) internal returns (bytes memory) {
+    return functionDelegateCall(target, data, "Address: low-level delegate call failed");
+  }
+
+  /**
+   * @dev Same as {xref-Address-functionCall-address-bytes-string-}[`functionCall`],
+   * but performing a delegate call.
+   *
+   * _Available since v3.4._
+   */
+  function functionDelegateCall(
+    address target,
+    bytes memory data,
+    string memory errorMessage
+  ) internal returns (bytes memory) {
+    require(isContract(target), "Address: delegate call to non-contract");
+
+    // solhint-disable-next-line avoid-low-level-calls
+    (bool success, bytes memory returndata) = target.delegatecall(data);
+    return _verifyCallResult(success, returndata, errorMessage);
+  }
+
+  function _verifyCallResult(
+    bool success,
+    bytes memory returndata,
+    string memory errorMessage
+  ) private pure returns (bytes memory) {
+    if (success) {
+      return returndata;
+    } else {
+      // Look for revert reason and bubble it up if present
+      if (returndata.length > 0) {
+        // The easiest way to bubble the revert reason is using memory via assembly
+
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+          let returndata_size := mload(returndata)
+          revert(add(32, returndata), returndata_size)
+        }
+      } else {
+        revert(errorMessage);
+      }
+    }
+  }
+}
+
+// File: @chainlink/contracts/src/v0.7/interfaces/WithdrawalInterface.sol
+
+
 pragma solidity ^0.7.0;
 
-import "@chainlink/contracts/src/v0.7/AuthorizedReceiver.sol";
-import "@chainlink/contracts/src/v0.7/LinkTokenReceiver.sol";
-import "@chainlink/contracts/src/v0.7/ConfirmedOwner.sol";
-import "@chainlink/contracts/src/v0.7/interfaces/LinkTokenInterface.sol";
-import "@chainlink/contracts/src/v0.7/interfaces/OperatorInterface.sol";
-import "@chainlink/contracts/src/v0.7/interfaces/OwnableInterface.sol";
-import "@chainlink/contracts/src/v0.7/interfaces/WithdrawalInterface.sol";
-import "@chainlink/contracts/src/v0.7/vendor/Address.sol";
-import "@chainlink/contracts/src/v0.7/vendor/SafeMathChainlink.sol";
+interface WithdrawalInterface {
+  /**
+   * @notice transfer LINK held by the contract belonging to msg.sender to
+   * another address
+   * @param recipient is the address to send the LINK to
+   * @param amount is the amount of LINK to send
+   */
+  function withdraw(address recipient, uint256 amount) external;
+
+  /**
+   * @notice query the available amount of LINK to withdraw by msg.sender
+   */
+  function withdrawable() external view returns (uint256);
+}
+
+// File: @chainlink/contracts/src/v0.7/interfaces/OracleInterface.sol
+
+
+pragma solidity ^0.7.0;
+
+interface OracleInterface {
+  function fulfillOracleRequest(
+    bytes32 requestId,
+    uint256 payment,
+    address callbackAddress,
+    bytes4 callbackFunctionId,
+    uint256 expiration,
+    bytes32 data
+  ) external returns (bool);
+
+  function withdraw(address recipient, uint256 amount) external;
+
+  function withdrawable() external view returns (uint256);
+}
+
+// File: @chainlink/contracts/src/v0.7/interfaces/ChainlinkRequestInterface.sol
+
+
+pragma solidity ^0.7.0;
+
+interface ChainlinkRequestInterface {
+  function oracleRequest(
+    address sender,
+    uint256 requestPrice,
+    bytes32 serviceAgreementID,
+    address callbackAddress,
+    bytes4 callbackFunctionId,
+    uint256 nonce,
+    uint256 dataVersion,
+    bytes calldata data
+  ) external;
+
+  function cancelOracleRequest(
+    bytes32 requestId,
+    uint256 payment,
+    bytes4 callbackFunctionId,
+    uint256 expiration
+  ) external;
+}
+
+// File: @chainlink/contracts/src/v0.7/interfaces/OperatorInterface.sol
+
+
+pragma solidity ^0.7.0;
+
+
+
+interface OperatorInterface is ChainlinkRequestInterface, OracleInterface {
+  function operatorRequest(
+    address sender,
+    uint256 payment,
+    bytes32 specId,
+    bytes4 callbackFunctionId,
+    uint256 nonce,
+    uint256 dataVersion,
+    bytes calldata data
+  ) external;
+
+  function fulfillOracleRequest2(
+    bytes32 requestId,
+    uint256 payment,
+    address callbackAddress,
+    bytes4 callbackFunctionId,
+    uint256 expiration,
+    bytes calldata data
+  ) external returns (bool);
+
+  function ownerTransferAndCall(
+    address to,
+    uint256 value,
+    bytes calldata data
+  ) external returns (bool success);
+}
+
+// File: @chainlink/contracts/src/v0.7/interfaces/LinkTokenInterface.sol
+
+
+pragma solidity ^0.7.0;
+
+interface LinkTokenInterface {
+  function allowance(address owner, address spender) external view returns (uint256 remaining);
+
+  function approve(address spender, uint256 value) external returns (bool success);
+
+  function balanceOf(address owner) external view returns (uint256 balance);
+
+  function decimals() external view returns (uint8 decimalPlaces);
+
+  function decreaseApproval(address spender, uint256 addedValue) external returns (bool success);
+
+  function increaseApproval(address spender, uint256 subtractedValue) external;
+
+  function name() external view returns (string memory tokenName);
+
+  function symbol() external view returns (string memory tokenSymbol);
+
+  function totalSupply() external view returns (uint256 totalTokensIssued);
+
+  function transfer(address to, uint256 value) external returns (bool success);
+
+  function transferAndCall(
+    address to,
+    uint256 value,
+    bytes calldata data
+  ) external returns (bool success);
+
+  function transferFrom(
+    address from,
+    address to,
+    uint256 value
+  ) external returns (bool success);
+}
+
+// File: @chainlink/contracts/src/v0.7/interfaces/OwnableInterface.sol
+
+
+pragma solidity ^0.7.0;
+
+interface OwnableInterface {
+  function owner() external returns (address);
+
+  function transferOwnership(address recipient) external;
+
+  function acceptOwnership() external;
+}
+
+// File: @chainlink/contracts/src/v0.7/ConfirmedOwnerWithProposal.sol
+
+
+pragma solidity ^0.7.0;
+
+
+/**
+ * @title The ConfirmedOwner contract
+ * @notice A contract with helpers for basic contract ownership.
+ */
+contract ConfirmedOwnerWithProposal is OwnableInterface {
+  address private s_owner;
+  address private s_pendingOwner;
+
+  event OwnershipTransferRequested(address indexed from, address indexed to);
+  event OwnershipTransferred(address indexed from, address indexed to);
+
+  constructor(address newOwner, address pendingOwner) {
+    require(newOwner != address(0), "Cannot set owner to zero");
+
+    s_owner = newOwner;
+    if (pendingOwner != address(0)) {
+      _transferOwnership(pendingOwner);
+    }
+  }
+
+  /**
+   * @notice Allows an owner to begin transferring ownership to a new address,
+   * pending.
+   */
+  function transferOwnership(address to) public override onlyOwner {
+    _transferOwnership(to);
+  }
+
+  /**
+   * @notice Allows an ownership transfer to be completed by the recipient.
+   */
+  function acceptOwnership() external override {
+    require(msg.sender == s_pendingOwner, "Must be proposed owner");
+
+    address oldOwner = s_owner;
+    s_owner = msg.sender;
+    s_pendingOwner = address(0);
+
+    emit OwnershipTransferred(oldOwner, msg.sender);
+  }
+
+  /**
+   * @notice Get the current owner
+   */
+  function owner() public view override returns (address) {
+    return s_owner;
+  }
+
+  /**
+   * @notice validate, transfer ownership, and emit relevant events
+   */
+  function _transferOwnership(address to) private {
+    require(to != msg.sender, "Cannot transfer to self");
+
+    s_pendingOwner = to;
+
+    emit OwnershipTransferRequested(s_owner, to);
+  }
+
+  /**
+   * @notice validate access
+   */
+  function _validateOwnership() internal view {
+    require(msg.sender == s_owner, "Only callable by owner");
+  }
+
+  /**
+   * @notice Reverts if called by anyone other than the contract owner.
+   */
+  modifier onlyOwner() {
+    _validateOwnership();
+    _;
+  }
+}
+
+// File: @chainlink/contracts/src/v0.7/ConfirmedOwner.sol
+
+
+pragma solidity ^0.7.0;
+
+
+/**
+ * @title The ConfirmedOwner contract
+ * @notice A contract with helpers for basic contract ownership.
+ */
+contract ConfirmedOwner is ConfirmedOwnerWithProposal {
+  constructor(address newOwner) ConfirmedOwnerWithProposal(newOwner, address(0)) {}
+}
+
+// File: @chainlink/contracts/src/v0.7/LinkTokenReceiver.sol
+
+
+pragma solidity ^0.7.0;
+
+abstract contract LinkTokenReceiver {
+  /**
+   * @notice Called when LINK is sent to the contract via `transferAndCall`
+   * @dev The data payload's first 2 words will be overwritten by the `sender` and `amount`
+   * values to ensure correctness. Calls oracleRequest.
+   * @param sender Address of the sender
+   * @param amount Amount of LINK sent (specified in wei)
+   * @param data Payload of the transaction
+   */
+  function onTokenTransfer(
+    address sender,
+    uint256 amount,
+    bytes memory data
+  ) public validateFromLINK permittedFunctionsForLINK(data) {
+    assembly {
+      // solhint-disable-next-line avoid-low-level-calls
+      mstore(add(data, 36), sender) // ensure correct sender is passed
+      // solhint-disable-next-line avoid-low-level-calls
+      mstore(add(data, 68), amount) // ensure correct amount is passed
+    }
+    // solhint-disable-next-line avoid-low-level-calls
+    (bool success, ) = address(this).delegatecall(data); // calls oracleRequest
+    require(success, "Unable to create request");
+  }
+
+  function getChainlinkToken() public view virtual returns (address);
+
+  /**
+   * @notice Validate the function called on token transfer
+   */
+  function _validateTokenTransferAction(bytes4 funcSelector, bytes memory data) internal virtual;
+
+  /**
+   * @dev Reverts if not sent from the LINK token
+   */
+  modifier validateFromLINK() {
+    require(msg.sender == getChainlinkToken(), "Must use LINK token");
+    _;
+  }
+
+  /**
+   * @dev Reverts if the given data does not begin with the `oracleRequest` function selector
+   * @param data The data payload of the request
+   */
+  modifier permittedFunctionsForLINK(bytes memory data) {
+    bytes4 funcSelector;
+    assembly {
+      // solhint-disable-next-line avoid-low-level-calls
+      funcSelector := mload(add(data, 32))
+    }
+    _validateTokenTransferAction(funcSelector, data);
+    _;
+  }
+}
+
+// File: @chainlink/contracts/src/v0.7/interfaces/AuthorizedReceiverInterface.sol
+
+
+pragma solidity ^0.7.0;
+
+interface AuthorizedReceiverInterface {
+  function isAuthorizedSender(address sender) external view returns (bool);
+
+  function getAuthorizedSenders() external returns (address[] memory);
+
+  function setAuthorizedSenders(address[] calldata senders) external;
+}
+
+// File: @chainlink/contracts/src/v0.7/AuthorizedReceiver.sol
+
+
+pragma solidity ^0.7.0;
+
+
+abstract contract AuthorizedReceiver is AuthorizedReceiverInterface {
+  mapping(address => bool) private s_authorizedSenders;
+  address[] private s_authorizedSenderList;
+
+  event AuthorizedSendersChanged(address[] senders, address changedBy);
+
+  /**
+   * @notice Sets the fulfillment permission for a given node. Use `true` to allow, `false` to disallow.
+   * @param senders The addresses of the authorized Chainlink node
+   */
+  function setAuthorizedSenders(address[] calldata senders) external override validateAuthorizedSenderSetter {
+    require(senders.length > 0, "Must have at least 1 authorized sender");
+    // Set previous authorized senders to false
+    uint256 authorizedSendersLength = s_authorizedSenderList.length;
+    for (uint256 i = 0; i < authorizedSendersLength; i++) {
+      s_authorizedSenders[s_authorizedSenderList[i]] = false;
+    }
+    // Set new to true
+    for (uint256 i = 0; i < senders.length; i++) {
+      s_authorizedSenders[senders[i]] = true;
+    }
+    // Replace list
+    s_authorizedSenderList = senders;
+    emit AuthorizedSendersChanged(senders, msg.sender);
+  }
+
+  /**
+   * @notice Retrieve a list of authorized senders
+   * @return array of addresses
+   */
+  function getAuthorizedSenders() external view override returns (address[] memory) {
+    return s_authorizedSenderList;
+  }
+
+  /**
+   * @notice Use this to check if a node is authorized for fulfilling requests
+   * @param sender The address of the Chainlink node
+   * @return The authorization status of the node
+   */
+  function isAuthorizedSender(address sender) public view override returns (bool) {
+    return s_authorizedSenders[sender];
+  }
+
+  /**
+   * @notice customizable guard of who can update the authorized sender list
+   * @return bool whether sender can update authorized sender list
+   */
+  function _canSetAuthorizedSenders() internal virtual returns (bool);
+
+  /**
+   * @notice validates the sender is an authorized sender
+   */
+  function _validateIsAuthorizedSender() internal view {
+    require(isAuthorizedSender(msg.sender), "Not authorized sender");
+  }
+
+  /**
+   * @notice prevents non-authorized addresses from calling this method
+   */
+  modifier validateAuthorizedSender() {
+    _validateIsAuthorizedSender();
+    _;
+  }
+
+  /**
+   * @notice prevents non-authorized addresses from calling this method
+   */
+  modifier validateAuthorizedSenderSetter() {
+    require(_canSetAuthorizedSenders(), "Cannot set authorized senders");
+    _;
+  }
+}
+
+// File: contracts/WhitelistingOperator.sol
+
+
+pragma solidity ^0.7.6;
+
+
+
+
+
+
+
+
+
 
 interface AccessControllerInterface {
   function hasAccess(address user, bytes calldata data) external view returns (bool);

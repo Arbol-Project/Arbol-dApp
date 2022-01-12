@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.4;
+pragma solidity ^0.8.9;
 
 // Constants that need to be set before deploying:
 // set DECIMALS, LINK_ADDRESS (in both contracts), STABLECOIN_ADDRESS, ARBOL_ORACLE, and EVALUATION_JOB depending on network
@@ -127,7 +127,7 @@ contract BlizzardDerivativeProvider is SimpleWriteAccessController {
         uint256 payout = blizzardContract.payout();
         contractPaidOut = true;
         if (payout > 0) {
-            require(stablecoin.transfer(PREMIUM_ADDRESS, payout), "unable to payout to buyer");
+            require(stablecoin.transfer(PREMIUM_ADDRESS, COLLATERAL_PAYMENT), "unable to payout to buyer");
         }
         require(stablecoin.transfer(COLLATERAL_ADDRESS, stablecoin.balanceOf(address(this))), "unable to return final balance to provider");
     }
@@ -248,9 +248,9 @@ contract BlizzardOption is ChainlinkClient, ConfirmedOwner {
     uint256 private constant ORACLE_PAYMENT = 1 * 10**2;                                                        // 0.0000000000000001 LINK
     address private constant LINK_ADDRESS = 0xa36085F69e2889c224210F603D836748e7dC0088;                         // Link token address on Ethereum Kovan
     // address private constant ARBOL_ORACLE = 0x58935F97aB874Bc4181Bc1A3A85FDE2CA80885cd;                         // address of Arbol Chainlink Node oracle contract
-    address private constant ARBOL_ORACLE = 0x2bD976e4AB857eE553f461E6934d06c086a25D7e;                         // address of Arbol Chainlink Node operator contract
+    address public constant ARBOL_ORACLE = 0x2bD976e4AB857eE553f461E6934d06c086a25D7e;                         // address of Arbol Chainlink Node operator contract
     // bytes32 private constant EVALUATION_JOB = "63bb451d36754aab849577a73ce4eb7e";                               // general Get Contract Evaluation job ID for oracle contract
-    bytes32 private constant EVALUATION_JOB = "c9a0bbc14f5e47d09010e32cf1e6d569";                               // general Get Contract Evaluation job ID for oracle contract
+    bytes32 public constant EVALUATION_JOB = "c9a0bbc14f5e47d09010e32cf1e6d569";                               // general Get Contract Evaluation job ID for oracle contract
 
     mapping(bytes32 => uint256) public oracleMap;
     address[] public oracles;

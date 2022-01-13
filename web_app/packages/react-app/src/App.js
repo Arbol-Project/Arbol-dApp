@@ -147,7 +147,6 @@ function App() {
     // fetch("https://api-kovan.etherscan.io/api?module=account&action=txlistinternal&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=999999999&sort=asc&apikey="+process.env.REACT_APP_ETHERSCAN_KEY)
     .then(resp => resp.json())
     .then(data => {
-      console.log(data)
       tokenDataSetter(data.result)})
     }, []);
 
@@ -178,7 +177,6 @@ function App() {
     fetch("https://api-kovan.etherscan.io/api?module=account&action=txlistinternal&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=999999999&sort=asc&apikey="+process.env.REACT_APP_ETHERSCAN_KEY)
     .then(resp => resp.json())
     .then(data => {
-      console.log(data)
       internalDataSetter(data.result)})
     }, []);
 

@@ -157,7 +157,7 @@ function App() {
         if (deploy_hashes.includes(row["hash"])) {
           row["action"] = "Deploy Contract";
         } else {
-          row["action"] = "Deploy Test Contract";
+          row["action"] = "Deploy Verification Proxy";
         }
       }
     }

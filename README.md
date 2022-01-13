@@ -4,7 +4,7 @@ Arbol-dApp Monorepo.
 
 ## Web App
 
-The frontend is a mostly-React app bootstrapped with [Create Eth App](https://github.com/paulrberg/create-eth-app) and powered by [Netlify](https://www.netlify.com/). It is a work in progress and will contain interfaces for all deployed contracts. It is hosted at [arbol-dapp.xyz](https://www.arbol-dapp.xyz)
+The frontend is a Node app bootstrapped with [Create Eth App](https://github.com/paulrberg/create-eth-app) and hosted by [Heroku](https://www.heroku.com/). It is hosted at [arbol-dapp.xyz](https://www.arbol-dapp.xyz) and displays an interface for the deployed Blizzard Derivative Provider contract on Polygon Mainnet, allowing predetermined parties to execute agreed upon transactions.
 
 ## Chainlink Node
 
@@ -34,17 +34,18 @@ The IPFS web UI can be accessed at `http://localhost:5001/webui`; if SSH tunneli
 
 ## Smart Contracts
 
-This directory holds smart contract source for [Arbol](https://www.arbolmarket.com/) derivative deals, [Hardhat](https://hardhat.org/) deployment, verification, and evaluation scripts, Chainlink oracle job definitions, and contract deployment records.
+This directory holds smart contract source for [Arbol](https://www.arbolmarket.com/) derivative deals, [Hardhat](https://hardhat.org/) testing, deployment, verification, and evaluation scripts, Chainlink oracle job definitions, and contract deployment records.
 
-To deploy, verify, and test smart contracts located in `smart_contracts/hardhat/contracts`, first make sure Hardhat
+To test, deploy, verify, and test smart contracts located in `smart_contracts/hardhat/contracts`, first make sure Hardhat
 is installed locally, then run the following:
 
 ```
 # from Arbol-dApp
 cd smart_contracts/hardhat
+npx hardhat test                                # run tests on Blizzard contract (Contract should be set for Kovan network)
 npx hardhat run scripts/deploy-all.js           # deploy all contracts or replace with specific deployment script
 npx hardhat run scripts/verify-deployments.js   # verify source codes for all deployed contracts
 npx hardhat run scripts/evaluate-deployments.js # evaluate all deployed contracts with expired coverage periods
 ```
 
-Deployment details can be viewed in `web_app/packages/contracts/src/logs`. Depending on the contract, evaluation may fail if certain conditions are not met (for example, for all contracts, LINK token provider must first approve derivativeProvider contract to move funds for oracle requests). Web app interfaces are automatically generated for contract deployments.
+Deployment details can be viewed in `web_app/packages/contracts/src/logs`. Depending on the contract, evaluation may fail if certain conditions are not met (for example, for all contracts, LINK token provider must first approve derivativeProvider contract to move funds for oracle requests).

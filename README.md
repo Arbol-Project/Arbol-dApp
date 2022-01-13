@@ -4,7 +4,7 @@ Arbol-dApp Monorepo.
 
 ## Web App
 
-The frontend is a Node app bootstrapped with [Create Eth App](https://github.com/paulrberg/create-eth-app) and hosted by [Heroku](https://www.heroku.com/). It is hosted at [arbol-dapp.xyz](https://www.arbol-dapp.xyz) and displays an interface for the deployed Blizzard Derivative Provider contract on Polygon Mainnet, allowing predetermined parties to execute agreed upon transactions.
+The frontend is a [Node](https://nodejs.org/en/) app bootstrapped with [Create Eth App](https://github.com/paulrberg/create-eth-app) and hosted by [Heroku](https://www.heroku.com/). It is hosted at [arbol-dapp.xyz](https://www.arbol-dapp.xyz) and displays an interface for the deployed Blizzard Derivative Provider contract on Polygon Mainnet, allowing predetermined parties to execute agreed upon transactions.
 
 ## Chainlink Node
 

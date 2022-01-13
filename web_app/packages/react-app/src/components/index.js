@@ -56,10 +56,8 @@ export const Col = styled.div`
 `;
 
 export const Image = styled.img`
-  height: 30vmin;
-  margin-top: 24px;
+  height: 25vmin;
   margin-bottom: 8px;
-  margins: 4px 0px
   pointer-events: none;
 `;
 
@@ -74,7 +72,8 @@ export const Title = styled.p`
 
 export const Text = styled.p`
   color: white;
-  padding: 0px 8px;
+  padding: 0px 20px;
+  margin: 10px 0px;
   font-size: calc(4px + 2vmin);
   font-family: Quicksand;
 `;

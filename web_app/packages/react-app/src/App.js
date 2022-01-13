@@ -18,8 +18,6 @@ const addressBook = {
   "0xa679c6154b8d4619Af9F83f0bF9a13A680e01eCf": "Purchaser",
   "0xbf417C41F3ab1e01BD6867fB540dA7b734EaeA95": "Provider",
   [addresses.BlizzardDerivativeProvider]: "Contract"
-
-
 }
 
 
@@ -117,9 +115,9 @@ function App() {
   ];
 
   // useEffect(() => {
-  //   fetch("https://api-kovan.etherscan.io/api?module=account&action=txlist&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=99999999&sort=asc&apikey="+process.env.REACT_APP_ETHERSCAN_KEY)
-  //   // fetch("https://api-kovan.etherscan.io/api?module=account&action=tokentx&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=999999999&sort=asc&apikey="+process.env.REACT_APP_ETHERSCAN_KEY)
-  //   // fetch("https://api-kovan.etherscan.io/api?module=account&action=txlistinternal&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=999999999&sort=asc&apikey="+process.env.REACT_APP_ETHERSCAN_KEY)
+  //   fetch("https://api-kovan.polygonscan.com/api?module=account&action=txlist&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=99999999&sort=asc&apikey="+process.env.REACT_APP_POLYGONSCAN_KEY)
+  //   // fetch("https://api-kovan.polygonscan.com/api?module=account&action=tokentx&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=999999999&sort=asc&apikey="+process.env.REACT_APP_POLYGONSCAN_KEY)
+  //   // fetch("https://api-kovan.polygonscan.com/api?module=account&action=txlistinternal&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=999999999&sort=asc&apikey="+process.env.REACT_APP_POLYGONSCAN_KEY)
   //   .then(resp => resp.json())
   //   .then(data => {
   //     console.log(data)
@@ -142,9 +140,9 @@ function App() {
   // }
 
   useEffect(() => {
-    // fetch("https://api-kovan.etherscan.io/api?module=account&action=txlist&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=99999999&sort=asc&apikey="+process.env.REACT_APP_ETHERSCAN_KEY)
-    fetch("https://api-kovan.etherscan.io/api?module=account&action=tokentx&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=999999999&sort=asc&apikey="+process.env.REACT_APP_ETHERSCAN_KEY)
-    // fetch("https://api-kovan.etherscan.io/api?module=account&action=txlistinternal&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=999999999&sort=asc&apikey="+process.env.REACT_APP_ETHERSCAN_KEY)
+    // fetch("https://api-kovan.polygonscan.com/api?module=account&action=txlist&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=99999999&sort=asc&apikey="+process.env.REACT_APP_POLYGONSCAN_KEY)
+    fetch("https://api.polygonscan.com/api?module=account&action=tokentx&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=999999999&sort=asc&apikey="+process.env.REACT_APP_POLYGONSCAN_KEY)
+    // fetch("https://api-kovan.polygonscan.com/api?module=account&action=txlistinternal&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=999999999&sort=asc&apikey="+process.env.REACT_APP_POLYGONSCAN_KEY)
     .then(resp => resp.json())
     .then(data => {
       tokenDataSetter(data.result)})
@@ -172,9 +170,9 @@ function App() {
 
 
   useEffect(() => {
-    // fetch("https://api-kovan.etherscan.io/api?module=account&action=txlist&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=99999999&sort=asc&apikey="+process.env.REACT_APP_ETHERSCAN_KEY)
-    // fetch("https://api-kovan.etherscan.io/api?module=account&action=tokentx&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=999999999&sort=asc&apikey="+process.env.REACT_APP_ETHERSCAN_KEY)
-    fetch("https://api-kovan.etherscan.io/api?module=account&action=txlistinternal&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=999999999&sort=asc&apikey="+process.env.REACT_APP_ETHERSCAN_KEY)
+    // fetch("https://api-kovan.polygonscan.com/api?module=account&action=txlist&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=99999999&sort=asc&apikey="+process.env.REACT_APP_POLYGONSCAN_KEY)
+    // fetch("https://api-kovan.polygonscan.com/api?module=account&action=tokentx&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=999999999&sort=asc&apikey="+process.env.REACT_APP_POLYGONSCAN_KEY)
+    fetch("https://api.polygonscan.com/api?module=account&action=txlistinternal&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=999999999&sort=asc&apikey="+process.env.REACT_APP_POLYGONSCAN_KEY)
     .then(resp => resp.json())
     .then(data => {
       internalDataSetter(data.result)})
@@ -328,7 +326,7 @@ function App() {
                     The Purchase Contract option approves the smart contract to transfer the premium cost in USDC from the caller's wallet, then executes the actual transfer and instantiates a new Option contract.
                     Transactions and token transfers with the Derivative Provider smart contract are updated on refresh.
                   </Text>
-                      <Link href={"https://kovan.etherscan.io/address/" + addresses.BlizzardDerivativeProvider} style={{ marginTop: "8px" }}> etherscan </Link>
+                      <Link href={"https://polygonscan.com/address/" + addresses.BlizzardDerivativeProvider} style={{ marginTop: "8px" }}> polygonscan </Link>
                       <Link href="https://github.com/Arbol-Project/Arbol-dApp" style={{ marginTop: "8px" }}> source </Link>
                 </Col>
               </Grid>

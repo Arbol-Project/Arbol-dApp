@@ -26,17 +26,14 @@ describe("BlizzardDerivativeFactory Tests", function () {
   let admin;
   let purchaser;
   let provider;
+  let LinkAddress;
+  let StableAddress;
   var params = ["station_id", "USW00003927", "weather_variable", "SNOW", "dataset", "ghcnd", "opt_type", "CALL", "strike", "0", "limit", "250000", "tick", "250000", "threshold", "6", "imperial_units", "True", "dates", '["2021-10-06", "2021-10-08", "2021-10-26", "2021-10-28", "2021-10-31", "2021-11-02", "2021-11-06", "2021-11-08", "2021-11-15", "2021-11-27", "2021-11-29", "2021-12-03", "2021-12-04", "2021-12-07", "2021-12-13", "2021-12-15", "2021-12-21", "2021-12-23"]'];
 
   before(async function () {
     // get interfaces for LINK token and stable coin to approve transfers
     [ admin ] = await ethers.getSigners();
-    LinkToken = new ethers.Contract("0xa36085F69e2889c224210F603D836748e7dC0088", ERC20ABI, admin);
-    StableCoin = new ethers.Contract("0xe8AA8A60C9417d8fD59EB4378687dDCEEd29c1B4", ERC20ABI, admin);
-  });
 
-  beforeEach(async function () {
-    // deploy new provider contract, approve LINK and stablecoin transfers
     BlizzardDerivativeProvider = await ethers.getContractFactory("BlizzardDerivativeProvider");
     ProviderContract = await BlizzardDerivativeProvider.deploy();
     await ProviderContract.deployed();
@@ -45,6 +42,18 @@ describe("BlizzardDerivativeFactory Tests", function () {
     purchaser = await ProviderContract.PREMIUM_ADDRESS();
     collateral = await ProviderContract.COLLATERAL_PAYMENT();
     premium = await ProviderContract.PREMIUM_PAYMENT();
+    LinkAddress = await ProviderContract.LINK_ADDRESS();
+    StableAddress = await ProviderContract.STABLECOIN_ADDRESS();
+
+    LinkToken = new ethers.Contract(LinkAddress, ERC20ABI, admin);
+    StableCoin = new ethers.Contract(StableAddress, ERC20ABI, admin);
+  });
+
+  beforeEach(async function () {
+    // deploy new provider contract, approve LINK and stablecoin transfers
+    BlizzardDerivativeProvider = await ethers.getContractFactory("BlizzardDerivativeProvider");
+    ProviderContract = await BlizzardDerivativeProvider.deploy();
+    await ProviderContract.deployed();
 
     var tx = await StableCoin.approve(ProviderContract.address, collateral.add(premium));
     await tx.wait();

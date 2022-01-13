@@ -4,8 +4,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Web3Modal from "web3modal";
 // import Formatic from "formatic";
 // const ALCHEMY_TOKEN = process.env.ALCHEMY_TOKEN;
-const INFURA_ID = "57683385d9284daea40fe2f6e42269f9";
-const NETWORK = "kovan";
+const INFURA_ID = "";
+const NETWORK = "mainnet";
 
 function useWeb3Modal(config = {}) {
   const [provider, setProvider] = useState();

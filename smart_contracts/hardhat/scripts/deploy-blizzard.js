@@ -12,11 +12,6 @@ async function main() {
   const BlizzardDerivativeProvider = await hre.ethers.getContractFactory("BlizzardDerivativeProvider");
   var derivative_provider = null;
 
-  const defaultProvider = hre.ethers.getDefaultProvider();
-  const [defaultSigner] = await hre.ethers.getSigners();
-  const defaultAddress = await defaultSigner.address;
-  const balance = await defaultProvider.getBalance(defaultAddress);
-
   if ("BlizzardDerivativeProvider" in Providers) {
     provider = Providers.BlizzardDerivativeProvider;
     derivative_provider = await BlizzardDerivativeProvider.attach(provider.address);

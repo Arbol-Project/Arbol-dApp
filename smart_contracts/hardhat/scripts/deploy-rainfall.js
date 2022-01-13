@@ -9,7 +9,6 @@ const RainfallSRO1 = require("../SROs/Cambodia_rain_basket_August21-December21.j
 const RainfallSRO2 = require("../SROs/Cambodia_rain_basket_December21-April22.json");
 const ContractList = RainfallSRO1.__config__.contracts.concat([RainfallSRO2]);
 
-
 async function main() {
 
   const RainfallDerivativeProvider = await hre.ethers.getContractFactory("RainfallDerivativeProvider");
@@ -54,7 +53,7 @@ async function main() {
         var tx = await derivative_provider.newContract(parameters, end_unix);
         await tx.wait();
 
-        var deployed_address = await derivative_provider.getContractAddress(id);
+        var deployed_address = await derivative_provider.contracts(id);
         const RainfallOption = await hre.ethers.getContractFactory("RainfallOption");
         var rainfall_option = await RainfallOption.attach(deployed_address);
         console.log("RainfallOption deployed to:", rainfall_option.address);

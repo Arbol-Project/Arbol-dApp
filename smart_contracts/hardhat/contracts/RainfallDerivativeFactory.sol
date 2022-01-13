@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-// need to set LINK_ADDRESS and oracles/jobs depending on network
-// also need to set LINK buffer back to 2x
 
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
@@ -11,16 +9,16 @@ contract RainfallDerivativeProvider is ConfirmedOwner {
     /**
      * @dev RainfallDerivativeProvider contract for general rainfall option contracts
      */
-    uint256 private constant ORACLE_PAYMENT = 1 * 10**14;                                                       // 0.0001 LINK
-    address public constant ORACLE_BANK = 0x69640770407A09B166AED26B778699045B304768;                           // address of LINK provider for oracle requests
-    address public constant LINK_ADDRESS = 0xa36085F69e2889c224210F603D836748e7dC0088;                          // Link token address on Ethereum Kovan
+    uint256 private constant ORACLE_PAYMENT = 1 * 10**10; // 0.00000001 LINK
+    address public constant ORACLE_BANK = 0x456789ccc3813e8797c4B5C5BAB846ee4A47b0BA; // Oracle funder
+    address public constant LINK_ADDRESS = 0xb0897686c545045aFc77CF20eC7A532E3120E0F1; // Link token address on Polygon Mainnet
 
     mapping(string => RainfallOption) public contracts;
     
     /**
      * @dev Event to log when a contract is created
      */
-    event contractCreated(address _contract, string _id);
+    event contractCreated(address _contract, string[] _parameters);
 
     /**
      * @dev Sets deploying address as owner
@@ -53,9 +51,26 @@ contract RainfallDerivativeProvider is ConfirmedOwner {
     {
         RainfallOption rainfallContract = new RainfallOption();
         rainfallContract.initialize(ORACLE_PAYMENT, LINK_ADDRESS, _parameters, _end);
-        rainfallContract.addOracleJob(0x58935F97aB874Bc4181Bc1A3A85FDE2CA80885cd, stringToBytes32("63bb451d36754aab849577a73ce4eb7e"));
         contracts[_parameters[1]] = rainfallContract;
-        emit contractCreated(address(rainfallContract), _parameters[1]);
+        emit contractCreated(address(rainfallContract), _parameters);
+    }
+
+    /**
+     * @notice Request payout evaluation for a specified contract
+     * @dev Can only be called by the contract owner
+     * @param _id string contract ID
+     */
+    function initiateContractEvaluation(
+        string memory _id
+    ) 
+        external 
+        onlyOwner 
+    {
+        RainfallOption rainfallContract = contracts[_id];
+        LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);
+        uint256 oraclePayment = rainfallContract.getOraclePayment();
+        require(link.transferFrom(ORACLE_BANK, address(rainfallContract), oraclePayment), "Unable to fund deployed contract");
+        rainfallContract.requestPayoutEvaluation();
     }
 
     /**
@@ -93,21 +108,6 @@ contract RainfallDerivativeProvider is ConfirmedOwner {
     }
 
     /**
-     * @notice Returns the address of the contract for a given id
-     * @param _id string contract ID
-     * @return address of deployed contract
-     */
-    function getContractAddress(
-        string memory _id
-    )
-        external
-        view
-        returns (address)
-    {
-        return address(contracts[_id]);
-    }
-
-    /**
      * @notice Get the parameters for the specified contract
      * @dev Can only be called by the contract owner
      * @param _id string contract ID
@@ -122,24 +122,6 @@ contract RainfallDerivativeProvider is ConfirmedOwner {
         returns (string[] memory) 
     {
         return contracts[_id].getParameters();
-    }
-
-    /**
-     * @notice Request payout evaluation for a specified contract
-     * @dev Can only be called by the contract owner
-     * @param _id string contract ID
-     */
-    function initiateContractEvaluation(
-        string memory _id
-    ) 
-        external 
-        onlyOwner 
-    {
-        RainfallOption rainfallContract = contracts[_id];
-        LinkTokenInterface link = LinkTokenInterface(LINK_ADDRESS);
-        uint256 oracle_mult = rainfallContract.getNumJobs();
-        require(link.transferFrom(ORACLE_BANK, address(rainfallContract), ORACLE_PAYMENT * oracle_mult), "Unable to fund deployed contract");
-        rainfallContract.requestPayoutEvaluation();
     }
 
     /**
@@ -193,6 +175,7 @@ contract RainfallDerivativeProvider is ConfirmedOwner {
             // solhint-disable-line no-inline-assembly
             _result := mload(add(_source, 32))
         }
+        
     }
 }
 
@@ -202,6 +185,9 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
      * @dev RainfallOption contract for rainfall option contracts
      */
     using Chainlink for Chainlink.Request;
+
+    address public constant ARBOL_ORACLE = 0x76dfA9a36db355F101B241b66e2fA97f7Ca09C24; // Polygon Mainnet Operator.sol address
+    bytes32 public constant EVALUATION_JOB = "ccaf1bfe97d8469caff395a0aaa61e27"; // Get Contract Evaluation job ID for Polygon Mainnet
 
     uint256 private oraclePayment;
     mapping(bytes32 => uint256) public oracleMap;
@@ -215,10 +201,6 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
     uint256 private end;
     uint256 public payout;
 
-    event contractEnded(address _contract, uint256 _time);
-    event evaluationRequestSent(address _contract, address _oracle, bytes32 _request, uint256 _time);
-    event evaluationRequestFulfilled(address _contract, uint256 _payout, uint256 _time);
-
     /**
      * @notice Creates a new rainfall option contract
      * @dev Assigns caller address as contract ownert
@@ -228,7 +210,9 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
     {
         payout = 0;
         contractEvaluated = false;
-        requestsPending = 0;
+        
+        oracles.push(ARBOL_ORACLE);
+        jobs.push(EVALUATION_JOB);
     }
 
     /**
@@ -257,18 +241,46 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
     }
 
     /**
-     * @notice Get the contract parameters
+     * @notice Makes a chainlink oracle request to compute a payout evaluation for this contract
      * @dev Can only be called by the contract owner
-     * @return string[] contract terms
      */
-    function getParameters() 
+    function requestPayoutEvaluation() 
         public 
         onlyOwner 
-        view
-        returns (string[] memory) 
     {
+        require(end < block.timestamp, "unable to call until coverage period has ended");
+        // do all looped reads from memory instead of storage
+        uint256 _oraclePayment = oraclePayment;
+        address[] memory _oracles = oracles;
+        bytes32[] memory _jobs = jobs;
         string[] memory _parameters = parameters;
-        return _parameters;
+        uint256 requests = 0;
+
+        for (uint256 i = 0; i != _oracles.length; i += 1) {
+            Chainlink.Request memory req = buildChainlinkRequest(_jobs[i], address(this), this.fulfillPayoutEvaluation.selector);
+            req.addStringArray("parameters", _parameters);
+            sendChainlinkRequestTo(_oracles[i], req, _oraclePayment);
+            requests += 1;
+            }
+        requestsPending = requests;
+    }
+
+    /**
+     * @dev Callback function for chainlink oracle requests, assigns payout
+     */
+    function fulfillPayoutEvaluation(bytes32 _requestId, uint256 _result)
+        public
+        recordChainlinkFulfillment(_requestId)
+    {
+        payout += _result;
+        requestsPending -= 1;
+        if (requestsPending == 0) {
+            payout /= oracles.length;
+            contractEvaluated = true;
+
+            LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
+            require(link.transfer(owner(), link.balanceOf(address(this))), "Unable to transfer remaining LINK tokens");
+        }
     }
 
     /**
@@ -284,9 +296,18 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
         public 
         onlyOwner
     {
-        oracles.push(_oracle);
-        jobs.push(_job);
-        oracleMap[_job] = oracles.length - 1;
+        uint256 index = oracleMap[_job];
+        if (jobs.length == 0) {
+            oracles.push(_oracle);
+            jobs.push(_job);
+            oracleMap[_job] = oracles.length - 1;
+        } else {
+            if (jobs[index] != _job) {
+                oracles.push(_oracle);
+                jobs.push(_job);
+                oracleMap[_job] = oracles.length - 1;
+            }
+        }
     }
 
     /**
@@ -316,60 +337,29 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
     }
 
     /**
-     * @notice Get the number of contract jobs
-     * @return uint256 number of jobs
+     * @notice Get the contract parameters
+     * @dev Can only be called by the contract owner
+     * @return string[] contract terms
      */
-    function getNumJobs() 
+    function getParameters() 
+        public 
+        onlyOwner 
+        view
+        returns (string[] memory) 
+    {
+        string[] memory _parameters = parameters;
+        return _parameters;
+    }
+
+    /**
+     * @notice Get the total oracle payment amount
+     * @return uint256 oracle payment
+     */
+    function getOraclePayment() 
         public 
         view 
         returns (uint256) 
     {
-        return jobs.length;
-    }
-
-    /**
-     * @notice Makes a chainlink oracle request to compute a payout evaluation for this contract
-     * @dev Can only be called by the contract owner
-     */
-    function requestPayoutEvaluation() 
-        public 
-        onlyOwner 
-    {
-        require(end < block.timestamp, "unable to call until coverage period has ended");
-        emit contractEnded(address(this), block.timestamp);
-        // do all looped reads from memory instead of storage
-        uint256 _oraclePayment = oraclePayment;
-        address[] memory _oracles = oracles;
-        bytes32[] memory _jobs = jobs;
-        string[] memory _parameters = parameters;
-        uint256 requests = 0;
-
-        for (uint256 i = 0; i != _oracles.length; i += 1) {
-            Chainlink.Request memory req = buildChainlinkRequest(_jobs[i], address(this), this.fulfillPayoutEvaluation.selector);
-            req.addStringArray("parameters", _parameters);
-            bytes32 requestId = sendChainlinkRequestTo(_oracles[i], req, _oraclePayment);
-            requests += 1;
-            emit evaluationRequestSent(address(this), _oracles[i], requestId, block.timestamp);
-            }
-        requestsPending = requests;
-    }
-
-    /**
-     * @dev Callback function for chainlink oracle requests, assigns payout
-     */
-    function fulfillPayoutEvaluation(bytes32 _requestId, uint256 _result)
-        public
-        recordChainlinkFulfillment(_requestId)
-    {
-        payout += _result;
-        requestsPending -= 1;
-        if (requestsPending == 0) {
-            payout /= oracles.length;
-            contractEvaluated = true;
-
-            LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
-            require(link.transfer(owner(), link.balanceOf(address(this))), "Unable to transfer remaining LINK tokens");
-        }
-        emit evaluationRequestFulfilled(address(this), _result, block.timestamp);
+        return oraclePayment * jobs.length;
     }
 }

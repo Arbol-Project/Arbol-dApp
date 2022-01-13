@@ -5,30 +5,74 @@ const ProviderLogs = path.join(process.cwd(), "../../web_app/packages/contracts/
 const ContractLogs = path.join(process.cwd(), "../../web_app/packages/contracts/src/logs/contracts.json");
 const Providers = require(ProviderLogs);
 const Contracts = require(ContractLogs);
+const abis = require(path.join(process.cwd(), "../../web_app/packages/contracts/src/abi.js"));
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
 
 async function main() {
 
+  // const [defaultSigner] = await hre.ethers.getSigners();
+
     for (const [pname, pdata] of Object.entries(Providers)) {
       const DerivativeProvider = await hre.ethers.getContractFactory(pname);
       var derivative_provider = await DerivativeProvider.attach(pdata.address);
-      
+
+      const Operator = await hre.ethers.getContractFactory("Operator");
+      // const Link = new Contract(, abis.erc20, defaultSigner);
+
+
+      // const defaultProvider = hre.ethers.getDefaultProvider();
+      // const [defaultSigner] = await hre.ethers.getSigners();
+      // var LinkAddress;
+    
+      // const link = new Contract(LinkAddress, abis.erc20, defaultSigner);
+
+      var today = new Date();
+      var cutoff;
+      if (today.getDate() > 16) {
+        if (today.getMonth() == 0) {
+          cutoff = new Date(today.getYear()-1+1900, 11, 0);
+        } else {
+          cutoff = new Date(today.getYear()+1900, today.getMonth()-1, 0);
+        }
+      } else {
+        if (today.getMonth() < 2) {
+          cutoff = new Date(today.getYear()-1+1900, today.getMonth()+10, 0);
+        } else {
+          cutoff = new Date(today.getYear()+1900, today.getMonth()-2, 0);
+        }
+      }      
+
       for (const [cname, caddr] of Object.entries(pdata.contracts)) {
-        // add two days to end to make sure data is there
+    
         var end_date = new Date(Contracts[cname].end);
-        var end_time = end_date.getTime();
-        if (caddr == Contracts[cname].address && (end_time + 1000*60*60*24*2) < parseInt(Date.now())) {
+
+        if (caddr == Contracts[cname].address && end_date.getTime() < cutoff.getTime()) {
           if (Contracts[cname].evaluated) {
             continue;
           }
           console.log("Initiating contract evaluation for:", cname);
           if (pname == "RainfallDerivativeProvider") {
-            var tx = await derivative_provider.initiateContractEvaluation(cname);
+            var optionAddress = derivative_provider.contracts(cname);
+            const OptionContract = await hre.ethers.getContractFactory("RainfallOption");
+            var option_contract = OptionContract.attach(optionAddress);
+            var operator_address = await option_contract.ARBOL_ORACLE();
+            var whitelistingOperator= await Operator.attach(operator_address);
+            var tx = await whitelistingOperator.addAccess(optionAddress);
+            await tx.wait();
+            tx = await derivative_provider.initiateContractEvaluation(cname);
             console.log("waiting...");
             await tx.wait();
           } else if (pname == "BlizzardDerivativeProvider") {
-            var tx = await derivative_provider.initiateContractEvaluation();
+            var optionAddress = derivative_provider.blizzardContract();
+            const OptionContract = await hre.ethers.getContractFactory("BlizzardOption");
+            var option_contract = OptionContract.attach(optionAddress);
+            var operator_address = await option_contract.ARBOL_ORACLE();
+            var whitelistingOperator= await Operator.attach(operator_address);
+            var tx = await whitelistingOperator.addAccess(optionAddress);
+            await tx.wait();
+
+            tx = await derivative_provider.initiateContractEvaluation();
             console.log("Waiting...");
             await tx.wait();
           }

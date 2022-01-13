@@ -1,4 +1,4 @@
-# Arbol-dApp
+# Arbol Adapter
 
 Chainlink External Adapter for dClimate data retrieval and Arbol contract evaluation.
 

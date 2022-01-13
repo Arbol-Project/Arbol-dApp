@@ -14,7 +14,6 @@ import { DataGrid } from '@mui/x-data-grid';
 export const theme = createTheme(themeOptions);
 
 const addressBook = {
-  "0x69640770407A09B166AED26B778699045B304768": "Operator",
   "0xa679c6154b8d4619Af9F83f0bF9a13A680e01eCf": "Purchaser",
   "0xbf417C41F3ab1e01BD6867fB540dA7b734EaeA95": "Provider",
   [addresses.BlizzardDerivativeProvider]: "Contract"
@@ -31,19 +30,9 @@ function WalletButton({ provider, loadWeb3Modal, logoutOfWeb3Modal }) {
         if (!provider) {
           return;
         }
-
         // Load the user's accounts.
         const accounts = await provider.listAccounts();
         setAccount(accounts[0]);
-
-        // disabled for testing (not on Mainnet)
-        // // Resolve the ENS name for the first account.
-        // const name = await provider.lookupAddress(accounts[0]);
-
-        // Render either the ENS name or the shortened account address.
-        // if (name) {
-        //   setRendered(name);
-        // } else {
         setRendered(account.substring(0, 6) + "..." + account.substring(36));
         // }
       } catch (err) {
@@ -81,20 +70,12 @@ function WalletButton({ provider, loadWeb3Modal, logoutOfWeb3Modal }) {
 }
  
 function App() {
-  // const { loading, error, data } = useQuery(GET_TRANSFERS);
+
   const [provider, loadWeb3Modal, logoutOfWeb3Modal] = useWeb3Modal();
-  // const [normalRows, setNormalRows] = useState([]);
+
   const [internalRows, setInternalRows] = useState([]);
   const [tokenRows, setTokenRows] = useState([]);
 
-  // const normalColumns = [
-  //   { field: 'id', headerName: '#', width: 10 },
-  //   { field: 'hash', headerName: 'Tx Hash', width: 120 },
-  //   { field: 'from', headerName: 'Caller', width: 120 },
-  //   // { field: 'action', headerName: 'Action', width: 120 },
-  //   // { field: 'explorer', headerName: 'Tx Link', width: 320 },
-  //   { field: 'time', headerName: 'Time', width: 200 },
-  // ];
 
   const tokenColumns = [
     { field: 'id', headerName: '#', width: 10 },
@@ -114,35 +95,8 @@ function App() {
     { field: 'action', headerName: 'Action', width: 200 },
   ];
 
-  // useEffect(() => {
-  //   fetch("https://api-kovan.polygonscan.com/api?module=account&action=txlist&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=99999999&sort=asc&apikey="+process.env.REACT_APP_POLYGONSCAN_KEY)
-  //   // fetch("https://api-kovan.polygonscan.com/api?module=account&action=tokentx&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=999999999&sort=asc&apikey="+process.env.REACT_APP_POLYGONSCAN_KEY)
-  //   // fetch("https://api-kovan.polygonscan.com/api?module=account&action=txlistinternal&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=999999999&sort=asc&apikey="+process.env.REACT_APP_POLYGONSCAN_KEY)
-  //   .then(resp => resp.json())
-  //   .then(data => {
-  //     console.log(data)
-  //     normalDataSetter(data.result)})
-  //   }, []);
-
-  // async function normalDataSetter(data) {
-  //   var new_rows = []
-  //   for (var i = 0; i < data.length; i++) {
-  //     const row = data[i];
-  //     row["id"] = i;
-  //     var date = new Date(parseInt(row["timeStamp"]) * 1000);
-  //     row["time"] = date.toISOString();
-  //     if (getAddress(row["from"]) in addressBook) {
-  //       row["from"] = addressBook[getAddress(row["from"])];
-  //     }
-  //     new_rows.push(row);
-  //   }
-  //   setNormalRows(new_rows.reverse());
-  // }
-
   useEffect(() => {
-    // fetch("https://api-kovan.polygonscan.com/api?module=account&action=txlist&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=99999999&sort=asc&apikey="+process.env.REACT_APP_POLYGONSCAN_KEY)
     fetch("https://api.polygonscan.com/api?module=account&action=tokentx&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=999999999&sort=asc&apikey="+process.env.REACT_APP_POLYGONSCAN_KEY)
-    // fetch("https://api-kovan.polygonscan.com/api?module=account&action=txlistinternal&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=999999999&sort=asc&apikey="+process.env.REACT_APP_POLYGONSCAN_KEY)
     .then(resp => resp.json())
     .then(data => {
       tokenDataSetter(data.result)})
@@ -170,8 +124,6 @@ function App() {
 
 
   useEffect(() => {
-    // fetch("https://api-kovan.polygonscan.com/api?module=account&action=txlist&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=99999999&sort=asc&apikey="+process.env.REACT_APP_POLYGONSCAN_KEY)
-    // fetch("https://api-kovan.polygonscan.com/api?module=account&action=tokentx&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=999999999&sort=asc&apikey="+process.env.REACT_APP_POLYGONSCAN_KEY)
     fetch("https://api.polygonscan.com/api?module=account&action=txlistinternal&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=999999999&sort=asc&apikey="+process.env.REACT_APP_POLYGONSCAN_KEY)
     .then(resp => resp.json())
     .then(data => {
@@ -219,7 +171,6 @@ function App() {
     const MainContract = new Contract(addresses.BlizzardDerivativeProvider, abis.BlizzardDerivativeProvider, defaultSigner);
     const usdc = new Contract(addresses.USDC, abis.erc20, defaultSigner);
 
-    var oracleBank = await MainContract.ORACLE_BANK();
     var collateralAddress = await MainContract.COLLATERAL_ADDRESS();
     var premiumAddress = await MainContract.PREMIUM_ADDRESS();
     var collateralAmount = await MainContract.COLLATERAL_PAYMENT();
@@ -242,26 +193,9 @@ function App() {
 
       const deployedAddress = await MainContract.blizzardContract();
       console.log(deployedAddress);
-    } else if (defaultAddress === oracleBank) {
-
-      tx = await usdc.approve(addresses.BlizzardDerivativeProvider, collateralAmount + premiumAmount);
-      await tx.wait();
-
-      tx = await MainContract.depositCollateral();
-      await tx.wait();
-      tx = await MainContract.depositPremium();
-      await tx.wait();
-
-      const deployedAddress = await MainContract.blizzardContract();
-      console.log(deployedAddress);
-    }
+    } 
   }
 
-  // React.useEffect(() => {
-  //   if (!loading && !error && data && data.transfers) {
-  //     console.log({ transfers: data.transfers });
-  //   }
-  // }, [loading, error, data]);
 
   return (
       <div>
@@ -317,14 +251,14 @@ function App() {
                         PURCHASE CONTRACT
                       </Button>
                   <Text> 
-                    The Arbol-dApp Portal provides an endpoint for interacting with Arbol's deployed Weather Derivative Provider smart contracts. 
+                    The Arbol-dApp Portal provides an endpoint for interacting with Arbol's deployed Weather Derivative Provider smart contracts deployed on Polygon Mainnet. 
                   </Text>
                   <Text>
                     The Escrow Collateral option approves the Derivative Provider smart contract to transfer the collateral cost in USDC from the caller's wallet, then executes the actual transfer. Collateral must be deposited before contract purchase.
                   </Text>
                   <Text>
-                    The Purchase Contract option approves the smart contract to transfer the premium cost in USDC from the caller's wallet, then executes the actual transfer and instantiates a new Option contract.
-                    Transactions and token transfers with the Derivative Provider smart contract are updated on refresh.
+                    The Purchase Contract option approves the smart contract to transfer the premium cost in USDC from the caller's wallet, then executes the actual transfer and deploys a new Option contract.
+                    Internal transactions and token transfers associated with the Derivative Provider smart contract are updated on refresh.
                   </Text>
                       <Link href={"https://polygonscan.com/address/" + addresses.BlizzardDerivativeProvider} style={{ marginTop: "8px" }}> polygonscan </Link>
                       <Link href="https://github.com/Arbol-Project/Arbol-dApp" style={{ marginTop: "8px" }}> source </Link>
@@ -332,14 +266,6 @@ function App() {
               </Grid>
             <Grid item xs={6}>
               <Col>
-                {/* <div style={{ height: 250, width: '90%', marginTop: "50px", marginBottom: "20px"}}>
-                  <DataGrid
-                    rows={normalRows}
-                    columns={normalColumns}
-                    pageSize={8}
-                    rowsPerPageOptions={[8]}
-                  />
-                </div> */}
                 <Text>
                     Token Transfers
                   </Text>

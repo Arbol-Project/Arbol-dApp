@@ -260,8 +260,6 @@ function App() {
                     The Purchase Contract option approves the smart contract to transfer the premium cost in USDC from the caller's wallet, then executes the actual transfer and deploys a new Option contract.
                     Internal transactions and token transfers associated with the Derivative Provider smart contract are updated on refresh.
                   </Text>
-                      <Link href={"https://polygonscan.com/address/" + addresses.BlizzardDerivativeProvider} style={{ marginTop: "8px" }}> polygonscan </Link>
-                      <Link href="https://github.com/Arbol-Project/Arbol-dApp" style={{ marginTop: "8px" }}> source </Link>
                 </Col>
               </Grid>
             <Grid item xs={6}>
@@ -280,7 +278,7 @@ function App() {
                   <Text>
                     Internal Transactions
                   </Text>
-                <div style={{ height: 400, width: '90%', marginTop: "10px", marginBottom: "20px"}}>
+                <div style={{ height: 320, width: '90%', marginTop: "10px", marginBottom: "20px"}}>
                   <DataGrid
                     rows={internalRows}
                     columns={internalColumns}
@@ -288,6 +286,8 @@ function App() {
                     rowsPerPageOptions={[8]}
                   />
                 </div>
+                <Link href={"https://polygonscan.com/address/" + addresses.BlizzardDerivativeProvider} style={{ marginTop: "8px" }}> polygonscan </Link>
+                <Link href="https://github.com/Arbol-Project/Arbol-dApp" style={{ marginTop: "8px" }}> source </Link>
               </Col>
             </Grid>
           </Grid>

@@ -58,6 +58,7 @@ export const Col = styled.div`
 export const Image = styled.img`
   height: 25vmin;
   margin-bottom: 8px;
+  margin-top: 10px;
   pointer-events: none;
 `;
 

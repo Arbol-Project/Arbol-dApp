@@ -5,7 +5,7 @@ const ProviderLogs = path.join(process.cwd(), "../../web_app/packages/contracts/
 const ContractLogs = path.join(process.cwd(), "../../web_app/packages/contracts/src/logs/contracts.json");
 const Providers = require(ProviderLogs);
 const Contracts = require(ContractLogs);
-const abis = require(path.join(process.cwd(), "../../web_app/packages/contracts/src/abi.js"));
+// const abis = require(path.join(process.cwd(), "../../web_app/packages/contracts/src/abi.js"));
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
 
@@ -33,13 +33,13 @@ async function main() {
         if (today.getMonth() == 0) {
           cutoff = new Date(today.getYear()-1+1900, 11, 0);
         } else {
-          cutoff = new Date(today.getYear()+1900, today.getMonth()-1, 0);
+          cutoff = new Date(today.getYear()+1900, today.getMonth(), 0);
         }
       } else {
         if (today.getMonth() < 2) {
-          cutoff = new Date(today.getYear()-1+1900, today.getMonth()+10, 0);
+          cutoff = new Date(today.getYear()-1+1900, today.getMonth()+11, 0);
         } else {
-          cutoff = new Date(today.getYear()+1900, today.getMonth()-2, 0);
+          cutoff = new Date(today.getYear()+1900, today.getMonth()-1, 0);
         }
       }      
 

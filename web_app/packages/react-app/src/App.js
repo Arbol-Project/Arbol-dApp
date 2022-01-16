@@ -117,8 +117,8 @@ function App() {
       }
       if (getAddress(row["from"]) in addressBook) {
         row["from"] = addressBook[getAddress(row["from"])];
-      }
-      new_rows.push(row);
+        new_rows.push(row);
+      } 
     }
     setTokenRows(new_rows.reverse());
   }

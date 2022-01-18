@@ -23,6 +23,9 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
 
+    - name: Get ECS Integration
+      run: curl -L https://raw.githubusercontent.com/docker/compose-cli/main/scripts/install/install_linux.sh | sh
+
     - name: Login to Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
@@ -64,7 +67,7 @@ jobs:
 
     - name: Create and set ECS context
       run: |
-        docker context create --from-env ecs dappecs
+        docker context create ecs dappecs --from-env
         docker context use dappecs
 
     - name: Build

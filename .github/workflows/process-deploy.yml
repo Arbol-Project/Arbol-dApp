@@ -16,6 +16,17 @@ jobs:
       with:
         submodules: true
 
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
     - name: Get .env secrets
       uses: say8425/aws-secrets-manager-actions@v1
       env:
@@ -50,10 +61,6 @@ jobs:
       env:
         TLS_KEY_SECRET: ${{ secrets.TLS_KEY }}
       run: echo "$TLS_KEY_SECRET" base64 --decode > ./chainlink_node/chainlink/tls/server.key
-
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
 
     - name: Create and set ECS context
       run: |

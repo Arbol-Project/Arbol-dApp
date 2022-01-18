@@ -1,0 +1,68 @@
+version: "3.8"
+
+secrets:
+  docker_registry:
+    external: true
+
+services:
+  chainlink-node-1:
+    secrets:
+      - docker_registry
+    environment:
+      - DOCKER_REGISTRY=/run/secrets/docker_registry
+    network_mode: host
+    container_name: primary-node
+    build: chainlink/
+    image: ${DOCKER_REGISTRY}/chainlink-node-1
+    env_file:
+      - chainlink/.env
+    volumes:
+      - chainlink:/chainlink
+
+  ipfs-daemon:
+    secrets:
+      - docker_registry
+    environment:
+      - DOCKER_REGISTRY=/run/secrets/docker_registry
+    network_mode: host
+    container_name: ipfs-daemon
+    build: ipfs/
+    image: ${DOCKER_REGISTRY}/ipfs-daemon
+    volumes:
+      - /export
+      - /data/ipfs
+    depends_on:
+      - chainlink-node-1
+    restart: on-failure
+    healthcheck:
+      test: ipfs swarm peers || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  external-adapter:
+    secrets:
+      - docker_registry
+    environment:
+      - DOCKER_REGISTRY=/run/secrets/docker_registry
+      - PYTHONUNBUFFERED=1
+    network_mode: host
+    container_name: arbol-adapter
+    build: adapter/
+    image: ${DOCKER_REGISTRY}/external-adapter
+    volumes:
+      - adapter:/adapter
+      - "../web_app/packages/contracts/src/logs:/adapter/logs"
+      - "../smart_contracts/hardhat/SROs:/adapter/SROs"
+    restart: on-failure
+    depends_on:
+      ipfs-daemon:
+        condition: service_healthy
+      chainlink-node-1:
+        condition: service_started
+
+volumes:
+  adapter:
+  export:
+  data:
+  chainlink:

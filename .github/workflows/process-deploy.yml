@@ -71,7 +71,7 @@ jobs:
 
     - name: Create and set ECS context
       run: |
-        docker context create ecs --docker dappecs --from-env
+        docker context create ecs dappecs --from-env
         docker context use dappecs
 
     - name: Deploy

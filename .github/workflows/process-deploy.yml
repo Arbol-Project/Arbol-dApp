@@ -64,7 +64,7 @@ jobs:
 
     - name: Create and set ECS context
       run: |
-        sudo docker context create --docker host=tcp://docker:2376 ecs dappecs --from-env
+        docker context ls
         docker context use dappecs
 
     - name: Build

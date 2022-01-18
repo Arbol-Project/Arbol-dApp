@@ -72,7 +72,7 @@ jobs:
 
     - name: Build
       working-directory: chainlink_node
-      run: docker compose build
+      run: docker-compose build
 
     - name: Deploy
       working-directory: chainlink_node

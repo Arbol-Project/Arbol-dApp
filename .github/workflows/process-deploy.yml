@@ -65,14 +65,14 @@ jobs:
         TLS_KEY_SECRET: ${{ secrets.TLS_KEY }}
       run: echo "$TLS_KEY_SECRET" base64 --decode > ./chainlink_node/chainlink/tls/server.key
 
-    - name: Create and set ECS context
-      run: |
-        docker context create ecs dappecs --from-env
-        docker context use dappecs
-
     - name: Build
       working-directory: chainlink_node
       run: docker-compose build
+
+    - name: Create and set ECS context
+      run: |
+        docker context create ecs --docker dappecs --from-env
+        docker context use dappecs
 
     - name: Deploy
       working-directory: chainlink_node

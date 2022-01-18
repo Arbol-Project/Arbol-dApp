@@ -38,18 +38,18 @@ jobs:
 
     - name: Get Password secret
       env:
-        PASSWORD: ${{ secrets.PASSWORD }}
-      run: printf "$PASSWORD" base64 --decode > ./chainlink_node/chainlink/.password
+        PASSWORD_SECRET: ${{ secrets.PASSWORD }}
+      run: printf "$PASSWORD_SECRET" base64 --decode > ./chainlink_node/chainlink/.password
 
     - name: Get TLS cert
       env:
-        TLS_CERT: ${{ secrets.TLS_CERT }}
-      run: printf "$TLS_CERT" base64 --decode > ./chainlink_node/chainlink/tls/server.crt
+        TLS_CERT_SECRET: ${{ secrets.TLS_CERT }}
+      run: echo "$TLS_CERT_SECRET" base64 --decode > ./chainlink_node/chainlink/tls/server.crt
 
     - name: Get TLS key
       env:
-        TLS_KEY: ${{ secrets.TLS_KEY }}
-      run: printf "$TLS_KEY" base64 --decode > ./chainlink_node/chainlink/tls/server.key
+        TLS_KEY_SECRET: ${{ secrets.TLS_KEY }}
+      run: echo "$TLS_KEY_SECRET" base64 --decode > ./chainlink_node/chainlink/tls/server.key
 
     - name: Set docker registery secret
       env:

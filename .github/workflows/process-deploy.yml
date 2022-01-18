@@ -76,5 +76,5 @@ jobs:
 
     - name: Deploy
       working-directory: chainlink_node
-      run: docker compose up --file docker-compose.aws.yml
+      run: docker-compose up --file docker-compose.aws.yml
       

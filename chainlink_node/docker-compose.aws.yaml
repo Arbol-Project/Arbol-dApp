@@ -13,7 +13,7 @@ services:
     network_mode: host
     container_name: primary-node
     build: chainlink/
-    image: ${DOCKER_REGISTRY}/chainlink-node-1
+    image: 574269834288.dkr.ecr.us-east-1.amazonaws.com/chainlink-node-1
     env_file:
       - chainlink/.env
     volumes:
@@ -27,7 +27,7 @@ services:
     network_mode: host
     container_name: ipfs-daemon
     build: ipfs/
-    image: ${DOCKER_REGISTRY}/ipfs-daemon
+    image: 574269834288.dkr.ecr.us-east-1.amazonaws.com/ipfs-daemon
     volumes:
       - /export
       - /data/ipfs
@@ -49,7 +49,7 @@ services:
     network_mode: host
     container_name: arbol-adapter
     build: adapter/
-    image: ${DOCKER_REGISTRY}/external-adapter
+    image: 574269834288.dkr.ecr.us-east-1.amazonaws.com/external-adapter
     volumes:
       - adapter:/adapter
       - "../web_app/packages/contracts/src/logs:/adapter/logs"

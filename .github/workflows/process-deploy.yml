@@ -71,8 +71,10 @@ jobs:
         docker context use dappecs
 
     - name: Build
-      run: docker compose build --project-directory ./chainlink_node -f docker-compose.aws.yml
+      working-directory: ./chainlink-node
+      run: docker-compose build --file docker-compose.aws.yml
 
     - name: Deploy
-      run: docker compose up
+      working-directory: ./chainlink-node
+      run: docker compose up --file docker-compose.aws.yml
       

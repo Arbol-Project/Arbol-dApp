@@ -26,6 +26,10 @@ jobs:
         AWS_DEFAULT_REGION: us-east-1
         SECRET_NAME: dapp
         OUTPUT_PATH: './chainlink_node/chainlink/.env'
+    
+    - name: Translate ENV variables
+      run: |
+        printenv
 
     - name: Get API secrets
       run: echo ${{ secrets.API }} > ./chainlink_node/chainlink/.api

@@ -32,19 +32,29 @@ jobs:
         printenv
 
     - name: Get API secrets
-      run: echo ${{ secrets.API }} > ./chainlink_node/chainlink/.api
+      env:
+        API_SECRETS: ${{ secrets.API }}
+      run: printf "$API_SECRETS" base64 --decode > ./chainlink_node/chainlink/.api
 
     - name: Get Password secret
-      run: echo ${{ secrets.PASSWORD }} > ./chainlink_node/chainlink/.password
+      env:
+        PASSWORD: ${{ secrets.PASSWORD }}
+      run: printf "$PASSWORD" base64 --decode > ./chainlink_node/chainlink/.password
 
     - name: Get TLS cert
-      run: echo ${{ secrets.TLS_CERT }} > ./chainlink_node/chainlink/tls/server.crt
+      env:
+        TLS_CERT: ${{ secrets.TLS_CERT }}
+      run: printf "$TLS_CERT" > ./chainlink_node/chainlink/tls/server.crt
 
     - name: Get TLS key
-      run: echo ${{ secrets.TLS_KEY }} > ./chainlink_node/chainlink/tls/server.key
+      env:
+        TLS_KEY: ${{ secrets.TLS_KEY }}
+      run: printf "$TLS_KEY" > ./chainlink_node/chainlink/tls/server.key
 
     - name: Set docker registery secret
-      run: printf ${{ secrets.DOCKER_REGISTRY }} | docker secret create docker_registry -
+      env:
+        DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+      run: echo "$DOCKER_REGISTRY" | docker secret create docker_registry -
 
     - name: Login to Amazon ECR
       id: login-ecr

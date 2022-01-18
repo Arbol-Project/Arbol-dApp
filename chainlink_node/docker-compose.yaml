@@ -13,7 +13,7 @@ services:
     network_mode: host
     container_name: primary-node
     build: chainlink/
-    image: chainlink-node-1
+    image: ${DOCKER_REGISTRY}/chainlink-node-1
     env_file:
       - chainlink/.env
     volumes:
@@ -27,7 +27,7 @@ services:
     network_mode: host
     container_name: ipfs-daemon
     build: ipfs/
-    image: ipfs-daemon
+    image: ${DOCKER_REGISTRY}/ipfs-daemon
     volumes:
       - /export
       - /data/ipfs
@@ -49,7 +49,7 @@ services:
     network_mode: host
     container_name: arbol-adapter
     build: adapter/
-    image: external-adapter
+    image: ${DOCKER_REGISTRY}/external-adapter
     volumes:
       - adapter:/adapter
       - "../web_app/packages/contracts/src/logs:/adapter/logs"

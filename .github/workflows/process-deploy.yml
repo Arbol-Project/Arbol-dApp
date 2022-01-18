@@ -45,16 +45,19 @@ jobs:
       run: |
         printenv
 
-    # - name: Build & tag docker image
-    #   id: build-images
-    #   env:
-    #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-    #     ECR_REPOSITORY_CHAINLINK: chainlink-node-1
-    #     IMAGE_TAG_CHAINLINK: chainlink-node-1-${{ github.sha }}
-    #     ECR_REPOSITORY_ADAPTER: external-adapter
-    #     IMAGE_TAG_ADAPTER: external-adapter-${{ github.sha }}
-    #     ECR_REPOSITORY_IPFS: ipfs-daemon
-    #     IMAGE_TAG_IPFS: ipfs-daemon-${{ github.sha }}
+    - name: Build & tag docker image
+      id: build-images
+      working-directory: chainlink_node
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY_CHAINLINK: chainlink-node-1
+        IMAGE_TAG_CHAINLINK: chainlink-node-1-${{ github.sha }}
+        ECR_REPOSITORY_ADAPTER: external-adapter
+        IMAGE_TAG_ADAPTER: external-adapter-${{ github.sha }}
+        ECR_REPOSITORY_IPFS: ipfs-daemon
+        IMAGE_TAG_IPFS: ipfs-daemon-${{ github.sha }}
+      run: |
+        echo "DOCKER_REGISTRY=${ECR_REGISTRY}" >> .env
 
     - name: Get API secrets
       env:

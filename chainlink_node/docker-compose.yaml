@@ -1,19 +1,33 @@
 version: "3.8"
 
+secrets:
+  docker_registry:
+    external: true
+
 services:
   chainlink-node-1:
+    secrets:
+      - docker_registry
+    environment:
+      - DOCKER_REGISTRY=/run/secrets/docker_registry
     network_mode: host
     container_name: primary-node
     build: chainlink/
+    image: 574269834288.dkr.ecr.us-east-1.amazonaws.com/chainlink-node-1
     env_file:
       - chainlink/.env
     volumes:
       - chainlink:/chainlink
 
   ipfs-daemon:
+    secrets:
+      - docker_registry
+    environment:
+      - DOCKER_REGISTRY=/run/secrets/docker_registry
     network_mode: host
     container_name: ipfs-daemon
     build: ipfs/
+    image: 574269834288.dkr.ecr.us-east-1.amazonaws.com/ipfs-daemon
     volumes:
       - /export
       - /data/ipfs
@@ -27,11 +41,15 @@ services:
       retries: 5
 
   external-adapter:
+    secrets:
+      - docker_registry
     environment:
+      - DOCKER_REGISTRY=/run/secrets/docker_registry
       - PYTHONUNBUFFERED=1
     network_mode: host
     container_name: arbol-adapter
     build: adapter/
+    image: 574269834288.dkr.ecr.us-east-1.amazonaws.com/external-adapter
     volumes:
       - adapter:/adapter
       - "../web_app/packages/contracts/src/logs:/adapter/logs"

@@ -50,8 +50,10 @@ jobs:
       working-directory: chainlink_node
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.sha }}
       run: |
         echo "DOCKER_REGISTRY=${ECR_REGISTRY}" >> .env
+        echo "IMAGE_TAG=${IMAGE_TAG}" >> .env
 
     - name: Get API secrets
       env:
@@ -82,18 +84,16 @@ jobs:
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY_CHAINLINK: chainlink-node-1
-        IMAGE_TAG_CHAINLINK: chainlink-node-1-${{ github.sha }}
+        IMAGE_TAG: ${{ github.sha }}
         ECR_REPOSITORY_ADAPTER: external-adapter
-        IMAGE_TAG_ADAPTER: external-adapter-${{ github.sha }}
         ECR_REPOSITORY_IPFS: ipfs-daemon
-        IMAGE_TAG_IPFS: ipfs-daemon-${{ github.sha }}
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_DEFAULT_REGION: us-east-1
       run: |
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG_CHAINLINK
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG_ADAPTER
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG_IPFS
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG
         docker context create ecs dappecs --from-env
         docker context use dappecs
       

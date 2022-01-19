@@ -92,8 +92,11 @@ jobs:
         AWS_DEFAULT_REGION: us-east-1
       run: |
         docker push $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG
+        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG"
         docker push $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG
+        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG"
         docker push $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG
+        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG"
         docker context create ecs dappecs --from-env
         docker context use dappecs
       

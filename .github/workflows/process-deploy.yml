@@ -77,11 +77,6 @@ jobs:
       working-directory: chainlink_node
       run: docker-compose build
 
-    - name: Create and set ECS context
-      run: |
-        docker context create ecs dappecs --from-env
-        docker context use dappecs
-
     - name: Deploy
       working-directory: chainlink_node
       env:
@@ -99,4 +94,6 @@ jobs:
         docker push $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG_CHAINLINK
         docker push $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG_ADAPTER
         docker push $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG_IPFS
+        docker context create ecs dappecs --from-env
+        docker context use dappecs
       

@@ -30,14 +30,10 @@ async function main() {
       var today = new Date();
       var cutoff;
       if (today.getDate() > 16) {
+        cutoff = new Date(today.getYear()+1900, today.getMonth(), 0);
+      } else {
         if (today.getMonth() == 0) {
           cutoff = new Date(today.getYear()-1+1900, 11, 0);
-        } else {
-          cutoff = new Date(today.getYear()+1900, today.getMonth(), 0);
-        }
-      } else {
-        if (today.getMonth() < 2) {
-          cutoff = new Date(today.getYear()-1+1900, today.getMonth()+11, 0);
         } else {
           cutoff = new Date(today.getYear()+1900, today.getMonth()-1, 0);
         }

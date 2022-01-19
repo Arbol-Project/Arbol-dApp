@@ -111,4 +111,5 @@ jobs:
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG"
         docker context create ecs dappecs --from-env
         docker context use dappecs
+        docker compose up
       

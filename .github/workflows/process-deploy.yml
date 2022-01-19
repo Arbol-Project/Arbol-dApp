@@ -91,7 +91,7 @@ jobs:
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG ./adapter
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG ./ipfs
 
-    - name: Deploy
+    - name: Prepare Deploy
       working-directory: chainlink_node
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
@@ -111,5 +111,4 @@ jobs:
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG"
         docker context create ecs dappecs --from-env
         docker context use dappecs
-        docker compose run chainlink-node-1 ipfs-daemon external-adapter
-      
+        docker compose convert

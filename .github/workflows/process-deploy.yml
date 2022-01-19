@@ -90,5 +90,10 @@ jobs:
 
     - name: Deploy
       working-directory: chainlink_node
-      run: docker compose up
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      run: | 
+        aws ecr get-login-password --region us-west-1 | docker login --username AWS --password-stdin $ECR_REGISTRY
+        docker compose push
+        docker compose up
       

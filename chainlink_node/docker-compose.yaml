@@ -6,10 +6,6 @@ secrets:
 
 services:
   chainlink-node-1:
-    secrets:
-      - docker_registry
-    environment:
-      - DOCKER_REGISTRY=/run/secrets/docker_registry
     network_mode: host
     container_name: primary-node
     build: chainlink/
@@ -20,10 +16,6 @@ services:
       - chainlink:/chainlink
 
   ipfs-daemon:
-    secrets:
-      - docker_registry
-    environment:
-      - DOCKER_REGISTRY=/run/secrets/docker_registry
     network_mode: host
     container_name: ipfs-daemon
     build: ipfs/
@@ -41,10 +33,7 @@ services:
       retries: 5
 
   external-adapter:
-    secrets:
-      - docker_registry
     environment:
-      - DOCKER_REGISTRY=/run/secrets/docker_registry
       - PYTHONUNBUFFERED=1
     network_mode: host
     container_name: arbol-adapter

@@ -44,6 +44,34 @@ services:
 
 volumes:
   adapter:
+    driver_opts:
+    # Filesystem configuration
+    backup_policy: ENABLED
+    lifecycle_policy: AFTER_14_DAYS
+    performance_mode: maxIO
+    throughput_mode: provisioned
+    provisioned_throughput: 1
   export:
+    driver_opts:
+    # Filesystem configuration
+    backup_policy: ENABLED
+    lifecycle_policy: AFTER_14_DAYS
+    performance_mode: maxIO
+    throughput_mode: provisioned
+    provisioned_throughput: 1
   data:
+    driver_opts:
+    # Filesystem configuration
+    backup_policy: ENABLED
+    lifecycle_policy: AFTER_14_DAYS
+    performance_mode: maxIO
+    throughput_mode: provisioned
+    provisioned_throughput: 1
   chainlink:
+    driver_opts:
+    # Filesystem configuration
+    backup_policy: ENABLED
+    lifecycle_policy: AFTER_14_DAYS
+    performance_mode: maxIO
+    throughput_mode: provisioned
+    provisioned_throughput: 1

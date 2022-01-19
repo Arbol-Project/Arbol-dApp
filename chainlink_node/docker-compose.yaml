@@ -1,13 +1,10 @@
 version: "3.8"
 
-secrets:
-  docker_registry:
-    external: true
-
 services:
   chainlink-node-1:
     container_name: primary-node
-    image: ${DOCKER_REGISTRY}/chainlink-node-1:${IMAGE_TAG}
+    image: 574269834288.dkr.ecr.us-east-1.amazonaws.com/chainlink-node-1
+    x-aws-pull_credentials: "arn:aws:secretsmanager:us-east-1:574269834288:secret:docker-ecr-WfeJ0H"
     env_file:
       - chainlink/.env
     volumes:
@@ -15,7 +12,8 @@ services:
 
   ipfs-daemon:
     container_name: ipfs-daemon
-    image: ${DOCKER_REGISTRY}/ipfs-daemon:${IMAGE_TAG}
+    image: 574269834288.dkr.ecr.us-east-1.amazonaws.com/ipfs-daemon
+    x-aws-pull_credentials: "arn:aws:secretsmanager:us-east-1:574269834288:secret:docker-ecr-WfeJ0H"
     volumes:
       - /export
       - /data/ipfs
@@ -31,7 +29,8 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
     container_name: arbol-adapter
-    image: ${DOCKER_REGISTRY}/external-adapter:${IMAGE_TAG}
+    image: 574269834288.dkr.ecr.us-east-1.amazonaws.com/external-adapter
+    x-aws-pull_credentials: "arn:aws:secretsmanager:us-east-1:574269834288:secret:docker-ecr-WfeJ0H"
     volumes:
       - adapter:/adapter
       - "../web_app/packages/contracts/src/logs:/adapter/logs"

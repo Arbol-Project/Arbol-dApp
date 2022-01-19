@@ -17,7 +17,7 @@ async function main() {
   if ("RainfallDerivativeProvider" in Providers) {
     provider = Providers.RainfallDerivativeProvider;
     derivative_provider = await RainfallDerivativeProvider.attach(provider.address);
-    console.log("RainfallDerivativeProvider already deployed to:", derivative_provider.address);
+    // console.log("RainfallDerivativeProvider already deployed to:", derivative_provider.address);
   } else {
     derivative_provider = await RainfallDerivativeProvider.deploy();
     await derivative_provider.deployed();
@@ -28,9 +28,10 @@ async function main() {
     for (const contract of ContractList) {
       var id = contract.__config__.id.toString();
       if (id in Contracts) {
-        console.log("RainfallOption already deployed to:", Contracts[id].address);
+        // console.log("RainfallOption already deployed to:", Contracts[id].address);
         continue;
       } else {
+
         var opt_type = contract.__config__.payouts.__config__.derivative.__config__.opt_type;
         var dataset = contract.__config__.payouts.__config__.index_distribution.__config__.index.__config__.loader.__config__.dataset_name;
         var strike = contract.__config__.payouts.__config__.derivative.__config__.strike;
@@ -68,16 +69,21 @@ async function main() {
     } catch (error) {
       console.error(error)
     }
+
+    if (!("RainfallDerivativeProvider" in Providers)) {
+      Providers["RainfallDerivativeProvider"] = {"address": derivative_provider.address, "types": {"RainfallOption": false}, "verified": false, "contracts": contracts};
+      var deployment_content = JSON.stringify(Providers);
+      try {
+        fs.writeFileSync(ProviderLogs, deployment_content)
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
   } catch (error) {
     console.error(error)
   }
-  Providers["RainfallDerivativeProvider"] = {"address": derivative_provider.address, "types": {"RainfallOption": false}, "verified": false, "contracts": contracts};
-  var deployment_content = JSON.stringify(Providers);
-  try {
-    fs.writeFileSync(ProviderLogs, deployment_content)
-  } catch (error) {
-    console.error(error)
-  }
+  console.log("Done!");
 }
 
 main()

@@ -88,6 +88,7 @@ async function main() {
       console.error(error)
     }
   }
+  console.log("Done!");
 }
 
 main()

@@ -15,7 +15,7 @@ async function main() {
   if ("BlizzardDerivativeProvider" in Providers) {
     provider = Providers.BlizzardDerivativeProvider;
     derivative_provider = await BlizzardDerivativeProvider.attach(provider.address);
-    console.log("BlizzardDerivativeProvider already deployed to:", provider.address);
+    // console.log("BlizzardDerivativeProvider already deployed to:", provider.address);
   } else {
     derivative_provider = await BlizzardDerivativeProvider.deploy();
     await derivative_provider.deployed();
@@ -67,6 +67,7 @@ async function main() {
       console.error(error)
     }
   }
+  console.log("Done!");
 }
 
 main()

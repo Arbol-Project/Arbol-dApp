@@ -43,7 +43,7 @@ is installed locally, then run the following:
 # from Arbol-dApp
 cd smart_contracts/hardhat
 npx hardhat test                                # run tests on Blizzard contract (Contract should be set for Kovan network)
-npx hardhat run scripts/deploy-all.js           # deploy all contracts or replace with specific deployment script
+npx hardhat run scripts/deploy-blizzard.js      # deploy contracts
 npx hardhat run scripts/verify-deployments.js   # verify source codes for all deployed contracts
 npx hardhat run scripts/evaluate-deployments.js # evaluate all deployed contracts with expired coverage periods
 ```

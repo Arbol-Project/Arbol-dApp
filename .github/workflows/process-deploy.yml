@@ -77,7 +77,19 @@ jobs:
 
     - name: Build
       working-directory: chainlink_node
-      run: docker-compose build
+      env: 
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY_CHAINLINK: chainlink-node-1
+        IMAGE_TAG: ${{ github.sha }}
+        ECR_REPOSITORY_ADAPTER: external-adapter
+        ECR_REPOSITORY_IPFS: ipfs-daemon
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: us-east-1
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG ./chainlink
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG ./adapter
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG ./ipfs
 
     - name: Deploy
       working-directory: chainlink_node
@@ -91,11 +103,11 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_DEFAULT_REGION: us-east-1
       run: |
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:latest
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG"
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:latest
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG"
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:latest
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG"
         docker context create ecs dappecs --from-env
         docker context use dappecs

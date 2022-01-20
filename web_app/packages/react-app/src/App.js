@@ -294,6 +294,7 @@ function App() {
                   />
                 </div>
                 <Link href={"https://polygonscan.com/address/" + addresses.BlizzardDerivativeProvider} style={{ marginTop: "8px" }}> polygonscan </Link>
+                <Link href="https://market.link/adapters/15310064-34c6-4300-9a0b-5642a51e1613" style={{ marginTop: "8px" }}> market.link </Link>
                 <Link href="https://github.com/Arbol-Project/Arbol-dApp" style={{ marginTop: "8px" }}> source </Link>
               </Col>
             </Grid>

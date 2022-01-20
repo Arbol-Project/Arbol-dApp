@@ -140,6 +140,6 @@ jobs:
     - name: Deploy to Amazon ECS service
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
-        task-definition: ${{ steps.render-app-container.outputs.task-definition }}
+        task-definition: task-definition.json
         service: dapp-service
         cluster: dapp-cluster

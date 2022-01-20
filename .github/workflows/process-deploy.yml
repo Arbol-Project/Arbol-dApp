@@ -110,36 +110,36 @@ jobs:
         docker push $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG"
   
-      - name: Download Task Definition
-        run: aws ecs describe-task-definition --task-definition dapp-task --query taskDefinition > task-definition.json
-      
-      - name: Modify Amazon ECS task definition with Chainlink container
-        id: render-chainlink-node
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: task-definition.json
-          container-name: chainlink-node-1
-          image: $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:latest
+    - name: Download Task Definition
+      run: aws ecs describe-task-definition --task-definition dapp-task --query taskDefinition > task-definition.json
+    
+    - name: Modify Amazon ECS task definition with Chainlink container
+      id: render-chainlink-node
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: task-definition.json
+        container-name: chainlink-node-1
+        image: $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:latest
 
-      - name: Modify Amazon ECS task definition with IPFS container
-        id: render-ipfs-container
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: ${{ steps.render-chainlink-container.outputs.task-definition }}
-          container-name: ipfs-daemon
-          image: $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:latest
+    - name: Modify Amazon ECS task definition with IPFS container
+      id: render-ipfs-container
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: ${{ steps.render-chainlink-container.outputs.task-definition }}
+        container-name: ipfs-daemon
+        image: $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:latest
       
-      - name: Modify Amazon ECS task definition with External Adapter container
-        id: render-adapter-container
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: ${{ steps.render-ipfs-container.outputs.task-definition }}
-          container-name: external-adapter
-          image: $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:latest
+    - name: Modify Amazon ECS task definition with External Adapter container
+      id: render-adapter-container
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: ${{ steps.render-ipfs-container.outputs.task-definition }}
+        container-name: external-adapter
+        image: $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:latest
       
-      - name: Deploy to Amazon ECS service
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-        with:
-          task-definition: ${{ steps.render-app-container.outputs.task-definition }}
-          service: dapp-service
-          cluster: dapp-cluster
+    - name: Deploy to Amazon ECS service
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: ${{ steps.render-app-container.outputs.task-definition }}
+        service: dapp-service
+        cluster: dapp-cluster

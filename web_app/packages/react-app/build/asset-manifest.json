@@ -1,21 +1,21 @@
 {
   "files": {
     "main.css": "./static/css/main.a994015e.chunk.css",
-    "main.js": "./static/js/main.876eaf9b.chunk.js",
-    "main.js.map": "./static/js/main.876eaf9b.chunk.js.map",
+    "main.js": "./static/js/main.32f18d03.chunk.js",
+    "main.js.map": "./static/js/main.32f18d03.chunk.js.map",
     "runtime-main.js": "./static/js/runtime-main.9cd6711e.js",
     "runtime-main.js.map": "./static/js/runtime-main.9cd6711e.js.map",
-    "static/js/2.7036fa34.chunk.js": "./static/js/2.7036fa34.chunk.js",
-    "static/js/2.7036fa34.chunk.js.map": "./static/js/2.7036fa34.chunk.js.map",
+    "static/js/2.bd7602f9.chunk.js": "./static/js/2.bd7602f9.chunk.js",
+    "static/js/2.bd7602f9.chunk.js.map": "./static/js/2.bd7602f9.chunk.js.map",
     "index.html": "./index.html",
     "static/css/main.a994015e.chunk.css.map": "./static/css/main.a994015e.chunk.css.map",
-    "static/js/2.7036fa34.chunk.js.LICENSE.txt": "./static/js/2.7036fa34.chunk.js.LICENSE.txt",
+    "static/js/2.bd7602f9.chunk.js.LICENSE.txt": "./static/js/2.bd7602f9.chunk.js.LICENSE.txt",
     "static/media/Arbol_logo.55e4141f.png": "./static/media/Arbol_logo.55e4141f.png"
   },
   "entrypoints": [
     "static/js/runtime-main.9cd6711e.js",
-    "static/js/2.7036fa34.chunk.js",
+    "static/js/2.bd7602f9.chunk.js",
     "static/css/main.a994015e.chunk.css",
-    "static/js/main.876eaf9b.chunk.js"
+    "static/js/main.32f18d03.chunk.js"
   ]
 }

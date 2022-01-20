@@ -220,7 +220,7 @@ function App() {
               <Grid item xs={6}>
                 <Col>
                   <Image src={logo} alt="react-logo" />
-                      <Text> 
+                      {/* <Text> 
                         Provider
                       </Text>
                       <Button 
@@ -235,9 +235,9 @@ function App() {
                         }} 
                         onClick={() => depositUSDC(provider)}>
                         ESCROW COLLATERAL
-                      </Button>
+                      </Button> */}
                       <Text> 
-                        Purchaser
+                        {/* Purchaser */}
                       </Text>
                       <Button 
                         variant="contained" 
@@ -253,13 +253,18 @@ function App() {
                         PURCHASE CONTRACT
                       </Button>
                   <Text> 
-                    The Arbol-dApp Portal provides an endpoint for interacting with Arbol's deployed Weather Derivative Provider smart contracts deployed on Polygon Mainnet. 
+                    The Arbol-dApp Portal provides an endpoint for interacting with Arbol's Blizzard Derivative Provider smart contract deployed on Polygon Mainnet
+                    and permits a pre-approved buyer to purchase a 250K Blizzard Protection contract at a premium of 10K. 
                   </Text>
                   <Text>
+                  The protection contract automatically pays out the collateral amount to the buyer 
+                    if 6+ inches of snow are reported in Dallas on any of the coverage dates. The data source for weather observations is GHCND:USW00003927 (GHCND records for Dallas Fort Worth airport weather station).
+                  </Text>
+                  {/* <Text>
                     The Escrow Collateral option approves the Derivative Provider smart contract to transfer the collateral cost in USDC from the caller's wallet, then executes the actual transfer. Collateral must be deposited before contract purchase.
-                  </Text>
+                  </Text> */}
                   <Text>
-                    The Purchase Contract option approves the smart contract to transfer the premium cost in USDC from the caller's wallet, then executes the actual transfer and deploys a new Option contract.
+                    The Purchase Contract button approves the smart contract to transfer the premium cost in USDC from the caller's wallet, then executes the actual transfer and deploys a new protection contract.
                     Internal transactions and token transfers associated with the Derivative Provider smart contract are updated on refresh.
                   </Text>
                 </Col>

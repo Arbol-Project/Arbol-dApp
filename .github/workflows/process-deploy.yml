@@ -114,7 +114,7 @@ jobs:
       run: aws ecs describe-task-definition --task-definition dapp-task --query taskDefinition > task-definition.json
     
     - name: Modify Amazon ECS task definition with Chainlink container
-      id: render-chainlink-node
+      id: render-chainlink-container
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
         task-definition: task-definition.json

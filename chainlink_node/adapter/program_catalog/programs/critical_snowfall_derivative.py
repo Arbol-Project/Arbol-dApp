@@ -71,14 +71,18 @@ class CriticalSnowfallDerivative:
                         exhaust (str), string of num for exhaust value for the payout or None if tick is not None
                         tick (str), string of num for tick value for payout or None if exhaust is not None
             Returns: int, generated payout times 10^6 (in order to report back to chain in value of USDC)
+
+            N.B. Adding change to cut threshold in half to 3 inches at evaluation!!! :)
         '''
+        threshold = float(threshold) / 2
+
         limit = float(limit)
 
         index_value = data.max().value
         opt_type = opt_type.lower()
         direction = 1 if opt_type == 'call' else -1
         
-        payout = (index_value - float(threshold)) * direction
+        payout = (index_value - threshold) * direction
         if payout < 0:
             payout = 0
         if payout > 0:

@@ -258,7 +258,7 @@ function App() {
                   </Text>
                   <Text>
                   The protection contract automatically pays out the collateral amount to the buyer 
-                    if 6+ inches of snow are reported in Dallas on any of the coverage dates. The data source for weather observations is GHCND:USW00003927 (GHCND records for Dallas Fort Worth airport weather station).
+                    if 3+ inches of snow are reported in Dallas on any of the coverage dates. The data source for weather observations is GHCND:USW00003927 (GHCND records for Dallas Fort Worth airport weather station).
                   </Text>
                   {/* <Text>
                     The Escrow Collateral option approves the Derivative Provider smart contract to transfer the collateral cost in USDC from the caller's wallet, then executes the actual transfer. Collateral must be deposited before contract purchase.

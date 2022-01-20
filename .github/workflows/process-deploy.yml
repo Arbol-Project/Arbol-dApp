@@ -125,7 +125,7 @@ jobs:
       id: render-ipfs-container
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
-        task-definition: ${{ steps.render-chainlink-container.outputs.task-definition }}
+        task-definition: task-definition.json
         container-name: ipfs-daemon
         image: $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:latest
       
@@ -133,7 +133,7 @@ jobs:
       id: render-adapter-container
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
-        task-definition: ${{ steps.render-ipfs-container.outputs.task-definition }}
+        task-definition: task-definition.json
         container-name: external-adapter
         image: $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:latest
       

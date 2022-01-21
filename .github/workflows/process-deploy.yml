@@ -125,7 +125,7 @@ jobs:
       with:
         task-definition: task-definition-chainlink.json
         container-name: chainlink-node-1
-        image: $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:latest
+        image: $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK
 
     - name: Modify Amazon ECS task definition with IPFS container
       id: render-ipfs-container
@@ -133,7 +133,7 @@ jobs:
       with:
         task-definition: task-definition-ipfs.json
         container-name: ipfs-daemon
-        image: $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:latest
+        image: $ECR_REGISTRY/$ECR_REPOSITORY_IPFS
       
     - name: Modify Amazon ECS task definition with External Adapter container
       id: render-adapter-container
@@ -141,7 +141,7 @@ jobs:
       with:
         task-definition: task-definition-adapter.json
         container-name: external-adapter
-        image: $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:latest
+        image: $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER
       
     - name: Deploy Chainlink Node to Amazon ECS service
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1

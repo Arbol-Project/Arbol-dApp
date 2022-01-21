@@ -371,42 +371,31 @@ Resources:
                   - 'ec2:AuthorizeSecurityGroupIngress'
                   - 'ecr:*'
                 Resource: '*'
-  ServiceScalingTarget:
+  ServiceScalingTargetChainlink:
     Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-    DependsOn:
-      - serviceChainlink
-      - serviceIPFS
-      - serviceAdapter
+    DependsOn: serviceChainlink
     Properties:
       MaxCapacity: 2
       MinCapacity: 1
       ResourceId: !Join 
         - ''
         - - serviceChainlink/
-          - serviceIPFS/
-          - serivceAdapter/
           - !Ref ECSCluster
           - /
           - !GetAtt 
             - serviceChainlink
-            - Name
-          - !GetAtt
-            - serviceIPFS
-            - Name
-          - !GetAtt
-            - serviceAdapter
             - Name
       RoleARN: !GetAtt 
         - AutoscalingRole
         - Arn
       ScalableDimension: 'ecs:service:DesiredCount'
       ServiceNamespace: ecs
-  ServiceScalingPolicy:
+  ServiceScalingPolicyChainlink:
     Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
     Properties:
       PolicyName: AStepPolicy
       PolicyType: StepScaling
-      ScalingTargetId: !Ref ServiceScalingTarget
+      ScalingTargetId: !Ref ServiceScalingTargetChainlink
       StepScalingPolicyConfiguration:
         AdjustmentType: PercentChangeInCapacity
         Cooldown: 60
@@ -414,24 +403,88 @@ Resources:
         StepAdjustments:
           - MetricIntervalLowerBound: 0
             ScalingAdjustment: 200
-  ALB500sAlarmScaleUp:
-    Type: 'AWS::CloudWatch::Alarm'
+  ServiceScalingTargetIPFS:
+    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
+    DependsOn: serviceIPFS
     Properties:
-      EvaluationPeriods: 1
-      Statistic: Average
-      Threshold: 10
-      AlarmDescription: Alarm if our ALB generates too many HTTP 500s.
-      Period: 60
-      AlarmActions:
-        - !Ref ServiceScalingPolicy
-      Namespace: AWS/ApplicationELB
-      Dimensions:
-        - Name: LoadBalancer
-          Value: !GetAtt 
-            - ECSALB
-            - LoadBalancerFullName
-      ComparisonOperator: GreaterThanThreshold
-      MetricName: HTTPCode_ELB_5XX_Count
+      MaxCapacity: 2
+      MinCapacity: 1
+      ResourceId: !Join 
+        - ''
+        - - serviceIPFS/
+          - !Ref ECSCluster
+          - /
+          - !GetAtt 
+            - serviceIPFS
+            - Name
+      RoleARN: !GetAtt 
+        - AutoscalingRole
+        - Arn
+      ScalableDimension: 'ecs:service:DesiredCount'
+      ServiceNamespace: ecs
+  ServiceScalingPolicyIPFS:
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+    Properties:
+      PolicyName: AStepPolicy
+      PolicyType: StepScaling
+      ScalingTargetId: !Ref ServiceScalingTargetIPFS
+      StepScalingPolicyConfiguration:
+        AdjustmentType: PercentChangeInCapacity
+        Cooldown: 60
+        MetricAggregationType: Average
+        StepAdjustments:
+          - MetricIntervalLowerBound: 0
+            ScalingAdjustment: 200
+  ServiceScalingTargetAdapter:
+    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
+    DependsOn: serviceAdapter
+    Properties:
+      MaxCapacity: 2
+      MinCapacity: 1
+      ResourceId: !Join 
+        - ''
+        - - serviceAdapter/
+          - !Ref ECSCluster
+          - /
+          - !GetAtt 
+            - serviceAdapter
+            - Name
+      RoleARN: !GetAtt 
+        - AutoscalingRole
+        - Arn
+      ScalableDimension: 'ecs:service:DesiredCount'
+      ServiceNamespace: ecs
+  ServiceScalingPolicyIPFS:
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+    Properties:
+      PolicyName: AStepPolicy
+      PolicyType: StepScaling
+      ScalingTargetId: !Ref ServiceScalingTargetAdapter
+      StepScalingPolicyConfiguration:
+        AdjustmentType: PercentChangeInCapacity
+        Cooldown: 60
+        MetricAggregationType: Average
+        StepAdjustments:
+          - MetricIntervalLowerBound: 0
+            ScalingAdjustment: 200
+  # ALB500sAlarmScaleUp:
+  #   Type: 'AWS::CloudWatch::Alarm'
+  #   Properties:
+  #     EvaluationPeriods: 1
+  #     Statistic: Average
+  #     Threshold: 10
+  #     AlarmDescription: Alarm if our ALB generates too many HTTP 500s.
+  #     Period: 60
+  #     AlarmActions:
+  #       - !Ref ServiceScalingPolicy
+  #     Namespace: AWS/ApplicationELB
+  #     Dimensions:
+  #       - Name: LoadBalancer
+  #         Value: !GetAtt 
+  #           - ECSALB
+  #           - LoadBalancerFullName
+  #     ComparisonOperator: GreaterThanThreshold
+  #     MetricName: HTTPCode_ELB_5XX_Count
   EC2Role:
     Type: 'AWS::IAM::Role'
     Properties:

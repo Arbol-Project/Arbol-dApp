@@ -121,27 +121,39 @@ jobs:
     
     - name: Modify Amazon ECS task definition with Chainlink container
       id: render-chainlink-container
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY_CHAINLINK: chainlink-node-1
+        IMAGE_TAG: ${{ github.sha }}
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
         task-definition: task-definition-chainlink.json
         container-name: chainlink-node-1
-        image: $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK
+        image: $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG
 
     - name: Modify Amazon ECS task definition with IPFS container
       id: render-ipfs-container
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY_IPFS: ipfs-daemon
+        IMAGE_TAG: ${{ github.sha }}
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
         task-definition: task-definition-ipfs.json
         container-name: ipfs-daemon
-        image: $ECR_REGISTRY/$ECR_REPOSITORY_IPFS
+        image: $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG
       
     - name: Modify Amazon ECS task definition with External Adapter container
       id: render-adapter-container
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY_ADAPTER: external-adapter
+        IMAGE_TAG: ${{ github.sha }}
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
         task-definition: task-definition-adapter.json
         container-name: external-adapter
-        image: $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER
+        image: $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG
       
     - name: Deploy Chainlink Node to Amazon ECS service
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1

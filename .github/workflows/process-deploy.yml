@@ -160,6 +160,6 @@ jobs:
     - name: Deploy External Adapter to Amazon ECS service
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
-        task-definition: task-definition-ipfs.json
+        task-definition: task-definition-adapter.json
         service: dapp-service-adapter
         cluster: dapp-cluster

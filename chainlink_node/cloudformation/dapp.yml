@@ -55,7 +55,7 @@ Parameters:
 Mappings:
   AWSRegionToAMI:
     us-east-1:
-      AMIID: ami-09bee01cc997a78a6
+      AMIID: ami-00bf0e20ed7ea8cdc
     us-east-2:
       AMIID: ami-0a9e12068cb98a01d
     us-west-1:
@@ -314,7 +314,7 @@ Resources:
       DesiredCount: 1
       LoadBalancers:
         - ContainerName: chainlink-node-1
-          ContainerPort: 80
+          ContainerPort: 6688
           TargetGroupArn: !Ref ECSTG
       Role: !Ref ECSServiceRole
       TaskDefinition: !Ref taskdefinitionChainlink

@@ -110,14 +110,20 @@ jobs:
         docker push $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG"
   
-    - name: Download Task Definition
-      run: aws ecs describe-task-definition --task-definition dapp-task --query taskDefinition > task-definition.json
+    - name: Download Task Definition for Chainlink Node
+      run: aws ecs describe-task-definition --task-definition dapp-task-chainlink --query taskDefinition > task-definition-chainlink.json
+
+    - name: Download Task Definition for IPFS Daemon
+      run: aws ecs describe-task-definition --task-definition dapp-task-ipfs --query taskDefinition > task-definition-ipfs.json
+
+    - name: Download Task Definition for External Adapter
+      run: aws ecs describe-task-definition --task-definition dapp-task-adapter --query taskDefinition > task-definition-adapter.json
     
     - name: Modify Amazon ECS task definition with Chainlink container
       id: render-chainlink-container
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
-        task-definition: task-definition.json
+        task-definition: task-definition-chainlink.json
         container-name: chainlink-node-1
         image: $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:latest
 
@@ -125,7 +131,7 @@ jobs:
       id: render-ipfs-container
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
-        task-definition: task-definition.json
+        task-definition: task-definition-ipfs.json
         container-name: ipfs-daemon
         image: $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:latest
       
@@ -133,13 +139,27 @@ jobs:
       id: render-adapter-container
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
-        task-definition: task-definition.json
+        task-definition: task-definition-adapter.json
         container-name: external-adapter
         image: $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:latest
       
-    - name: Deploy to Amazon ECS service
+    - name: Deploy Chainlink Node to Amazon ECS service
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
-        task-definition: task-definition.json
-        service: dapp-service
+        task-definition: task-definition-chainlink.json
+        service: dapp-service-chainlink
+        cluster: dapp-cluster
+
+    - name: Deploy IPFS Daemon to Amazon ECS service
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: task-definition-ipfs.json
+        service: dapp-service-ipfs
+        cluster: dapp-cluster
+
+    - name: Deploy External Adapter to Amazon ECS service
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: task-definition-ipfs.json
+        service: dapp-service-adapter
         cluster: dapp-cluster

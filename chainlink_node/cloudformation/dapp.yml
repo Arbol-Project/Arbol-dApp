@@ -12,12 +12,12 @@ Parameters:
     Description: Number of instances to launch in your ECS cluster.
   MaxSize:
     Type: Number
-    Default: '1'
+    Default: '2'
     Description: Maximum number of instances that can be launched in your ECS cluster.
   InstanceType:
     Description: EC2 instance type
     Type: String
-    Default: t2.micro
+    Default: c4.xlarge
     AllowedValues:
       - t2.micro
       - t2.small
@@ -114,10 +114,10 @@ Resources:
         - - ECSLogGroup
           - !Ref 'AWS::StackName'
       RetentionInDays: 14
-  taskdefinition:
+  taskdefinitionChainlink:
     Type: 'AWS::ECS::TaskDefinition'
     Properties:
-      Family: dapp-task
+      Family: dapp-task-chainlink
       ContainerDefinitions:
         - Name: chainlink-node-1
           Cpu: 512
@@ -129,12 +129,21 @@ Resources:
             Options:
               awslogs-group: !Ref CloudwatchLogsGroup
               awslogs-region: !Ref 'AWS::Region'
-              awslogs-stream-prefix: dapp
+              awslogs-stream-prefix: dapp-chainlink
           MountPoints:
             - ContainerPath: /chainlink
               SourceVolume: Chainlink
           PortMappings:
             - ContainerPort: 80
+      Volumes:
+      - Host:
+          SourcePath: chainlink
+        Name: Chainlink
+  taskdefinitionIPFS:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      Family: dapp-task-ipfs
+      ContainerDefinitions:
         - Name: ipfs-daemon
           Cpu: 512
           Essential: true
@@ -145,18 +154,32 @@ Resources:
             Options:
               awslogs-group: !Ref CloudwatchLogsGroup
               awslogs-region: !Ref 'AWS::Region'
-              awslogs-stream-prefix: dapp
+              awslogs-stream-prefix: dapp-ipfs
           MountPoints:
             - ContainerPath: /export
               SourceVolume: Export
             - ContainerPath: /data/ipfs
               SourceVolume: DataIpfs
+          PortMappings:
+            - ContainerPort: 80
           # HealthCheck:
           #   Command: 
           #   - "CMD-SHELL", "ipfs swarm peers || exit 1"
           #   Interval: 30
           #   Retries: 5
           #   Timeout: 10
+      Volumes:
+      - Host:
+          SourcePath: export
+        Name: Export
+      - Host:
+          SourcePath: /data/ipfs
+        Name: DataIpfs
+  taskdefinitionAdapter:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      Family: dapp-task-adapter
+      ContainerDefinitions:
         - Name: external-adapter
           Cpu: 512
           Essential: true
@@ -170,7 +193,7 @@ Resources:
             Options:
               awslogs-group: !Ref CloudwatchLogsGroup
               awslogs-region: !Ref 'AWS::Region'
-              awslogs-stream-prefix: dapp
+              awslogs-stream-prefix: dapp-adapter
           MountPoints:
             - ContainerPath: /adapter
               SourceVolume: Adapter
@@ -178,16 +201,9 @@ Resources:
               SourceVolume: __Web_AppPackagesContractsSrcLogs
             - ContainerPath: /adapter/SROs
               SourceVolume: __Smart_ContractsHardhatSros
+          PortMappings:
+            - ContainerPort: 80
       Volumes:
-      - Host:
-          SourcePath: chainlink
-        Name: Chainlink
-      - Host:
-          SourcePath: export
-        Name: Export
-      - Host:
-          SourcePath: /data/ipfs
-        Name: DataIpfs
       - Host:
           SourcePath: adapter
         Name: Adapter
@@ -289,11 +305,11 @@ Resources:
             - !Ref 'AWS::Region'
             - |+
 
-  service:
+  serviceChainlink:
     Type: 'AWS::ECS::Service'
     DependsOn: ALBListener
     Properties:
-      ServiceName: dapp-service
+      ServiceName: dapp-service-chainlink
       Cluster: !Ref ECSCluster
       DesiredCount: 1
       LoadBalancers:
@@ -301,7 +317,33 @@ Resources:
           ContainerPort: 80
           TargetGroupArn: !Ref ECSTG
       Role: !Ref ECSServiceRole
-      TaskDefinition: !Ref taskdefinition
+      TaskDefinition: !Ref taskdefinitionChainlink
+  serviceIPFS:
+    Type: 'AWS::ECS::Service'
+    DependsOn: ALBListener
+    Properties:
+      ServiceName: dapp-service-ipfs
+      Cluster: !Ref ECSCluster
+      DesiredCount: 1
+      LoadBalancers:
+        - ContainerName: ipfs-daemon
+          ContainerPort: 80
+          TargetGroupArn: !Ref ECSTG
+      Role: !Ref ECSServiceRole
+      TaskDefinition: !Ref taskdefinitionIPFS
+  serviceAdapter:
+    Type: 'AWS::ECS::Service'
+    DependsOn: ALBListener
+    Properties:
+      ServiceName: dapp-service-adapter
+      Cluster: !Ref ECSCluster
+      DesiredCount: 1
+      LoadBalancers:
+        - ContainerName: external-adapter
+          ContainerPort: 80
+          TargetGroupArn: !Ref ECSTG
+      Role: !Ref ECSServiceRole
+      TaskDefinition: !Ref taskdefinitionAdapter
   ECSServiceRole:
     Type: 'AWS::IAM::Role'
     Properties:
@@ -330,17 +372,28 @@ Resources:
                 Resource: '*'
   ServiceScalingTarget:
     Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-    DependsOn: service
+    DependsOn:
+      - serviceChainlink
+      - serviceIPFS
+      - serviceAdapter
     Properties:
       MaxCapacity: 2
       MinCapacity: 1
       ResourceId: !Join 
         - ''
-        - - service/
+        - - serviceChainlink/
+          - serviceIPFS/
+          - serivceAdapter/
           - !Ref ECSCluster
           - /
           - !GetAtt 
-            - service
+            - serviceChainlink
+            - Name
+          - !GetAtt
+            - serviceIPFS
+            - Name
+          - !GetAtt
+            - serviceAdapter
             - Name
       RoleARN: !GetAtt 
         - AutoscalingRole
@@ -403,6 +456,7 @@ Resources:
                   - 'ecs:RegisterContainerInstance'
                   - 'ecs:StartTelemetrySession'
                   - 'ecs:Submit*'
+                  - 'ecr:*'
                   - 'logs:CreateLogStream'
                   - 'logs:PutLogEvents'
                 Resource: '*'
@@ -437,8 +491,8 @@ Resources:
       Roles:
         - !Ref EC2Role
 Outputs:
-  ecsservice:
-    Value: !Ref service
+  # ecsservice:
+  #   Value: !Ref service
   ecscluster:
     Value: !Ref ECSCluster
   ECSALB:
@@ -448,5 +502,9 @@ Outputs:
       - - !GetAtt 
           - ECSALB
           - DNSName
-  taskdef:
-    Value: !Ref taskdefinition
+  taskdefChainlink:
+    Value: !Ref taskdefinitionChainlink
+  taskdefIPFS:
+    Value: !Ref taskdefinitionIPFS
+  taskdefAdapter:
+    Value: !Ref taskdefinitionAdapter

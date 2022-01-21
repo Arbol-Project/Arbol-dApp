@@ -208,10 +208,10 @@ Resources:
           SourcePath: adapter
         Name: Adapter
       - Host:
-          SourcePath: web_app/packages/contracts/src/logs
+          SourcePath: /web_app/packages/contracts/src/logs
         Name: WebAppPackagesContractsSrcLogs
       - Host:
-          SourcePath: smart_contracts/hardhat/SROs
+          SourcePath: /smart_contracts/hardhat/SROs
         Name: SmartContractsHardhatSros
   ECSALB:
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'

@@ -134,7 +134,7 @@ Resources:
             - ContainerPath: /chainlink
               SourceVolume: Chainlink
           PortMappings:
-            - ContainerPort: 80
+            - ContainerPort: 6688
       Volumes:
       - Host:
           SourcePath: chainlink

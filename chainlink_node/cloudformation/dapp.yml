@@ -122,7 +122,7 @@ Resources:
         - Name: chainlink-node-1
           Cpu: 512
           Essential: true
-          Image: 574269834288.dkr.ecr.us-east-1.amazonaws.com/chainlink-node-1:19ba8be33467e6fdc92ce4e6b24a68a355210799
+          Image: 574269834288.dkr.ecr.us-east-1.amazonaws.com/chainlink-node-1
           Memory: 1024
           LogConfiguration:
             LogDriver: awslogs
@@ -147,7 +147,7 @@ Resources:
         - Name: ipfs-daemon
           Cpu: 512
           Essential: true
-          Image: 574269834288.dkr.ecr.us-east-1.amazonaws.com/ipfs-daemon:19ba8be33467e6fdc92ce4e6b24a68a355210799
+          Image: 574269834288.dkr.ecr.us-east-1.amazonaws.com/ipfs-daemon
           Memory: 1024
           LogConfiguration:
             LogDriver: awslogs
@@ -183,7 +183,7 @@ Resources:
         - Name: external-adapter
           Cpu: 512
           Essential: true
-          Image: 574269834288.dkr.ecr.us-east-1.amazonaws.com/external-adapter:19ba8be33467e6fdc92ce4e6b24a68a355210799
+          Image: 574269834288.dkr.ecr.us-east-1.amazonaws.com/external-adapter
           Memory: 1024
           Environment:
           - Name: 'PYTHONUNBUFFERED'

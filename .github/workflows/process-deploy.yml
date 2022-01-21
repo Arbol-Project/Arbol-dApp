@@ -91,87 +91,86 @@ jobs:
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG ./adapter
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG ./ipfs
 
-    - name: Build and Push to Amazon ECR
-      working-directory: chainlink_node
+    - name: Push Chainlink Node to Amazon ECR
+      id: push-chainlink-image
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY_CHAINLINK: chainlink-node-1
         IMAGE_TAG: ${{ github.sha }}
-        ECR_REPOSITORY_ADAPTER: external-adapter
-        ECR_REPOSITORY_IPFS: ipfs-daemon
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_DEFAULT_REGION: us-east-1
       run: |
         docker push $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG"
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG
-        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG"
+
+    - name: Push IPFS Daemon to Amazon ECR
+      id: push-ipfs-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY_IPFS: ipfs-daemon
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
         docker push $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG"
+
+    - name: Push External Adapter to Amazon ECR
+      id: push-adapter-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.sha }}
+        ECR_REPOSITORY_ADAPTER: external-adapter
+      run: |
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG
+        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG"
   
-    - name: Download Task Definition for Chainlink Node
-      run: aws ecs describe-task-definition --task-definition dapp-task-chainlink --query taskDefinition > task-definition-chainlink.json
-
-    - name: Download Task Definition for IPFS Daemon
-      run: aws ecs describe-task-definition --task-definition dapp-task-ipfs --query taskDefinition > task-definition-ipfs.json
-
-    - name: Download Task Definition for External Adapter
-      run: aws ecs describe-task-definition --task-definition dapp-task-adapter --query taskDefinition > task-definition-adapter.json
+    - name: Download Task Definitions
+      run: |
+        aws ecs describe-task-definition --task-definition dapp-task-chainlink --query taskDefinition > task-definition-chainlink.json
+        aws ecs describe-task-definition --task-definition dapp-task-ipfs --query taskDefinition > task-definition-ipfs.json
+        aws ecs describe-task-definition --task-definition dapp-task-adapter --query taskDefinition > task-definition-adapter.json
     
     - name: Modify Amazon ECS task definition with Chainlink container
       id: render-chainlink-container
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY_CHAINLINK: chainlink-node-1
-        IMAGE_TAG: ${{ github.sha }}
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
         task-definition: task-definition-chainlink.json
         container-name: chainlink-node-1
-        image: $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG
+        image: ${{ steps.push-chainlink-image.outputs.image }}
 
     - name: Modify Amazon ECS task definition with IPFS container
       id: render-ipfs-container
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY_IPFS: ipfs-daemon
-        IMAGE_TAG: ${{ github.sha }}
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
         task-definition: task-definition-ipfs.json
         container-name: ipfs-daemon
-        image: $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG
+        image: ${{ steps.push-ipfs-image.outputs.image }}
       
     - name: Modify Amazon ECS task definition with External Adapter container
       id: render-adapter-container
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY_ADAPTER: external-adapter
-        IMAGE_TAG: ${{ github.sha }}
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
         task-definition: task-definition-adapter.json
         container-name: external-adapter
-        image: $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG
+        image: ${{ steps.push-adapter-image.outputs.image }}
       
     - name: Deploy Chainlink Node to Amazon ECS service
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
-        task-definition: task-definition-chainlink.json
+        task-definition: ${{ steps.render-chainlink-container.outputs.task-definition }}
         service: dapp-service-chainlink
         cluster: dapp-cluster
+        wait-for-service-stability: true
 
     - name: Deploy IPFS Daemon to Amazon ECS service
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
-        task-definition: task-definition-ipfs.json
+        task-definition: ${{ steps.render-ipfs-container.outputs.task-definition }}
         service: dapp-service-ipfs
         cluster: dapp-cluster
+        wait-for-service-stability: true
 
     - name: Deploy External Adapter to Amazon ECS service
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
-        task-definition: task-definition-adapter.json
+        task-definition: ${{ steps.render-adapter-container.outputs.task-definition }}
         service: dapp-service-adapter
         cluster: dapp-cluster
+        wait-for-service-stability: true

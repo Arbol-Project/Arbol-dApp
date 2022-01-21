@@ -83,11 +83,11 @@ class RainfallDerivative:
         opt_type = opt_type.lower()
         direction = 1 if opt_type == 'call' else -1
 
-        if exhaust is not None:
+        if tick is not None:
+            tick = float(tick)
+        else:
             exhaust = float(exhaust)
             tick = abs(limit / (strike - exhaust))
-        else:
-            tick = float(tick)
 
         payout = (index_value - strike) * tick * direction
         if payout < 0:

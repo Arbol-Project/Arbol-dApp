@@ -212,7 +212,7 @@
         "verified": true,
         "provider": "RainfallDerivativeProvider",
         "end": "2021-12-31",
-        "evaluated": true,
+        "evaluated": false,
         "payout": "72257"
     },
     "Moung Ruessei PUT, limit: 1.9k": {
@@ -221,7 +221,7 @@
         "verified": true,
         "provider": "RainfallDerivativeProvider",
         "end": "2021-12-31",
-        "evaluated": true,
+        "evaluated": false,
         "payout": "0"
     },
     "Samlout CALL, limit: 142": {
@@ -230,7 +230,7 @@
         "verified": true,
         "provider": "RainfallDerivativeProvider",
         "end": "2021-12-31",
-        "evaluated": true,
+        "evaluated": false,
         "payout": "0"
     },
     "Samlout PUT, limit: 142": {
@@ -239,7 +239,7 @@
         "verified": true,
         "provider": "RainfallDerivativeProvider",
         "end": "2021-12-31",
-        "evaluated": true,
+        "evaluated": false,
         "payout": "0"
     },
     "Moung Ruessei CALL, limit: 6.69k": {
@@ -248,7 +248,7 @@
         "verified": true,
         "provider": "RainfallDerivativeProvider",
         "end": "2021-12-31",
-        "evaluated": true,
+        "evaluated": false,
         "payout": "255004"
     },
     "Moung Ruessei PUT, limit: 6.69k": {
@@ -257,7 +257,7 @@
         "verified": true,
         "provider": "RainfallDerivativeProvider",
         "end": "2021-12-31",
-        "evaluated": true,
+        "evaluated": false,
         "payout": "0"
     },
     "Samlout CALL, limit: 3.03k": {
@@ -266,7 +266,7 @@
         "verified": true,
         "provider": "RainfallDerivativeProvider",
         "end": "2021-12-31",
-        "evaluated": true,
+        "evaluated": false,
         "payout": "0"
     },
     "Samlout PUT, limit: 3.03k": {
@@ -275,7 +275,7 @@
         "verified": true,
         "provider": "RainfallDerivativeProvider",
         "end": "2021-12-31",
-        "evaluated": true,
+        "evaluated": false,
         "payout": "0"
     },
     "Moung Ruessei CALL, limit: 955": {
@@ -284,7 +284,7 @@
         "verified": true,
         "provider": "RainfallDerivativeProvider",
         "end": "2021-12-31",
-        "evaluated": true,
+        "evaluated": false,
         "payout": "36425"
     },
     "Moung Ruessei PUT, limit: 955": {
@@ -293,7 +293,7 @@
         "verified": true,
         "provider": "RainfallDerivativeProvider",
         "end": "2021-12-31",
-        "evaluated": true,
+        "evaluated": false,
         "payout": "0"
     },
     "Cambodia Rainfall December 21 - April 22": {

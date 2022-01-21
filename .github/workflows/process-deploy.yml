@@ -173,4 +173,4 @@ jobs:
         task-definition: ${{ steps.render-adapter-container.outputs.task-definition }}
         service: dapp-service-adapter
         cluster: dapp-cluster
-        wait-for-service-stability: true
+        # wait-for-service-stability: true -- Gotta figure out volume path issue before uncommenting this

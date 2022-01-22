@@ -54,9 +54,29 @@ async function main() {
             var option_contract = OptionContract.attach(optionAddress);
             var operator_address = await option_contract.ARBOL_ORACLE();
             var whitelistingOperator= await Operator.attach(operator_address);
-            var tx = await whitelistingOperator.addAccess(optionAddress);
-            await tx.wait();
+            var access = await whitelistingOperator.hasAccess(optionAddress, 64);
+            console.log("access:", access);
+            if (!access) {
+              console.log("Adding operator access");
+              var tx = await whitelistingOperator.addAccess(optionAddress);
+              console.log("tx hash:", tx.hash);
+              await tx.wait();
+              console.log("√");
+            }
+            // console.log("replacing job with long version");
+            // var long_job = "607f1d9089514a2a9eb1aa7c3db1c895";
+            // tx = await derivative_provider.removeContractJob(cname, long_job);
+            // console.log("tx hash:", tx.hash);
+            // await tx.wait();
+            // tx = await derivative_provider.addContractJob(cname, operator_address, long_job);
+            // console.log("tx hash:", tx.hash);
+            // await tx.wait();
+            // tx = await derivative_provider.removeContractJob(cname, "ccaf1bfe97d8469caff395a0aaa61e27");
+            // console.log("tx hash:", tx.hash);
+            // await tx.wait();
+            console.log("init eval");
             tx = await derivative_provider.initiateContractEvaluation(cname);
+            console.log("tx hash:", tx.hash);
             console.log("waiting...");
             await tx.wait();
           } else if (pname == "BlizzardDerivativeProvider") {
@@ -66,9 +86,11 @@ async function main() {
             var operator_address = await option_contract.ARBOL_ORACLE();
             var whitelistingOperator= await Operator.attach(operator_address);
             var tx = await whitelistingOperator.addAccess(optionAddress);
+            console.log("tx hash:", tx.hash);
             await tx.wait();
 
             tx = await derivative_provider.initiateContractEvaluation();
+            console.log("tx hash:", tx.hash);
             console.log("Waiting...");
             await tx.wait();
           }
@@ -83,19 +105,26 @@ async function main() {
             Contracts[cname].evaluated = true;
             Contracts[cname].payout = payout;
           } else {
-            console.log("Waiting 4 more minutes...");
-            await delay(60*1000);
-            evaluated = await derivative_provider.getContractEvaluated(cname);
+            var retries = 0;
+            while (!evaluated) {
+              if (retries > 1) {
+                break;
+              }
+              retries += 1;
+              console.log("Waiting 5 more minutes...");
+              await delay(300*1000);
+              evaluated = await derivative_provider.getContractEvaluated(cname);
 
-            if (evaluated) {
-              var payout = await derivative_provider.getContractPayout(cname);
-              payout = payout.toString();
-              console.log("Contract:", cname, "Payout:", payout.slice(0, -2) + "." + payout.slice(-2));
+              if (evaluated) {
+                var payout = await derivative_provider.getContractPayout(cname);
+                payout = payout.toString();
+                console.log("Contract:", cname, "Payout:", payout.slice(0, -2) + "." + payout.slice(-2));
 
-              Contracts[cname].evaluated = true;
-              Contracts[cname].payout = payout;
-            } else {
-              console.log("Contract evaluation undetermined:", cname);
+                Contracts[cname].evaluated = true;
+                Contracts[cname].payout = payout;
+              } else {
+                console.log("Contract evaluation undetermined:", cname);
+              }
             }
           }
         }

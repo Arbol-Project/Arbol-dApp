@@ -249,6 +249,9 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
         onlyOwner 
     {
         require(end < block.timestamp, "unable to call until coverage period has ended");
+        if (contractEvaluated) {
+            payout = 0;
+        }
         // do all looped reads from memory instead of storage
         uint256 _oraclePayment = oraclePayment;
         address[] memory _oracles = oracles;

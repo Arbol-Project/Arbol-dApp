@@ -7,7 +7,7 @@ const Providers = require(ProviderLogs);
 const Contracts = require(ContractLogs);
 const RainfallSRO1 = require("../SROs/Cambodia_rain_basket_August21-December21.json");
 const RainfallSRO2 = require("../SROs/Cambodia_rain_basket_December21-April22.json");
-const ContractList = RainfallSRO1.__config__.contracts.concat([RainfallSRO2]);
+const ContractList = RainfallSRO1.__config__.contracts.concat(RainfallSRO2.__config__.contracts);
 
 async function main() {
 
@@ -26,7 +26,12 @@ async function main() {
   var contracts = {};
   try {
     for (const contract of ContractList) {
-      var id = contract.__config__.id.toString();
+      if (!contract.__config__.id) {
+        var id = "temp";
+      } else {
+        var id = contract.__config__.id.toString();
+      }
+      
       if (id in Contracts) {
         // console.log("RainfallOption already deployed to:", Contracts[id].address);
         continue;
@@ -34,9 +39,9 @@ async function main() {
 
         var opt_type = contract.__config__.payouts.__config__.derivative.__config__.opt_type;
         var dataset = contract.__config__.payouts.__config__.index_distribution.__config__.index.__config__.loader.__config__.dataset_name;
-        var strike = contract.__config__.payouts.__config__.derivative.__config__.strike;
-        var limit = contract.__config__.payouts.__config__.derivative.__config__.limit;
-        var tick = contract.__config__.payouts.__config__.derivative.__config__.tick;
+        var strike = contract.__config__.payouts.__config__.derivative.__config__.strike.toString();
+        var limit = contract.__config__.payouts.__config__.derivative.__config__.limit.toString();
+        var tick = contract.__config__.payouts.__config__.derivative.__config__.tick.toString();
         var start = contract.__config__.payouts.__config__.index_distribution.__config__.index.__config__.start;
         var end = contract.__config__.payouts.__config__.index_distribution.__config__.index.__config__.end;
         var end_date = new Date(contract.__config__.payouts.__config__.index_distribution.__config__.index.__config__.end);
@@ -48,8 +53,13 @@ async function main() {
           var lon = config.__config__.lon;
           locations.push([lat, lon])
         }
+        locations = JSON.stringify(locations);
 
-        var parameters = ["id", id, "dataset", dataset, "opt_type", opt_type, "start", start, "end", end, "strike", strike.toString(), "limit", limit.toString(), "tick", tick.toString(), "locations", JSON.stringify(locations)]
+        if (id === "temp") {
+          id = "Cambodia Rainfall " + opt_type + ", limit: " + limit;
+        }
+
+        var parameters = ["id", id, "dataset", dataset, "opt_type", opt_type, "start", start, "end", end, "strike", strike, "limit", limit, "tick", tick, "locations", locations];
 
         var tx = await derivative_provider.newContract(parameters, end_unix);
         await tx.wait();
@@ -72,13 +82,15 @@ async function main() {
 
     if (!("RainfallDerivativeProvider" in Providers)) {
       Providers["RainfallDerivativeProvider"] = {"address": derivative_provider.address, "types": {"RainfallOption": false}, "verified": false, "contracts": contracts};
-      var deployment_content = JSON.stringify(Providers);
-      try {
-        fs.writeFileSync(ProviderLogs, deployment_content)
-      } catch (error) {
-        console.error(error)
-      }
+    } else {
+      Providers["RainfallDerivativeProvider"].contracts = Object.assign({}, Providers["RainfallDerivativeProvider"].contracts, contracts);
     }
+    var deployment_content = JSON.stringify(Providers);
+    try {
+      fs.writeFileSync(ProviderLogs, deployment_content)
+    } catch (error) {
+      console.error(error)
+    } 
 
   } catch (error) {
     console.error(error)

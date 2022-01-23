@@ -379,7 +379,7 @@ Resources:
       MinCapacity: 1
       ResourceId: !Join 
         - ''
-        - - serviceChainlink/
+        - - service/
           - !Ref ECSCluster
           - /
           - !GetAtt 
@@ -411,7 +411,7 @@ Resources:
       MinCapacity: 1
       ResourceId: !Join 
         - ''
-        - - serviceIPFS/
+        - - service/
           - !Ref ECSCluster
           - /
           - !GetAtt 
@@ -443,7 +443,7 @@ Resources:
       MinCapacity: 1
       ResourceId: !Join 
         - ''
-        - - serviceAdapter/
+        - - service/
           - !Ref ECSCluster
           - /
           - !GetAtt 

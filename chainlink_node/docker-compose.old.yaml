@@ -2,24 +2,21 @@ version: "3.8"
 
 services:
   chainlink-node-1:
-    network_mode: host
     container_name: primary-node
-    build: chainlink/
+    image: ${DOCKER_REGISTRY}/chainlink-node-1:${IMAGE_TAG}
     env_file:
       - chainlink/.env
     volumes:
       - chainlink:/chainlink
 
   ipfs-daemon:
-    network_mode: host
     container_name: ipfs-daemon
-    build: ipfs/
+    image: ${DOCKER_REGISTRY}/ipfs-daemon:${IMAGE_TAG}
     volumes:
       - /export
       - /data/ipfs
     depends_on:
       - chainlink-node-1
-    restart: on-failure
     healthcheck:
       test: ipfs swarm peers || exit 1
       interval: 30s
@@ -29,14 +26,12 @@ services:
   external-adapter:
     environment:
       - PYTHONUNBUFFERED=1
-    network_mode: host
     container_name: arbol-adapter
-    build: adapter/
+    image: ${DOCKER_REGISTRY}/external-adapter:${IMAGE_TAG}
     volumes:
       - adapter:/adapter
       - "../web_app/packages/contracts/src/logs:/adapter/logs"
       - "../smart_contracts/hardhat/SROs:/adapter/SROs"
-    restart: on-failure
     depends_on:
       ipfs-daemon:
         condition: service_healthy

@@ -161,7 +161,7 @@ Resources:
             - ContainerPath: /data/ipfs
               SourceVolume: DataIpfs
           PortMappings:
-            - ContainerPort: 80
+            - ContainerPort: 5001
           # HealthCheck:
           #   Command: 
           #   - "CMD-SHELL", "ipfs swarm peers || exit 1"
@@ -202,7 +202,7 @@ Resources:
             - ContainerPath: /adapter/SROs
               SourceVolume: SmartContractsHardhatSros
           PortMappings:
-            - ContainerPort: 80
+            - ContainerPort: 8000
       Volumes:
       - Host:
           SourcePath: adapter
@@ -327,7 +327,7 @@ Resources:
       DesiredCount: 1
       LoadBalancers:
         - ContainerName: ipfs-daemon
-          ContainerPort: 80
+          ContainerPort: 5001
           TargetGroupArn: !Ref ECSTG
       Role: !Ref ECSServiceRole
       TaskDefinition: !Ref taskdefinitionIPFS
@@ -340,7 +340,7 @@ Resources:
       DesiredCount: 1
       LoadBalancers:
         - ContainerName: external-adapter
-          ContainerPort: 80
+          ContainerPort: 8000
           TargetGroupArn: !Ref ECSTG
       Role: !Ref ECSServiceRole
       TaskDefinition: !Ref taskdefinitionAdapter

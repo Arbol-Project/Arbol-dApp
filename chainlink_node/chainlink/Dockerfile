@@ -9,6 +9,8 @@ COPY .api /.api
 RUN chmod +x /.api
 COPY .password /.password
 RUN chmod +x /.password
+COPY .env /.env
+RUN chmod +x /.env
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh

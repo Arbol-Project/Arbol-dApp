@@ -149,7 +149,7 @@ Resources:
             - ContainerPath: /chainlink
               SourceVolume: Chainlink
           PortMappings:
-            - ContainerPort: 6688
+            - ContainerPort: 6689
       Volumes:
       - Host:
           SourcePath: chainlink
@@ -329,7 +329,7 @@ Resources:
       DesiredCount: 1
       LoadBalancers:
         - ContainerName: chainlink-node-1
-          ContainerPort: 6688
+          ContainerPort: 6689
           TargetGroupArn: !Ref ECSTG
       Role: !Ref ECSServiceRole
       TaskDefinition: !Ref taskdefinitionChainlink

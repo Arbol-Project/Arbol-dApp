@@ -55,8 +55,11 @@ jobs:
         echo "DOCKER_REGISTRY=${ECR_REGISTRY}" >> .env
         echo "IMAGE_TAG=${IMAGE_TAG}" >> .env
 
-    - name: Get API secrets
-      run: printf "DATABASE_URL=${secrets.DATABASE_URL}" >> ./chainlink_node/chainlink/.env
+    - name: Get Database URL
+      working-directory: chainlink_node/chainlink
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL_ENV_LINE }}
+      run: printf "$DATABASE_URL" base64 --decode >> .env
 
     - name: Get API secrets
       env:

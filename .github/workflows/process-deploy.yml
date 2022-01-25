@@ -56,6 +56,9 @@ jobs:
         echo "IMAGE_TAG=${IMAGE_TAG}" >> .env
 
     - name: Get API secrets
+      run: printf "DATABASE_URL=${secrets.DATABASE_URL} >> ./chainlink_node/chainlink/.env
+
+    - name: Get API secrets
       env:
         API_SECRETS: ${{ secrets.API }}
       run: printf "$API_SECRETS" base64 --decode > ./chainlink_node/chainlink/.api

@@ -59,7 +59,9 @@ jobs:
       working-directory: chainlink_node/chainlink
       env:
         DATABASE_URL: ${{ secrets.DATABASE_URL_ENV_LINE }}
-      run: printf "$DATABASE_URL" base64 --decode >> .env
+      run: |
+        printf "$DATABASE_URL" base64 --decode >> .env
+        ls -la
 
     - name: Get API secrets
       env:

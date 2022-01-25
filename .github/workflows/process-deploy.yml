@@ -62,6 +62,7 @@ jobs:
       run: |
         printf "$DATABASE_URL" base64 --decode >> .env
         ls -la
+        cat .env
 
     - name: Get API secrets
       env:

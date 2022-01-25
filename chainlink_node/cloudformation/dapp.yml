@@ -124,6 +124,9 @@ Resources:
           Essential: true
           Image: 574269834288.dkr.ecr.us-east-1.amazonaws.com/chainlink-node-1
           Memory: 1024
+          Environment:
+          - Name: DATABASE_URL
+            Value: placeholder
           LogConfiguration:
             LogDriver: awslogs
             Options:

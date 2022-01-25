@@ -126,7 +126,19 @@ Resources:
           Memory: 1024
           Environment:
           - Name: DATABASE_URL
-            Value: placeholder
+            Value: 
+          - Name: ETH_CHAIN_ID
+            Value: 42
+          - Name: LINK_CONTRACT_ADDRESS
+            Value: 
+          - Name: ETH_URL
+            Value: 
+          - Name: ETH_HTTP_URL
+            Value: 
+          - Name: TLS_CERT_PATH
+            Value: /tls/server.crt
+          - Name: TLS_KEY_PATH
+            Value: /tls/server.key
           LogConfiguration:
             LogDriver: awslogs
             Options:

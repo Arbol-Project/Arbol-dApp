@@ -45,22 +45,9 @@ jobs:
       run: |
         printenv
 
-    - name: Set Environment
-      id: set-env
-      working-directory: chainlink_node
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        IMAGE_TAG: ${{ github.sha }}
-      run: |
-        echo "DOCKER_REGISTRY=${ECR_REGISTRY}" >> .env
-        echo "IMAGE_TAG=${IMAGE_TAG}" >> .env
-
-    - name: Get Database URL
+    - name: Sanity Check envs
       working-directory: chainlink_node/chainlink
-      env:
-        DATABASE_URL: ${{ secrets.DATABASE_URL_ENV_LINE }}
       run: |
-        printf "$DATABASE_URL" base64 --decode >> .env
         ls -la
         cat .env
 

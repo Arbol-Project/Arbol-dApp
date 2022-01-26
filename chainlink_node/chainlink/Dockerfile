@@ -1,4 +1,4 @@
-FROM smartcontract/chainlink:0.10.14
+FROM smartcontract/chainlink:1.1.0
 
 RUN mkdir /chainlink
 RUN mkdir /chainlink/tls

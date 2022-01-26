@@ -127,18 +127,40 @@ Resources:
           Environment:
           - Name: DATABASE_URL
             Value: 
-          - Name: ETH_CHAIN_ID
-            Value: 42
-          - Name: LINK_CONTRACT_ADDRESS
-            Value: 
-          - Name: ETH_URL
-            Value: 
-          - Name: ETH_HTTP_URL
-            Value: 
+#           - Name: ETH_CHAIN_ID
+#             Value: 42
+#           - Name: LINK_CONTRACT_ADDRESS
+#             Value: 
+#           - Name: ETH_URL
+#             Value: 
+#           - Name: ETH_HTTP_URL
+#             Value: 
           - Name: TLS_CERT_PATH
             Value: /tls/server.crt
           - Name: TLS_KEY_PATH
             Value: /tls/server.key
+          - Name: CHAINLINK_TLS_REDIRECT
+            Value: true
+          - Name: SECURE_COOKIES
+            Value: false
+          - Name: CHAINLINK_TLS_PORT
+            Value: 0
+          - Name: DATABASE_TIMEOUT
+            Value: 0
+          - Name: DEFAULT_HTTP_TIMEOUT
+            Value: "10m"
+          - Name: MINIMUM_CONTRACT_PAYMENT_LINK_JUELS
+            Value: 0
+          - Name: MIN_OUTGOING_CONFIRMATIONS
+            Value: 2
+          - Name: FEATURE_WEBHOOK_V2
+            Value: true
+          - Name: JSON_CONSOLE
+            Value: true
+          - Name: LOG_LEVEL
+            Value: "debug"
+          - Name: CHAINLINK_DEV
+            Value: true
           LogConfiguration:
             LogDriver: awslogs
             Options:

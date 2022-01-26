@@ -1,0 +1,172 @@
+on:
+  push:
+    branches:
+      - feat/*
+
+name: Deployment
+
+jobs:
+  deploy:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out Git repository
+      uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Get ECS Integration
+      run: curl -L https://raw.githubusercontent.com/docker/compose-cli/main/scripts/install/install_linux.sh | sh
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Get .env secrets
+      uses: say8425/aws-secrets-manager-actions@v1
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+      with:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: us-east-1
+        SECRET_NAME: dapp
+        OUTPUT_PATH: './chainlink_node/chainlink/.env'
+    
+    - name: Translate ENV variables
+      run: |
+        printenv
+
+    - name: Sanity Check envs
+      working-directory: chainlink_node/chainlink
+      run: |
+        ls -la
+        cat .env
+
+    - name: Get API secrets
+      env:
+        API_SECRETS: ${{ secrets.API }}
+      run: printf "$API_SECRETS" base64 --decode > ./chainlink_node/chainlink/.api
+
+    - name: Get Password secret
+      env:
+        PASSWORD_SECRET: ${{ secrets.PASSWORD }}
+      run: printf "$PASSWORD_SECRET" base64 --decode > ./chainlink_node/chainlink/.password
+
+    - name: Get TLS cert
+      env:
+        TLS_CERT_SECRET: ${{ secrets.TLS_CERT }}
+      run: echo "$TLS_CERT_SECRET" base64 --decode > ./chainlink_node/chainlink/tls/server.crt
+
+    - name: Get TLS key
+      env:
+        TLS_KEY_SECRET: ${{ secrets.TLS_KEY }}
+      run: echo "$TLS_KEY_SECRET" base64 --decode > ./chainlink_node/chainlink/tls/server.key
+
+    - name: Build
+      working-directory: chainlink_node
+      env: 
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY_CHAINLINK: chainlink-node-1
+        IMAGE_TAG: ${{ github.sha }}
+        ECR_REPOSITORY_ADAPTER: external-adapter
+        ECR_REPOSITORY_IPFS: ipfs-daemon
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: us-east-1
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG ./chainlink
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG ./adapter
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG ./ipfs
+
+    - name: Push Chainlink Node to Amazon ECR
+      id: push-chainlink-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY_CHAINLINK: chainlink-node-1
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG
+        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG"
+
+    - name: Push IPFS Daemon to Amazon ECR
+      id: push-ipfs-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY_IPFS: ipfs-daemon
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG
+        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG"
+
+    - name: Push External Adapter to Amazon ECR
+      id: push-adapter-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.sha }}
+        ECR_REPOSITORY_ADAPTER: external-adapter
+      run: |
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG
+        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG"
+  
+    - name: Download Task Definitions
+      run: |
+        aws ecs describe-task-definition --task-definition dapp-task-chainlink --query taskDefinition > task-definition-chainlink.json
+        aws ecs describe-task-definition --task-definition dapp-task-ipfs --query taskDefinition > task-definition-ipfs.json
+        aws ecs describe-task-definition --task-definition dapp-task-adapter --query taskDefinition > task-definition-adapter.json
+    
+    - name: Modify Amazon ECS task definition with Chainlink container
+      id: render-chainlink-container
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: task-definition-chainlink.json
+        container-name: chainlink-node-1
+        image: ${{ steps.push-chainlink-image.outputs.image }}
+
+    - name: Modify Amazon ECS task definition with IPFS container
+      id: render-ipfs-container
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: task-definition-ipfs.json
+        container-name: ipfs-daemon
+        image: ${{ steps.push-ipfs-image.outputs.image }}
+      
+    - name: Modify Amazon ECS task definition with External Adapter container
+      id: render-adapter-container
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: task-definition-adapter.json
+        container-name: external-adapter
+        image: ${{ steps.push-adapter-image.outputs.image }}
+      
+    - name: Deploy Chainlink Node to Amazon ECS service
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: ${{ steps.render-chainlink-container.outputs.task-definition }}
+        service: dapp-service-chainlink
+        cluster: dapp-cluster
+        # wait-for-service-stability: true
+
+    - name: Deploy IPFS Daemon to Amazon ECS service
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: ${{ steps.render-ipfs-container.outputs.task-definition }}
+        service: dapp-service-ipfs
+        cluster: dapp-cluster
+        # wait-for-service-stability: true
+
+    - name: Deploy External Adapter to Amazon ECS service
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: ${{ steps.render-adapter-container.outputs.task-definition }}
+        service: dapp-service-adapter
+        cluster: dapp-cluster
+        # wait-for-service-stability: true -- Gotta figure out volume path issue before uncommenting this

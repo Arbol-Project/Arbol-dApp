@@ -1,0 +1,601 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  VpcId:
+    Type: 'AWS::EC2::VPC::Id'
+    Description: Select a VPC that allows instances to access the Internet.
+  SubnetId:
+    Type: 'List<AWS::EC2::Subnet::Id>'
+    Description: Select at least two subnets in your selected VPC.
+  DesiredCapacity:
+    Type: Number
+    Default: '1'
+    Description: Number of instances to launch in your ECS cluster.
+  MaxSize:
+    Type: Number
+    Default: '2'
+    Description: Maximum number of instances that can be launched in your ECS cluster.
+  InstanceType:
+    Description: EC2 instance type
+    Type: String
+    Default: c4.xlarge
+    AllowedValues:
+      - t2.micro
+      - t2.small
+      - t2.medium
+      - t2.large
+      - m3.medium
+      - m3.large
+      - m3.xlarge
+      - m3.2xlarge
+      - m4.large
+      - m4.xlarge
+      - m4.2xlarge
+      - m4.4xlarge
+      - m4.10xlarge
+      - c4.large
+      - c4.xlarge
+      - c4.2xlarge
+      - c4.4xlarge
+      - c4.8xlarge
+      - c3.large
+      - c3.xlarge
+      - c3.2xlarge
+      - c3.4xlarge
+      - c3.8xlarge
+      - r3.large
+      - r3.xlarge
+      - r3.2xlarge
+      - r3.4xlarge
+      - r3.8xlarge
+      - i2.xlarge
+      - i2.2xlarge
+      - i2.4xlarge
+      - i2.8xlarge
+    ConstraintDescription: Please choose a valid instance type.
+Mappings:
+  AWSRegionToAMI:
+    us-east-1:
+      AMIID: ami-00bf0e20ed7ea8cdc
+    us-east-2:
+      AMIID: ami-0a9e12068cb98a01d
+    us-west-1:
+      AMIID: ami-0fa6c8d131a220017
+    us-west-2:
+      AMIID: ami-078c97cf1cefd1b38
+    eu-west-1:
+      AMIID: ami-0c9ef930279337028
+    eu-central-1:
+      AMIID: ami-065c1e34da68f2b02
+    ap-northeast-1:
+      AMIID: ami-02265963d1614d04d
+    ap-southeast-1:
+      AMIID: ami-0b68661b29b9e058c
+    ap-southeast-2:
+      AMIID: ami-00e4b147599c13588
+Resources:
+  ECSCluster:
+    Type: 'AWS::ECS::Cluster'
+    Properties:
+      ClusterName: dapp-cluster
+  EcsSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: ECS Security Group
+      VpcId: !Ref VpcId
+  EcsSecurityGroupHTTPinbound:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref EcsSecurityGroup
+      IpProtocol: tcp
+      FromPort: 80
+      ToPort: 80
+      CidrIp: 0.0.0.0/0
+  EcsSecurityGroupSSHinbound:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref EcsSecurityGroup
+      IpProtocol: tcp
+      FromPort: 22
+      ToPort: 22
+      CidrIp: 0.0.0.0/0
+  EcsSecurityGroupALBports:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref EcsSecurityGroup
+      IpProtocol: tcp
+      FromPort: 31000
+      ToPort: 61000
+      SourceSecurityGroupId: !Ref EcsSecurityGroup
+  CloudwatchLogsGroup:
+    Type: 'AWS::Logs::LogGroup'
+    Properties:
+      LogGroupName: !Join 
+        - '-'
+        - - ECSLogGroup
+          - !Ref 'AWS::StackName'
+      RetentionInDays: 14
+  taskdefinitionChainlink:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      Family: dapp-task-chainlink
+      ContainerDefinitions:
+        - Name: chainlink-node-1
+          Cpu: 512
+          Essential: true
+          Image: 574269834288.dkr.ecr.us-east-1.amazonaws.com/chainlink-node-1
+          Memory: 1024
+          Environment:
+          - Name: DATABASE_URL
+            Value: 
+#           - Name: ETH_CHAIN_ID
+#             Value: 42
+#           - Name: LINK_CONTRACT_ADDRESS
+#             Value: 
+#           - Name: ETH_URL
+#             Value: 
+#           - Name: ETH_HTTP_URL
+#             Value: 
+          - Name: TLS_CERT_PATH
+            Value: /tls/server.crt
+          - Name: TLS_KEY_PATH
+            Value: /tls/server.key
+          - Name: CHAINLINK_TLS_REDIRECT
+            Value: true
+          - Name: SECURE_COOKIES
+            Value: false
+          - Name: CHAINLINK_TLS_PORT
+            Value: 0
+          - Name: DATABASE_TIMEOUT
+            Value: 0
+          - Name: DEFAULT_HTTP_TIMEOUT
+            Value: "10m"
+          - Name: MINIMUM_CONTRACT_PAYMENT_LINK_JUELS
+            Value: 0
+          - Name: MIN_OUTGOING_CONFIRMATIONS
+            Value: 2
+          - Name: FEATURE_WEBHOOK_V2
+            Value: true
+          - Name: JSON_CONSOLE
+            Value: true
+          - Name: LOG_LEVEL
+            Value: "debug"
+          - Name: CHAINLINK_DEV
+            Value: true
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref CloudwatchLogsGroup
+              awslogs-region: !Ref 'AWS::Region'
+              awslogs-stream-prefix: dapp-chainlink
+          MountPoints:
+            - ContainerPath: /chainlink
+              SourceVolume: Chainlink
+          PortMappings:
+            - ContainerPort: 6689
+      Volumes:
+      - Host:
+          SourcePath: chainlink
+        Name: Chainlink
+  taskdefinitionIPFS:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      Family: dapp-task-ipfs
+      ContainerDefinitions:
+        - Name: ipfs-daemon
+          Cpu: 512
+          Essential: true
+          Image: 574269834288.dkr.ecr.us-east-1.amazonaws.com/ipfs-daemon
+          Memory: 1024
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref CloudwatchLogsGroup
+              awslogs-region: !Ref 'AWS::Region'
+              awslogs-stream-prefix: dapp-ipfs
+          MountPoints:
+            - ContainerPath: /export
+              SourceVolume: Export
+            - ContainerPath: /data/ipfs
+              SourceVolume: DataIpfs
+          PortMappings:
+            - ContainerPort: 5001
+          # HealthCheck:
+          #   Command: 
+          #   - "CMD-SHELL", "ipfs swarm peers || exit 1"
+          #   Interval: 30
+          #   Retries: 5
+          #   Timeout: 10
+      Volumes:
+      - Host:
+          SourcePath: export
+        Name: Export
+      - Host:
+          SourcePath: /data/ipfs
+        Name: DataIpfs
+  taskdefinitionAdapter:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      Family: dapp-task-adapter
+      ContainerDefinitions:
+        - Name: external-adapter
+          Cpu: 512
+          Essential: true
+          Image: 574269834288.dkr.ecr.us-east-1.amazonaws.com/external-adapter
+          Memory: 1024
+          Environment:
+          - Name: 'PYTHONUNBUFFERED'
+            Value: '1'
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref CloudwatchLogsGroup
+              awslogs-region: !Ref 'AWS::Region'
+              awslogs-stream-prefix: dapp-adapter
+          MountPoints:
+            - ContainerPath: /adapter
+              SourceVolume: Adapter
+            - ContainerPath: /adapter/logs
+              SourceVolume: WebAppPackagesContractsSrcLogs
+            - ContainerPath: /adapter/SROs
+              SourceVolume: SmartContractsHardhatSros
+          PortMappings:
+            - ContainerPort: 8000
+      Volumes:
+      - Host:
+          SourcePath: adapter
+        Name: Adapter
+      - Host:
+          SourcePath: /web_app/packages/contracts/src/logs
+        Name: WebAppPackagesContractsSrcLogs
+      - Host:
+          SourcePath: /smart_contracts/hardhat/SROs
+        Name: SmartContractsHardhatSros
+  ECSALB:
+    Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+    Properties:
+      Name: ECSALB
+      Scheme: internet-facing
+      LoadBalancerAttributes:
+        - Key: idle_timeout.timeout_seconds
+          Value: '30'
+      Subnets: !Ref SubnetId
+      SecurityGroups:
+        - !Ref EcsSecurityGroup
+  ALBListener:
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    DependsOn: ECSServiceRole
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref ECSTG
+      LoadBalancerArn: !Ref ECSALB
+      Port: '80'
+      Protocol: HTTP
+  ECSALBListenerRule:
+    Type: 'AWS::ElasticLoadBalancingV2::ListenerRule'
+    DependsOn: ALBListener
+    Properties:
+      Actions:
+        - Type: forward
+          TargetGroupArn: !Ref ECSTG
+      Conditions:
+        - Field: path-pattern
+          Values:
+            - /
+      ListenerArn: !Ref ALBListener
+      Priority: 1
+  ECSTG:
+    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+    DependsOn: ECSALB
+    Properties:
+      HealthCheckIntervalSeconds: 10
+      HealthCheckPath: /
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      Name: ECSTG
+      Port: 80
+      Protocol: HTTP
+      UnhealthyThresholdCount: 2
+      VpcId: !Ref VpcId
+  ECSAutoScalingGroup:
+    Type: 'AWS::AutoScaling::AutoScalingGroup'
+    Properties:
+      VPCZoneIdentifier: !Ref SubnetId
+      LaunchConfigurationName: !Ref ContainerInstances
+      MinSize: 1
+      MaxSize: !Ref MaxSize
+      DesiredCapacity: !Ref DesiredCapacity
+    CreationPolicy:
+      ResourceSignal:
+        Timeout: PT15M
+    UpdatePolicy:
+      AutoScalingReplacingUpdate:
+        WillReplace: true
+  ContainerInstances:
+    Type: 'AWS::AutoScaling::LaunchConfiguration'
+    Properties:
+      ImageId: !FindInMap 
+        - AWSRegionToAMI
+        - !Ref 'AWS::Region'
+        - AMIID
+      SecurityGroups:
+        - !Ref EcsSecurityGroup
+      InstanceType: !Ref InstanceType
+      IamInstanceProfile: !Ref EC2InstanceProfile
+      UserData: !Base64 
+        'Fn::Join':
+          - ''
+          - - |
+              #!/bin/bash -xe
+            - echo ECS_CLUSTER=
+            - !Ref ECSCluster
+            - |2
+               >> /etc/ecs/ecs.config
+            - |
+              yum install -y aws-cfn-bootstrap
+            - '/opt/aws/bin/cfn-signal -e $? '
+            - '         --stack '
+            - !Ref 'AWS::StackName'
+            - '         --resource ECSAutoScalingGroup '
+            - '         --region '
+            - !Ref 'AWS::Region'
+            - |+
+
+  serviceChainlink:
+    Type: 'AWS::ECS::Service'
+    DependsOn: ALBListener
+    Properties:
+      ServiceName: dapp-service-chainlink
+      Cluster: !Ref ECSCluster
+      DesiredCount: 1
+      LoadBalancers:
+        - ContainerName: chainlink-node-1
+          ContainerPort: 6689
+          TargetGroupArn: !Ref ECSTG
+      Role: !Ref ECSServiceRole
+      TaskDefinition: !Ref taskdefinitionChainlink
+  serviceIPFS:
+    Type: 'AWS::ECS::Service'
+    DependsOn: ALBListener
+    Properties:
+      ServiceName: dapp-service-ipfs
+      Cluster: !Ref ECSCluster
+      DesiredCount: 1
+      LoadBalancers:
+        - ContainerName: ipfs-daemon
+          ContainerPort: 5001
+          TargetGroupArn: !Ref ECSTG
+      Role: !Ref ECSServiceRole
+      TaskDefinition: !Ref taskdefinitionIPFS
+  serviceAdapter:
+    Type: 'AWS::ECS::Service'
+    DependsOn: ALBListener
+    Properties:
+      ServiceName: dapp-service-adapter
+      Cluster: !Ref ECSCluster
+      DesiredCount: 1
+      LoadBalancers:
+        - ContainerName: external-adapter
+          ContainerPort: 8000
+          TargetGroupArn: !Ref ECSTG
+      Role: !Ref ECSServiceRole
+      TaskDefinition: !Ref taskdefinitionAdapter
+  ECSServiceRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ecs.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: ecs-service
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'elasticloadbalancing:DeregisterInstancesFromLoadBalancer'
+                  - 'elasticloadbalancing:DeregisterTargets'
+                  - 'elasticloadbalancing:Describe*'
+                  - 'elasticloadbalancing:RegisterInstancesWithLoadBalancer'
+                  - 'elasticloadbalancing:RegisterTargets'
+                  - 'ec2:Describe*'
+                  - 'ec2:AuthorizeSecurityGroupIngress'
+                  - 'ecr:*'
+                Resource: '*'
+  ServiceScalingTargetChainlink:
+    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
+    DependsOn: serviceChainlink
+    Properties:
+      MaxCapacity: 2
+      MinCapacity: 1
+      ResourceId: !Join 
+        - ''
+        - - service/
+          - !Ref ECSCluster
+          - /
+          - !GetAtt 
+            - serviceChainlink
+            - Name
+      RoleARN: !GetAtt 
+        - AutoscalingRole
+        - Arn
+      ScalableDimension: 'ecs:service:DesiredCount'
+      ServiceNamespace: ecs
+  ServiceScalingPolicyChainlink:
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+    Properties:
+      PolicyName: AStepPolicy
+      PolicyType: StepScaling
+      ScalingTargetId: !Ref ServiceScalingTargetChainlink
+      StepScalingPolicyConfiguration:
+        AdjustmentType: PercentChangeInCapacity
+        Cooldown: 60
+        MetricAggregationType: Average
+        StepAdjustments:
+          - MetricIntervalLowerBound: 0
+            ScalingAdjustment: 200
+  ServiceScalingTargetIPFS:
+    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
+    DependsOn: serviceIPFS
+    Properties:
+      MaxCapacity: 2
+      MinCapacity: 1
+      ResourceId: !Join 
+        - ''
+        - - service/
+          - !Ref ECSCluster
+          - /
+          - !GetAtt 
+            - serviceIPFS
+            - Name
+      RoleARN: !GetAtt 
+        - AutoscalingRole
+        - Arn
+      ScalableDimension: 'ecs:service:DesiredCount'
+      ServiceNamespace: ecs
+  ServiceScalingPolicyIPFS:
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+    Properties:
+      PolicyName: AStepPolicy
+      PolicyType: StepScaling
+      ScalingTargetId: !Ref ServiceScalingTargetIPFS
+      StepScalingPolicyConfiguration:
+        AdjustmentType: PercentChangeInCapacity
+        Cooldown: 60
+        MetricAggregationType: Average
+        StepAdjustments:
+          - MetricIntervalLowerBound: 0
+            ScalingAdjustment: 200
+  ServiceScalingTargetAdapter:
+    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
+    DependsOn: serviceAdapter
+    Properties:
+      MaxCapacity: 2
+      MinCapacity: 1
+      ResourceId: !Join 
+        - ''
+        - - service/
+          - !Ref ECSCluster
+          - /
+          - !GetAtt 
+            - serviceAdapter
+            - Name
+      RoleARN: !GetAtt 
+        - AutoscalingRole
+        - Arn
+      ScalableDimension: 'ecs:service:DesiredCount'
+      ServiceNamespace: ecs
+  ServiceScalingPolicyIPFS:
+    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+    Properties:
+      PolicyName: AStepPolicy
+      PolicyType: StepScaling
+      ScalingTargetId: !Ref ServiceScalingTargetAdapter
+      StepScalingPolicyConfiguration:
+        AdjustmentType: PercentChangeInCapacity
+        Cooldown: 60
+        MetricAggregationType: Average
+        StepAdjustments:
+          - MetricIntervalLowerBound: 0
+            ScalingAdjustment: 200
+  # ALB500sAlarmScaleUp:
+  #   Type: 'AWS::CloudWatch::Alarm'
+  #   Properties:
+  #     EvaluationPeriods: 1
+  #     Statistic: Average
+  #     Threshold: 10
+  #     AlarmDescription: Alarm if our ALB generates too many HTTP 500s.
+  #     Period: 60
+  #     AlarmActions:
+  #       - !Ref ServiceScalingPolicy
+  #     Namespace: AWS/ApplicationELB
+  #     Dimensions:
+  #       - Name: LoadBalancer
+  #         Value: !GetAtt 
+  #           - ECSALB
+  #           - LoadBalancerFullName
+  #     ComparisonOperator: GreaterThanThreshold
+  #     MetricName: HTTPCode_ELB_5XX_Count
+  EC2Role:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: ecs-service
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'ecs:CreateCluster'
+                  - 'ecs:DeregisterContainerInstance'
+                  - 'ecs:DiscoverPollEndpoint'
+                  - 'ecs:Poll'
+                  - 'ecs:RegisterContainerInstance'
+                  - 'ecs:StartTelemetrySession'
+                  - 'ecs:Submit*'
+                  - 'ecr:*'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource: '*'
+  AutoscalingRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - application-autoscaling.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: service-autoscaling
+          PolicyDocument:
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'application-autoscaling:*'
+                  - 'cloudwatch:DescribeAlarms'
+                  - 'cloudwatch:PutMetricAlarm'
+                  - 'ecs:DescribeServices'
+                  - 'ecs:UpdateService'
+                Resource: '*'
+  EC2InstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Path: /
+      Roles:
+        - !Ref EC2Role
+Outputs:
+  # ecsservice:
+  #   Value: !Ref service
+  ecscluster:
+    Value: !Ref ECSCluster
+  ECSALB:
+    Description: Your ALB DNS URL
+    Value: !Join 
+      - ''
+      - - !GetAtt 
+          - ECSALB
+          - DNSName
+  taskdefChainlink:
+    Value: !Ref taskdefinitionChainlink
+  taskdefIPFS:
+    Value: !Ref taskdefinitionIPFS
+  taskdefAdapter:
+    Value: !Ref taskdefinitionAdapter

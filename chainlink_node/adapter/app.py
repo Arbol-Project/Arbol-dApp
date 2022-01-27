@@ -22,6 +22,15 @@ def build_app():
         adapter = Adapter(data)
         return jsonify(adapter.result)    
 
+    @app.route('/health', methods=['POST'])
+    def health_check():
+        ''' Simple health check route '''
+        healthy = {
+            'result': "healthy",
+            'statusCode': 200,
+        }
+        return jsonify(healthy)
+
     return app
 
 if __name__ == '__main__':

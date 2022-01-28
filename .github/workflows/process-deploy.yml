@@ -75,7 +75,7 @@ jobs:
       working-directory: chainlink_node
       env: 
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY_CHAINLINK: chainlink-node
+        ECR_REPOSITORY_CHAINLINK: chainlink-node-1
         IMAGE_TAG: ${{ github.sha }}
         ECR_REPOSITORY_ADAPTER: external-adapter
         ECR_REPOSITORY_IPFS: ipfs-daemon
@@ -91,7 +91,7 @@ jobs:
       id: push-chainlink-image
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY_CHAINLINK: chainlink-node
+        ECR_REPOSITORY_CHAINLINK: chainlink-node-1
         IMAGE_TAG: ${{ github.sha }}
       run: |
         docker push $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG
@@ -128,7 +128,7 @@ jobs:
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
         task-definition: task-definition-chainlink.json
-        container-name: chainlink-node
+        container-name: chainlink-node-1
         image: ${{ steps.push-chainlink-image.outputs.image }}
 
 #     - name: Modify Amazon ECS task definition with IPFS container

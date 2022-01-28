@@ -1,6 +1,7 @@
 type = "directrequest"
 schemaVersion = 1
 name = "Get Contract Evaluation"
+evmChainID = 137
 contractAddress = "0x76dfA9a36db355F101B241b66e2fA97f7Ca09C24"
 maxTaskDuration = "30s"
 observationSource = """
@@ -19,3 +20,4 @@ observationSource = """
     submit_tx    [type=ethtx to="0x76dfA9a36db355F101B241b66e2fA97f7Ca09C24" data="$(encode_tx)"]
     decode_log -> decode_cbor -> arbol_dapp -> parse -> encode_data -> encode_tx -> submit_tx
 """
+externalJobID = "ccaf1bfe-97d8-469c-aff3-95a0aaa61e27"

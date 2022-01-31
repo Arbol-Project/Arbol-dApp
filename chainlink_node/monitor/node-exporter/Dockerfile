@@ -2,4 +2,6 @@ FROM prom/node-exporter:latest
 
 COPY . /monitor
 
-ENTRYPOINT ["prom/node-exporter", "--path.rootfs=/monitor", "--web.config=/monitor/exporterweb.yml"]
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT /entrypoint.sh

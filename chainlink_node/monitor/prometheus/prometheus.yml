@@ -8,7 +8,7 @@ scrape_configs:
  - job_name: 'prometheus'
    basic_auth:
       username: chainlinkUser  # add here your Username of the prometheus authentication login
-      password: $PROMETHEUS_PASSWORD  # add here your Password of the prometheus authentication login
+      password: ${PROMETHEUS_PASSWORD}  # add here your Password of the prometheus authentication login
    static_configs:
      - targets: ['localhost:9090']
    scheme: https

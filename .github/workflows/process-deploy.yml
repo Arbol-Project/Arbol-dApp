@@ -99,12 +99,15 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_DEFAULT_REGION: us-east-1
+        PROMETHEUS_AUTH: ${{ secrets.PROMETHEUS_AUTH }}
+        PROMETHEUS_PASSWORD: ${{ secrets.PROMETHEUS_PASSWORD }}
+        
         # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG ./adapter
         # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG ./ipfs
         # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_EXPORTER:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_EXPORTER:latest ./monitor/node-exporter
       run: |
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:latest ./chainlink
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_PROMETHEUS:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_PROMETHEUS:latest ./monitor/prometheus
+        docker build --build-arg password=${PROMETHEUS_PASSWORD} auth=${PROMETHEUS_AUTH} -t $ECR_REGISTRY/$ECR_REPOSITORY_PROMETHEUS:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_PROMETHEUS:latest ./monitor/prometheus
 
     - name: Push Chainlink Node to Amazon ECR
       id: push-chainlink-image
@@ -164,14 +167,6 @@ jobs:
     #     aws ecs describe-task-definition --task-definition dapp-task-chainlink --query taskDefinition > task-definition-chainlink.json
     #     aws ecs describe-task-definition --task-definition dapp-task-monitor --query taskDefinition > task-definition-monitor.json
     
-    # - name: Modify Amazon ECS task definition with Chainlink container
-    #   id: render-chainlink-container
-    #   uses: aws-actions/amazon-ecs-render-task-definition@v1
-    #   with:
-    #     task-definition: task-definition-chainlink.json
-    #     container-name: chainlink-node
-    #     image: ${{ steps.push-chainlink-image.outputs.image }}
-
     # - name: Modify Amazon ECS task definition with Chainlink container
     #   id: render-chainlink-container
     #   uses: aws-actions/amazon-ecs-render-task-definition@v1

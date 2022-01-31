@@ -148,12 +148,12 @@ jobs:
 #         container-name: external-adapter
 #         image: ${{ steps.push-adapter-image.outputs.image }}
       
-    - name: Deploy Chainlink Node to Amazon ECS service
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-      with:
-        task-definition: ${{ steps.render-chainlink-container.outputs.task-definition }}
-        service: dapp-service-chainlink
-        cluster: dapp-cluster
+    # - name: Deploy Chainlink Node to Amazon ECS service
+    #   uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+    #   with:
+    #     task-definition: ${{ steps.render-chainlink-container.outputs.task-definition }}
+    #     service: dapp-service-chainlink
+    #     cluster: dapp-cluster
         # wait-for-service-stability: true
 
 #     - name: Deploy IPFS Daemon to Amazon ECS service

@@ -68,14 +68,14 @@ jobs:
         TLS_KEY_SECRET: ${{ secrets.TLS_KEY }}
       run: echo "$TLS_KEY_SECRET" base64 --decode > ./chainlink_node/chainlink/tls/server.key
 
-    - name: Get Node Exporter TLS cert
-      env:
-        TLS_CERT_SECRET: ${{ secrets.EXPORTER_CERT }}
-      run: echo "$TLS_KEY_SECRET" base64 --decode > ./chainlink_node/monitor/node-exporter/tls/node-exporter.crt
-    - name: Get Node Exporter TLS key
-      env:
-        TLS_KEY_SECRET: ${{ secrets.EXPORTER_KEY }}
-      run: echo "$TLS_KEY_SECRET" base64 --decode > ./chainlink_node/monitor/node-exporter/tls/node-exporter.key
+    # - name: Get Node Exporter TLS cert
+    #   env:
+    #     TLS_CERT_SECRET: ${{ secrets.EXPORTER_CERT }}
+    #   run: echo "$TLS_KEY_SECRET" base64 --decode > ./chainlink_node/monitor/node-exporter/tls/node-exporter.crt
+    # - name: Get Node Exporter TLS key
+    #   env:
+    #     TLS_KEY_SECRET: ${{ secrets.EXPORTER_KEY }}
+    #   run: echo "$TLS_KEY_SECRET" base64 --decode > ./chainlink_node/monitor/node-exporter/tls/node-exporter.key
 
     - name: Get Prometheus TLS cert
       env:
@@ -91,7 +91,7 @@ jobs:
       env: 
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY_CHAINLINK: chainlink-node
-        ECR_REPOSITORY_EXPORTER: node-exporter
+        # ECR_REPOSITORY_EXPORTER: node-exporter
         ECR_REPOSITORY_PROMETHEUS: prometheus
         IMAGE_TAG: ${{ github.sha }}
         # ECR_REPOSITORY_ADAPTER: external-adapter
@@ -101,9 +101,9 @@ jobs:
         AWS_DEFAULT_REGION: us-east-1
         # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG ./adapter
         # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG ./ipfs
+        # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_EXPORTER:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_EXPORTER:latest ./monitor/node-exporter
       run: |
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:latest ./chainlink
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_EXPORTER:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_EXPORTER:latest ./monitor/node-exporter
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_PROMETHEUS:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_PROMETHEUS:latest ./monitor/prometheus
 
     - name: Push Chainlink Node to Amazon ECR
@@ -117,15 +117,15 @@ jobs:
         docker push $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK --all-tags
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG"
 
-    - name: Push Node Exporter to Amazon ECR
-      id: push-node-exporter-image
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY_EXPORTER: node-exporter
-        IMAGE_TAG: ${{ github.sha }}
-      run: |
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY_EXPORTER --all-tags
-        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_EXPORTER:$IMAGE_TAG"
+    # - name: Push Node Exporter to Amazon ECR
+    #   id: push-node-exporter-image
+    #   env:
+    #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+    #     ECR_REPOSITORY_EXPORTER: node-exporter
+    #     IMAGE_TAG: ${{ github.sha }}
+    #   run: |
+    #     docker push $ECR_REGISTRY/$ECR_REPOSITORY_EXPORTER --all-tags
+    #     echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_EXPORTER:$IMAGE_TAG"
 
     - name: Push Prometheus to Amazon ECR
       id: push-prometheus-image

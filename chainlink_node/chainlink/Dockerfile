@@ -12,4 +12,5 @@ RUN chmod +x /.password
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
-ENTRYPOINT /entrypoint.sh
+# ENTRYPOINT /entrypoint.sh
+ENTRYPOINT [ "chainlink",  "local", "node", "-p", "/.password", "-a", "/.api" ]

@@ -51,52 +51,91 @@ jobs:
         ls -la
         cat .env
 
-    - name: Get API secrets
+    - name: Get Chainlink API secrets
       env:
         API_SECRETS: ${{ secrets.API }}
       run: printf "$API_SECRETS" base64 --decode > ./chainlink_node/chainlink/.api
-
-    - name: Get Password secret
+    - name: Get Chainlink Password
       env:
         PASSWORD_SECRET: ${{ secrets.PASSWORD }}
       run: printf "$PASSWORD_SECRET" base64 --decode > ./chainlink_node/chainlink/.password
-
-    - name: Get TLS cert
+    - name: Get Chainlink TLS cert
       env:
         TLS_CERT_SECRET: ${{ secrets.TLS_CERT }}
       run: echo "$TLS_CERT_SECRET" base64 --decode > ./chainlink_node/chainlink/tls/server.crt
-
-    - name: Get TLS key
+    - name: Get Chainlink TLS key
       env:
         TLS_KEY_SECRET: ${{ secrets.TLS_KEY }}
       run: echo "$TLS_KEY_SECRET" base64 --decode > ./chainlink_node/chainlink/tls/server.key
+
+    - name: Get Node Exporter TLS cert
+      env:
+        TLS_CERT_SECRET: ${{ secrets.EXPORTER_CERT }}
+      run: echo "$TLS_KEY_SECRET" base64 --decode > ./chainlink_node/monitor/node-exporter/tls/node-exporter.crt
+    - name: Get Node Exporter TLS key
+      env:
+        TLS_KEY_SECRET: ${{ secrets.EXPORTER_KEY }}
+      run: echo "$TLS_KEY_SECRET" base64 --decode > ./chainlink_node/monitor/node-exporter/tls/node-exporter.key
+
+    - name: Get Prometheus TLS cert
+      env:
+        TLS_CERT_SECRET: ${{ secrets.TLS_KEY }}
+      run: echo "$TLS_KEY_SECRET" base64 --decode > ./chainlink_node/monitor/prometheus/tls/prometheus.crt
+    - name: Get Prometheus TLS key
+      env:
+        TLS_KEY_SECRET: ${{ secrets.TLS_KEY }}
+      run: echo "$TLS_KEY_SECRET" base64 --decode > ./chainlink_node/monitor/prometheus/tls/prometheus.key
 
     - name: Build
       working-directory: chainlink_node
       env: 
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY_CHAINLINK: chainlink-node-1
+        ECR_REPOSITORY_CHAINLINK: chainlink-node
+        ECR_REPOSITORY_EXPORTER: node-exporter
+        ECR_REPOSITORY_PROMETHEUS: prometheus
         IMAGE_TAG: ${{ github.sha }}
-        ECR_REPOSITORY_ADAPTER: external-adapter
-        ECR_REPOSITORY_IPFS: ipfs-daemon
+        # ECR_REPOSITORY_ADAPTER: external-adapter
+        # ECR_REPOSITORY_IPFS: ipfs-daemon
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_DEFAULT_REGION: us-east-1
+        # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG ./adapter
+        # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG ./ipfs
       run: |
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:latest ./chainlink
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG ./adapter
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG ./ipfs
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_EXPORTER:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_EXPORTER:latest ./monitor/node-exporter
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_PROMETHEUS:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_PROMETHEUS:latest ./monitor/prometheus
 
     - name: Push Chainlink Node to Amazon ECR
       id: push-chainlink-image
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY_CHAINLINK: chainlink-node-1
+        ECR_REPOSITORY_CHAINLINK: chainlink-node
         IMAGE_TAG: ${{ github.sha }}
         # docker push $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG
       run: |
         docker push $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK --all-tags
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG"
+
+    - name: Push Node Exporter to Amazon ECR
+      id: push-node-exporter-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY_EXPORTER: node-exporter
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY_EXPORTER --all-tags
+        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_EXPORTER:$IMAGE_TAG"
+
+    - name: Push Prometheus to Amazon ECR
+      id: push-prometheus-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY_PROMETHEUS: prometheus
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY_PROMETHEUS --all-tags
+        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_PROMETHEUS:$IMAGE_TAG"
 
 #     - name: Push IPFS Daemon to Amazon ECR
 #       id: push-ipfs-image
@@ -118,19 +157,28 @@ jobs:
 #         docker push $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG
 #         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG"
   
-    - name: Download Task Definitions
-      run: |
-        aws ecs describe-task-definition --task-definition dapp-task-chainlink --query taskDefinition > task-definition-chainlink.json
-        aws ecs describe-task-definition --task-definition dapp-task-ipfs --query taskDefinition > task-definition-ipfs.json
-        aws ecs describe-task-definition --task-definition dapp-task-adapter --query taskDefinition > task-definition-adapter.json
+    # - name: Download Task Definitions
+    # # aws ecs describe-task-definition --task-definition dapp-task-ipfs --query taskDefinition > task-definition-ipfs.json
+    # # aws ecs describe-task-definition --task-definition dapp-task-adapter --query taskDefinition > task-definition-adapter.json
+    #   run: |
+    #     aws ecs describe-task-definition --task-definition dapp-task-chainlink --query taskDefinition > task-definition-chainlink.json
+    #     aws ecs describe-task-definition --task-definition dapp-task-monitor --query taskDefinition > task-definition-monitor.json
     
-    - name: Modify Amazon ECS task definition with Chainlink container
-      id: render-chainlink-container
-      uses: aws-actions/amazon-ecs-render-task-definition@v1
-      with:
-        task-definition: task-definition-chainlink.json
-        container-name: chainlink-node-1
-        image: ${{ steps.push-chainlink-image.outputs.image }}
+    # - name: Modify Amazon ECS task definition with Chainlink container
+    #   id: render-chainlink-container
+    #   uses: aws-actions/amazon-ecs-render-task-definition@v1
+    #   with:
+    #     task-definition: task-definition-chainlink.json
+    #     container-name: chainlink-node
+    #     image: ${{ steps.push-chainlink-image.outputs.image }}
+
+    # - name: Modify Amazon ECS task definition with Chainlink container
+    #   id: render-chainlink-container
+    #   uses: aws-actions/amazon-ecs-render-task-definition@v1
+    #   with:
+    #     task-definition: task-definition-chainlink.json
+    #     container-name: chainlink-node
+    #     image: ${{ steps.push-chainlink-image.outputs.image }}
 
 #     - name: Modify Amazon ECS task definition with IPFS container
 #       id: render-ipfs-container

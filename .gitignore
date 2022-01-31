@@ -21,7 +21,8 @@ smart_contracts/hardhat/artifacts
 # !smart_contracts/hardhat/artifacts/contracts
 smart_contracts/hardhat/node_modules/*
 
-*.secret.yml
+*.secret*
+*.monitoring
 
 __pycache__
 .DS_Store

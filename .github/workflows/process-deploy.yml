@@ -83,7 +83,7 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_DEFAULT_REGION: us-east-1
       run: |
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG ./chainlink
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:latest ./chainlink
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG ./adapter
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG ./ipfs
 
@@ -94,7 +94,7 @@ jobs:
         ECR_REPOSITORY_CHAINLINK: chainlink-node-1
         IMAGE_TAG: ${{ github.sha }}
       run: |
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG --all-tags
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG"
 
 #     - name: Push IPFS Daemon to Amazon ECR

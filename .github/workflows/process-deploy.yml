@@ -93,8 +93,9 @@ jobs:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY_CHAINLINK: chainlink-node-1
         IMAGE_TAG: ${{ github.sha }}
+        # docker push $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG
       run: |
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG --all-tags
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK --all-tags
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG"
 
 #     - name: Push IPFS Daemon to Amazon ECR

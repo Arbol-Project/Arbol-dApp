@@ -8,7 +8,7 @@ scrape_configs:
  - job_name: 'prometheus'
    basic_auth:
       username: chainlinkUser  # add here your Username of the prometheus authentication login
-      password: ${PROMETHEUS_PASSWORD}  # add here your Password of the prometheus authentication login
+      password: $PROMETHEUS_PASSWORD  # add here your Password of the prometheus authentication login
    static_configs:
      - targets: ['localhost:9090']
    scheme: https
@@ -17,7 +17,7 @@ scrape_configs:
 #  - job_name: 'node-exporter'
 #    basic_auth:
 #       username: chainlinkUser  # add here your Username of the node-exporter authentication login
-#       password: ${EXPORTER_PASSWORD}  # add here your Username of the node-exporter authentication login
+#       password: $EXPORTER_PASSWORD  # add here your Username of the node-exporter authentication login
 #    static_configs:
 #      - targets: ['node-exporter:9100']  # add the container ID of your running node-exporter
 #    scheme: https

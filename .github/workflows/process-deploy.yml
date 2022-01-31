@@ -107,7 +107,7 @@ jobs:
         # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_EXPORTER:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_EXPORTER:latest ./monitor/node-exporter
       run: |
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:latest ./chainlink
-        docker build --build-arg password=${PROMETHEUS_PASSWORD} auth=${PROMETHEUS_AUTH} -t $ECR_REGISTRY/$ECR_REPOSITORY_PROMETHEUS:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_PROMETHEUS:latest ./monitor/prometheus
+        docker build --build-arg password=${PROMETHEUS_PASSWORD} --build-arg auth=${PROMETHEUS_AUTH} -t $ECR_REGISTRY/$ECR_REPOSITORY_PROMETHEUS:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_PROMETHEUS:latest ./monitor/prometheus
 
     - name: Push Chainlink Node to Amazon ECR
       id: push-chainlink-image

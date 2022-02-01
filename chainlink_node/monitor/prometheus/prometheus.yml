@@ -14,6 +14,12 @@ scrape_configs:
    scheme: https
    tls_config:
      ca_file: /tls/prometheus.crt
+ - job_name: 'chainlink_p1'
+   static_configs:
+     - targets: ['chainlink-node:6688']  # add the container ID of your running Node and if you use a diffrent port you can also configure it
+   scheme: http
+   tls_config:
+     insecure_skip_verify: true
 #  - job_name: 'node-exporter'
 #    basic_auth:
 #       username: chainlinkUser  # add here your Username of the node-exporter authentication login
@@ -26,9 +32,3 @@ scrape_configs:
 # #    cert_file: /tls/prometheus.crt
 # #    key_file: /tls/prometheus.key
 #      insecure_skip_verify: true
- - job_name: 'chainlink_p1'
-   static_configs:
-     - targets: ['chainlink-node:6688']  # add the container ID of your running Node and if you use a diffrent port you can also configure it
-   scheme: http
-   tls_config:
-     insecure_skip_verify: true

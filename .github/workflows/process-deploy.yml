@@ -85,14 +85,6 @@ jobs:
       env:
         TLS_KEY_SECRET: ${{ secrets.PROMETHEUS_KEY }}
       run: echo "$TLS_KEY_SECRET" base64 --decode > ./chainlink_node/monitor/prometheus/tls/prometheus.key
-    - name: Get Prometheus config
-      env:
-        TLS_KEY_SECRET: ${{ secrets.PROMETHEUS_CONFIG }}
-      run: echo "$TLS_KEY_SECRET" base64 --decode > ./chainlink_node/monitor/prometheus/prometheus.yml
-    - name: Get Prometheus web config
-      env:
-        TLS_KEY_SECRET: ${{ secrets.PROMETHEUS_WEB }}
-      run: echo "$TLS_KEY_SECRET" base64 --decode > ./chainlink_node/monitor/prometheus/prometheusweb.yml
 
     - name: Build
       working-directory: chainlink_node
@@ -113,7 +105,7 @@ jobs:
         # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG ./adapter
         # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG ./ipfs
         # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_EXPORTER:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_EXPORTER:latest ./monitor/node-exporter
-        # --build-arg password=${PROMETHEUS_PASSWORD} --build-arg auth=${PROMETHEUS_AUTH} 
+        #  --build-arg password=${PROMETHEUS_PASSWORD} --build-arg auth=${PROMETHEUS_AUTH}
       run: |
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:latest ./chainlink
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_PROMETHEUS:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_PROMETHEUS:latest ./monitor/prometheus

@@ -1,10 +1,10 @@
 FROM prom/prometheus:latest
 
-COPY . /monitor
+COPY . /monitoring
 
 # ARG password
 # ARG auth
 # ENV PROMETHEUS_PASSWORD=$password
 # ENV PROMETHEUS_AUTH=$auth
 
-ENTRYPOINT ["prometheus", "--config.file=/monitor/prometheus.yml", "--web.config.file=/monitor/prometheusweb.yml"]
+ENTRYPOINT ["prometheus", "--config.file=/monitoring/prometheus.yml", "--web.config.file=/monitoring/prometheusweb.yml"]

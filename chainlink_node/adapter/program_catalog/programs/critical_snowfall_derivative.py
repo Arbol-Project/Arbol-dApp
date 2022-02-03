@@ -72,7 +72,7 @@ class CriticalSnowfallDerivative:
                         tick (str), string of num for tick value for payout or None if exhaust is not None
             Returns: int, generated payout times 10^6 (in order to report back to chain in value of USDC)
 
-            N.B. Adding change to cut threshold in half to 3 inches at evaluation!!! :)
+            N.B.1 Adding change to cut threshold from 6 to 3 inches [01-20-2022]
         '''
         threshold = float(threshold) / 2
 

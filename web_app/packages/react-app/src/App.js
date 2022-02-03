@@ -76,7 +76,6 @@ function App() {
   const [internalRows, setInternalRows] = useState([]);
   const [tokenRows, setTokenRows] = useState([]);
 
-
   const tokenColumns = [
     { field: 'id', headerName: '#', width: 10 },
 
@@ -94,6 +93,8 @@ function App() {
     { field: 'hash', headerName: 'Tx Hash', width: 120 },
     { field: 'action', headerName: 'Action', width: 200 },
   ];
+
+
 
   useEffect(() => {
     fetch("https://api.polygonscan.com/api?module=account&action=tokentx&address="+addresses.BlizzardDerivativeProvider+"&startblock=0&endblock=999999999&sort=asc&apikey="+process.env.REACT_APP_POLYGONSCAN_KEY)
@@ -246,7 +247,7 @@ function App() {
                           'background': 'linear-gradient(45deg, #EF5350 30%, #EA6A6A 90%)',
                           'border': 0,
                           'borderRadius': 3,
-                          'boxShadow': '0 3px 5px 2px rgba(255, 255, 255, .3)',
+                          'boxShadow': '0 3px 5px 2px rgba(120, 120, 120, .3)',
                           'color': 'white',
                         }} 
                         onClick={() => depositUSDC(provider)}>
@@ -254,11 +255,11 @@ function App() {
                       </Button>
                   <Text> 
                     The Arbol-dApp Portal provides an endpoint for interacting with Arbol's Blizzard Derivative Provider smart contract deployed on Polygon Mainnet
-                    and permits a pre-approved buyer to purchase a 250K Blizzard Protection contract at a premium of 10K. 
+                    and permits a pre-approved buyer to purchase a $250,000 Blizzard Protection contract at a premium of $10,000.
                   </Text>
                   <Text>
-                  The protection contract automatically pays out the collateral amount to the buyer 
-                    if 3+ inches of snow are reported in Dallas on any of the coverage dates. The data source for weather observations is GHCND:USW00003927 (GHCND records for Dallas Fort Worth airport weather station).
+                  The contract automatically pays out to the buyer if the threshold of 3 inches of snow is met or exceeded in Dallas on any of the covered dates. 
+                  The coverage period begins 15 days after contract purchase and ends on April 10, 2022. The data source for weather observations is GHCND:USW00003927 (GHCND records for Dallas Fort Worth airport weather station).
                   </Text>
                   {/* <Text>
                     The Escrow Collateral option approves the Derivative Provider smart contract to transfer the collateral cost in USDC from the caller's wallet, then executes the actual transfer. Collateral must be deposited before contract purchase.
@@ -271,6 +272,9 @@ function App() {
               </Grid>
             <Grid item xs={6}>
               <Col>
+              {/* <View>
+                <
+              </View> */}
                 <Text>
                     Token Transfers
                   </Text>

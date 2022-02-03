@@ -1,6 +1,6 @@
-import os
 import ast
 import pandas as pd
+from datetime import datetime, timedelta
 
 from dweather.dweather_client import client
 
@@ -93,10 +93,16 @@ class GHCNDatasetLoader(dAppLoader):
                         dataset_name (str), name of dataset from which to get weather data
                         imperial_units (str), string of bool for whether to use imperial units
                         kwargs (dict), additional request parameters
+
+            N.B.2 Adding change to cut any covered dates less than 15 days after contract purchase [02-03-2022]
+                for simplicity reasons I am going to update this "start_date" manually after the contract purchase
         '''
         super().__init__(dataset_name, imperial_units=imperial_units, **kwargs)
         self._station_id = station_id
         self._weather_variable = weather_variable
+
+        start_date = datetime(2022, 2, 18)
+        dates = [date for date in dates if datetime.strptime(date, '%Y-%m-%d') < (start_date + timedelta(days=15))]
         self._dates = ast.literal_eval(dates)
 
     def load(self):

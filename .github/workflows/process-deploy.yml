@@ -1,72 +1,72 @@
-on:
-  push:
-    branches:
-      - feat/*
+# on:
+#   push:
+#     branches:
+#       - feat/*
 
-name: Deployment
+# name: Deployment
 
-jobs:
-  deploy:
-    name: Build
-    runs-on: ubuntu-latest
+# jobs:
+#   deploy:
+#     name: Build
+#     runs-on: ubuntu-latest
 
-    steps:
-    - name: Check out Git repository
-      uses: actions/checkout@v2
-      with:
-        submodules: true
+#     steps:
+#     - name: Check out Git repository
+#       uses: actions/checkout@v2
+#       with:
+#         submodules: true
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
+#     - name: Configure AWS credentials
+#       uses: aws-actions/configure-aws-credentials@v1
+#       with:
+#         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#         aws-region: us-east-1
 
-    - name: Get ECS Integration
-      run: curl -L https://raw.githubusercontent.com/docker/compose-cli/main/scripts/install/install_linux.sh | sh
+#     - name: Get ECS Integration
+#       run: curl -L https://raw.githubusercontent.com/docker/compose-cli/main/scripts/install/install_linux.sh | sh
 
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
+#     - name: Login to Amazon ECR
+#       id: login-ecr
+#       uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Get .env secrets
-      uses: say8425/aws-secrets-manager-actions@v1
-      env:
-        ACTIONS_ALLOW_UNSECURE_COMMANDS: true
-      with:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_DEFAULT_REGION: us-east-1
-        SECRET_NAME: dapp
-        OUTPUT_PATH: './chainlink_node/chainlink/.env'
+#     - name: Get .env secrets
+#       uses: say8425/aws-secrets-manager-actions@v1
+#       env:
+#         ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+#       with:
+#         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#         AWS_DEFAULT_REGION: us-east-1
+#         SECRET_NAME: dapp
+#         OUTPUT_PATH: './chainlink_node/chainlink/.env'
     
-    - name: Translate ENV variables
-      run: |
-        printenv
+#     - name: Translate ENV variables
+#       run: |
+#         printenv
 
-    - name: Sanity Check envs
-      working-directory: chainlink_node/chainlink
-      run: |
-        ls -la
-        cat .env
+#     - name: Sanity Check envs
+#       working-directory: chainlink_node/chainlink
+#       run: |
+#         ls -la
+#         cat .env
 
-    - name: Get Chainlink API secrets
-      env:
-        API_SECRETS: ${{ secrets.API }}
-      run: printf "$API_SECRETS" base64 --decode > ./chainlink_node/chainlink/.api
-    - name: Get Chainlink Password
-      env:
-        PASSWORD_SECRET: ${{ secrets.PASSWORD }}
-      run: printf "$PASSWORD_SECRET" base64 --decode > ./chainlink_node/chainlink/.password
-    - name: Get Chainlink TLS cert
-      env:
-        TLS_CERT_SECRET: ${{ secrets.TLS_CERT }}
-      run: echo "$TLS_CERT_SECRET" base64 --decode > ./chainlink_node/chainlink/tls/server.crt
-    - name: Get Chainlink TLS key
-      env:
-        TLS_KEY_SECRET: ${{ secrets.TLS_KEY }}
-      run: echo "$TLS_KEY_SECRET" base64 --decode > ./chainlink_node/chainlink/tls/server.key
+    # - name: Get Chainlink API secrets
+    #   env:
+    #     API_SECRETS: ${{ secrets.API }}
+    #   run: printf "$API_SECRETS" base64 --decode > ./chainlink_node/chainlink/.api
+    # - name: Get Chainlink Password
+    #   env:
+    #     PASSWORD_SECRET: ${{ secrets.PASSWORD }}
+    #   run: printf "$PASSWORD_SECRET" base64 --decode > ./chainlink_node/chainlink/.password
+    # - name: Get Chainlink TLS cert
+    #   env:
+    #     TLS_CERT_SECRET: ${{ secrets.TLS_CERT }}
+    #   run: echo "$TLS_CERT_SECRET" base64 --decode > ./chainlink_node/chainlink/tls/server.crt
+    # - name: Get Chainlink TLS key
+    #   env:
+    #     TLS_KEY_SECRET: ${{ secrets.TLS_KEY }}
+    #   run: echo "$TLS_KEY_SECRET" base64 --decode > ./chainlink_node/chainlink/tls/server.key
 
     # - name: Get Node Exporter TLS cert
     #   env:
@@ -77,69 +77,69 @@ jobs:
     #     TLS_KEY_SECRET: ${{ secrets.EXPORTER_KEY }}
     #   run: echo "$TLS_KEY_SECRET" base64 --decode > ./chainlink_node/monitor/node-exporter/tls/node-exporter.key
 
-    - name: Get Prometheus TLS cert
-      env:
-        TLS_CERT_SECRET: ${{ secrets.PROMETHEUS_CERT }}
-      run: echo "$TLS_KEY_SECRET" base64 --decode > ./chainlink_node/monitor/prometheus/tls/prometheus.crt
-    - name: Get Prometheus TLS key
-      env:
-        TLS_KEY_SECRET: ${{ secrets.PROMETHEUS_KEY }}
-      run: echo "$TLS_KEY_SECRET" base64 --decode > ./chainlink_node/monitor/prometheus/tls/prometheus.key
+    # - name: Get Prometheus TLS cert
+    #   env:
+    #     TLS_CERT_SECRET: ${{ secrets.PROMETHEUS_CERT }}
+    #   run: echo "$TLS_KEY_SECRET" base64 --decode > ./chainlink_node/monitor/prometheus/tls/prometheus.crt
+    # - name: Get Prometheus TLS key
+    #   env:
+    #     TLS_KEY_SECRET: ${{ secrets.PROMETHEUS_KEY }}
+    #   run: echo "$TLS_KEY_SECRET" base64 --decode > ./chainlink_node/monitor/prometheus/tls/prometheus.key
 
-    - name: Build
-      working-directory: chainlink_node
-      env: 
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY_CHAINLINK: chainlink-node
-        # ECR_REPOSITORY_EXPORTER: node-exporter
-        ECR_REPOSITORY_PROMETHEUS: prometheus
-        IMAGE_TAG: ${{ github.sha }}
-        # ECR_REPOSITORY_ADAPTER: external-adapter
-        # ECR_REPOSITORY_IPFS: ipfs-daemon
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_DEFAULT_REGION: us-east-1
-        # PROMETHEUS_AUTH: ${{ secrets.PROMETHEUS_AUTH }}
-        # PROMETHEUS_PASSWORD: ${{ secrets.PROMETHEUS_PASSWORD }}
+    # - name: Build
+    #   working-directory: chainlink_node
+    #   env: 
+    #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+    #     ECR_REPOSITORY_CHAINLINK: chainlink-node
+    #     # ECR_REPOSITORY_EXPORTER: node-exporter
+    #     ECR_REPOSITORY_PROMETHEUS: prometheus
+    #     IMAGE_TAG: ${{ github.sha }}
+    #     # ECR_REPOSITORY_ADAPTER: external-adapter
+    #     # ECR_REPOSITORY_IPFS: ipfs-daemon
+    #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    #     AWS_DEFAULT_REGION: us-east-1
+    #     # PROMETHEUS_AUTH: ${{ secrets.PROMETHEUS_AUTH }}
+    #     # PROMETHEUS_PASSWORD: ${{ secrets.PROMETHEUS_PASSWORD }}
         
-        # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG ./adapter
-        # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG ./ipfs
-        # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_EXPORTER:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_EXPORTER:latest ./monitor/node-exporter
-        #  --build-arg password=${PROMETHEUS_PASSWORD} --build-arg auth=${PROMETHEUS_AUTH}
-      run: |
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:latest ./chainlink
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_PROMETHEUS:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_PROMETHEUS:latest ./monitor/prometheus
+    #     # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG ./adapter
+    #     # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG ./ipfs
+    #     # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_EXPORTER:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_EXPORTER:latest ./monitor/node-exporter
+    #     #  --build-arg password=${PROMETHEUS_PASSWORD} --build-arg auth=${PROMETHEUS_AUTH}
+    #   run: |
+    #     docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:latest ./chainlink
+    #     docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_PROMETHEUS:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_PROMETHEUS:latest ./monitor/prometheus
 
-    - name: Push Chainlink Node to Amazon ECR
-      id: push-chainlink-image
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY_CHAINLINK: chainlink-node
-        IMAGE_TAG: ${{ github.sha }}
-        # docker push $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG
-      run: |
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK --all-tags
-        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG"
-
-    # - name: Push Node Exporter to Amazon ECR
-    #   id: push-node-exporter-image
+    # - name: Push Chainlink Node to Amazon ECR
+    #   id: push-chainlink-image
     #   env:
     #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-    #     ECR_REPOSITORY_EXPORTER: node-exporter
+    #     ECR_REPOSITORY_CHAINLINK: chainlink-node
+    #     IMAGE_TAG: ${{ github.sha }}
+    #     # docker push $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG
+    #   run: |
+    #     docker push $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK --all-tags
+    #     echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG"
+
+    # # - name: Push Node Exporter to Amazon ECR
+    # #   id: push-node-exporter-image
+    # #   env:
+    # #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+    # #     ECR_REPOSITORY_EXPORTER: node-exporter
+    # #     IMAGE_TAG: ${{ github.sha }}
+    # #   run: |
+    # #     docker push $ECR_REGISTRY/$ECR_REPOSITORY_EXPORTER --all-tags
+    # #     echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_EXPORTER:$IMAGE_TAG"
+
+    # - name: Push Prometheus to Amazon ECR
+    #   id: push-prometheus-image
+    #   env:
+    #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+    #     ECR_REPOSITORY_PROMETHEUS: prometheus
     #     IMAGE_TAG: ${{ github.sha }}
     #   run: |
-    #     docker push $ECR_REGISTRY/$ECR_REPOSITORY_EXPORTER --all-tags
-    #     echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_EXPORTER:$IMAGE_TAG"
-
-    - name: Push Prometheus to Amazon ECR
-      id: push-prometheus-image
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY_PROMETHEUS: prometheus
-        IMAGE_TAG: ${{ github.sha }}
-      run: |
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY_PROMETHEUS --all-tags
-        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_PROMETHEUS:$IMAGE_TAG"
+    #     docker push $ECR_REGISTRY/$ECR_REPOSITORY_PROMETHEUS --all-tags
+    #     echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_PROMETHEUS:$IMAGE_TAG"
 
 #     - name: Push IPFS Daemon to Amazon ECR
 #       id: push-ipfs-image

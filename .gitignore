@@ -3,10 +3,11 @@ chainlink_node/scripts/send-secrets.sh
 chainlink_node/adapter/tests/payouts
 
 chainlink_node/chainlink/.env
+chainlink_node/chainlink/s3.env
 chainlink_node/chainlink/.api
 chainlink_node/chainlink/.password
 chainlink_node/chainlink/secrets*
-chainlink_node/chainlink/tls/server.*
+chainlink_node/chainlink/tls/chainlink.*
 
 smart_contracts/foundry
 smart_contracts/other
@@ -23,7 +24,7 @@ smart_contracts/hardhat/node_modules/*
 
 *.secret*
 *.monitoring
-
+*payouts*
 __pycache__
 .DS_Store
 .pytest_cache

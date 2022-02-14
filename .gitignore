@@ -23,7 +23,7 @@ smart_contracts/hardhat/artifacts
 smart_contracts/hardhat/node_modules/*
 
 *.secret*
-*.monitoring
+*monitoring
 *payouts*
 __pycache__
 .DS_Store

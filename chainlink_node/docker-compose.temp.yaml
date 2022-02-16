@@ -1,0 +1,121 @@
+version: "3.8"
+
+services:
+  chainlink-node-1:
+    # network_mode: host
+    container_name: chainlink-node
+    build: chainlink/
+    env_file:
+      - chainlink/.env
+    ports:
+      - 6688:6688
+      - 6689:6689
+    volumes:
+      # - chainlink:/chainlink
+      - ./:/hostfs
+
+  # node-exporter:
+  #   container_name: node-exporter
+  #   image: prom/node-exporter:latest
+  #   command:
+  #     - "--path.rootfs=/hostfs"
+  #     - "--web.config=/hostfs/web.yml"
+  #   restart: unless-stopped
+  #   ports:
+  #     - 9100:9100
+  #   volumes:
+  #     - ./:/hostfs
+  #     - ./cloudformation/monitor/exporterweb.yml:/hostfs/web.yml
+  #     - ./cloudformation/monitor/.tls/.node-exporter/node-exporter.key:/tls/node-exporter.key
+  #     - ./cloudformation/monitor/.tls/.node-exporter/node-exporter.crt:/tls/node-exporter.crt
+
+  prometheus-server:
+    container_name: prometheus
+    image: prom/prometheus:latest
+    environment:
+      - PROMETHEUS_AUTH=''
+      - PROMETHEUS_PASSWORD=""
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--web.config.file=/etc/prometheus/web.yml"
+    restart: unless-stopped
+    ports:
+      - 9090:9090
+    volumes:
+      - ./cloudformation/.monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./cloudformation/.monitoring/.tls/.prometheus/prometheus.key:/tls/prometheus.key
+      - ./cloudformation/.monitoring/.tls/.prometheus/prometheus.crt:/tls/prometheus.crt
+      - ./cloudformation/.monitoring/prometheusweb.yml:/etc/prometheus/web.yml
+
+  # loki-logger:
+  #   container_name: loki
+  #   image: grafana/loki:2.2.0
+  #   command:
+  #     - "-config.file=/mnt/config/loki.yml"
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./cloudformation/monitor/loki.yml:/mnt/config/loki.yml
+
+  # promtail-agent:
+  #   container_name: promtail
+  #   image: grafana/promtail:2.2.0
+  #   command:
+  #     - "-config.file=/mnt/config/promtail.yml"
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./cloudformation/monitor/promtail.yml:/mnt/config/promtail.yml
+  #     - /var/log:/var/log
+  #     - /var/lib/docker:/var/lib/docker
+
+  # grafana-dashboard:
+  #   container_name: grafana
+  #   image: grafana/grafana:latest
+  #   restart: unless-stopped
+  #   environment:
+  #     - GF_PATHS_CONFIG=/etc/grafana/grafana.ini
+  #   ports:
+  #     - 3000:3000
+  #   volumes:
+  #     - ./cloudformation/monitor/.tls/.grafana/grafana.key:/tls/grafana.key
+  #     - ./cloudformation/monitor/.tls/.grafana/grafana.crt:/tls/grafana.crt
+  #     - ./cloudformation/monitor/grafana.ini:/etc/grafana/grafana.ini
+
+#   ipfs-daemon:
+#     # network_mode: host
+#     container_name: ipfs-daemon
+#     build: ipfs/
+#     volumes:
+#       - /export
+#       - /data/ipfs
+#   #   depends_on:
+#   #     - chainlink-node-1
+#     restart: on-failure
+#   #   healthcheck:
+#   #     test: ipfs swarm peers || exit 1
+#   #     interval: 30s
+#   #     timeout: 10s
+#   #     retries: 5
+
+#   # external-adapter:
+#   # #   environment:
+#   # #     - PYTHONUNBUFFERED=1
+#   # #   network_mode: host
+#   #   container_name: arbol-adapter
+#   #   build: adapter/
+#   #   volumes:
+#   #     # - adapter:/adapter
+#   #     - "/:/hostfs"
+#   #     - "../web_app/packages/contracts/src/logs:/adapter/logs"
+#   #     - "../smart_contracts/hardhat/SROs:/adapter/SROs"
+#   #   restart: on-failure
+#   #   depends_on:
+#   #     ipfs-daemon:
+#   #       condition: service_healthy
+#   #     chainlink-node-1:
+#   #       condition: service_started
+
+# volumes:
+#   # adapter:
+#   export:
+#   data:
+#   # chainlink:

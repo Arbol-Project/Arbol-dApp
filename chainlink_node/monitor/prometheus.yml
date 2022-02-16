@@ -1,0 +1,35 @@
+global:
+  scrape_interval: 5s
+  external_labels:
+    monitor: "my-monitor"
+rule_files:
+  - "alert.rules"
+scrape_configs:
+  - job_name: "prometheus"
+    basic_auth:
+      username: username # add here your Username of the prometheus authentication login
+      password: password # add here your Password of the prometheus authentication login
+    static_configs:
+      - targets: ["localhost:9090"]
+    scheme: http
+    tls_config:
+      # ca_file: /tls/prometheus.crt
+      insecure_skip_verify: true
+  - job_name: "node-exporter"
+    basic_auth:
+      username: username # add here your Username of the node-exporter authentication login
+      password: password # add here your Username of the node-exporter authentication login
+    static_configs:
+      - targets: ["172.17.0.2:9100"] # add the container ID of your running node-exporter
+    scheme: http
+    tls_config:
+      #    ca_file: /tls/prometheus.crt
+      #    cert_file: /tls/prometheus.crt
+      #    key_file: /tls/prometheus.key
+      insecure_skip_verify: true
+  - job_name: "chainlink_p1"
+    static_configs:
+      - targets: ["172.17.0.5:6689"] # add the container ID of your running Node and if you use a diffrent port you can also configure it
+    scheme: https
+    tls_config:
+      insecure_skip_verify: true

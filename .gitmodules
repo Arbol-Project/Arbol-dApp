@@ -1,3 +1,4 @@
 [submodule "chainlink_node/adapter/dweather"]
 	path = chainlink_node/adapter/dweather
 	url = https://github.com/dmp267/dWeather-Python-Client.git
+	branch = master

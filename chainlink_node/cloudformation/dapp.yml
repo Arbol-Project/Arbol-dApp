@@ -131,6 +131,7 @@ Resources:
         - - ECSLogGroup
           - !Ref "AWS::StackName"
       RetentionInDays: 14
+  # dependent container ordering: chainlink (ip=172.17.0.2), exporter (...3), prometheus (...4), grafana (...5), ipfs (...6), arbol-ea (...7), dclimate-ea (...8)
   taskdefinitionChainlink:
     Type: "AWS::ECS::TaskDefinition"
     Properties:
@@ -192,10 +193,14 @@ Resources:
           Name: Chainlink
   taskdefinitionMonitor:
     Type: "AWS::ECS::TaskDefinition"
+    DependsOn: taskdefinitionChainlink
     Properties:
       Family: dapp-task-monitor
       ContainerDefinitions:
         - Name: node-exporter
+          DependsOn:
+            - Condition: START
+              ContainerName: chainlink-node
           Cpu: 512
           Memory: 1024
           User: 0
@@ -218,6 +223,9 @@ Resources:
           PortMappings:
             - ContainerPort: 9100
         - Name: prometheus
+          DependsOn:
+            - Condition: START
+              ContainerName: node-exporter
           Cpu: 512
           Memory: 1024
           User: 0
@@ -278,6 +286,9 @@ Resources:
         #   PortMappings:
         #     - ContainerPort: 9080
         - Name: grafana
+          DependsOn:
+            - Condition: START
+              ContainerName: prometheus
           Cpu: 512
           Memory: 1024
           User: 0

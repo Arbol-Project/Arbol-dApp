@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   ipfs-daemon:
-    network: bridge
+    network_mode: bridge
     container_name: ipfs-daemon
     build: ipfs
     ports:
@@ -13,8 +13,10 @@ services:
       - /data/ipfs
 
   arbol-adapter:
-    network: bridge
+    network_mode: bridge
     container_name: arbol-adapter
+    depends_on:
+      - ipfs-daemon
     build: adapter
     ports:
       - 8000:8000

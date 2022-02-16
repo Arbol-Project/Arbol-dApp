@@ -8,4 +8,4 @@ RUN pipenv install --system --deploy --ignore-pipfile
 RUN pip3 install gunicorn[gevent]
 # RUN python3 utils/preload_adapter.py
 
-ENTRYPOINT [ "gunicorn", "--worker-class", "gevent", "--workers", "2", "--bind", "127.0.0.1:8000", "wsgi:app", "--log-level info" ]
+ENTRYPOINT [ "gunicorn", "--worker-class", "gevent", "--workers", "2", "--bind", "172.17.0.8:8000", "wsgi:app", "--log-level info" ]

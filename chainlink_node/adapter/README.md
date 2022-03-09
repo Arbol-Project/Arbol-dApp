@@ -27,7 +27,7 @@ Then start the adapter app. It should now be listening on port `8000`, test with
 ```
 pipenv run python3 app.py
 # in another terminal
-curl -X POST -H "content-type:application/json" "http://0.0.0.0:8000/" --data '{ "id": 0, "data": { "params": { "dataset": "cpcc_precip_global-daily", "locations": ["[41.125, -75.125]", "[40.875, -75.500]", "[41.500, -74.875]", "[41.250, -75.625]"], "start": "1627776000", "end": "1638230400", "strike": "0.5", "exhaust": "0.25", "limit": "1000", "opt_type": "PUT" } } }'
+curl -X POST -H "content-type:application/json" "http://0.0.0.0:8000/" --data '{ "id": 0, "data": { "params": [ "dataset", "cpcc_precip_global-daily", "locations", "[[41.125, -75.125], [40.875, -75.500], [41.500, -74.875], [41.250, -75.625]]", "start", "1627776000", "end", "1638230400", "strike", "0.5", "exhaust", "0.25", "limit", "1000", "opt_type", "PUT" ] } }'
 ```
 
 Structure for data of the request above:
@@ -59,3 +59,9 @@ pipenv run python3 utils/preload_adapter.py
 ```
 
 Or you can disable this behavior by commenting out the first line (`python3 utils/preload_adapter.py`) in `adapter/entrypoint.sh`.
+
+# Temp
+
+```
+curl -X POST -H "content-type:application/json" "http://127.0.0.1:8000/" --data '{ "id": 0, "data": { "params": [ "dataset", "cpcc_precip_global-daily", "locations", "[[41.125, -75.125], [40.875, -75.500], [41.500, -74.875], [41.250, -75.625]]", "start", "1627776000", "end", "1638230400", "strike", "0.5", "exhaust", "0.25", "limit", "1000", "opt_type", "PUT" ] } }'
+```

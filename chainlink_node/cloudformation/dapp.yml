@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: 2010-09-09
 Parameters:
   VpcId:
-    Type: 'AWS::EC2::VPC::Id'
+    Type: "AWS::EC2::VPC::Id"
     Description: Select a VPC that allows instances to access the Internet.
   HostZoneID:
     Type: String
@@ -13,7 +13,7 @@ Parameters:
     Type: String
     Description: ARN of SSL certificate for Dashboard endpoint
   SubnetId:
-    Type: 'List<AWS::EC2::Subnet::Id>'
+    Type: "List<AWS::EC2::Subnet::Id>"
     Description: Select at least two subnets in your selected VPC.
   DesiredCapacity:
     Type: Number
@@ -83,16 +83,16 @@ Mappings:
       AMIID: ami-00e4b147599c13588
 Resources:
   ECSCluster:
-    Type: 'AWS::ECS::Cluster'
+    Type: "AWS::ECS::Cluster"
     Properties:
       ClusterName: dapp-cluster
   ECSSecurityGroup:
-    Type: 'AWS::EC2::SecurityGroup'
+    Type: "AWS::EC2::SecurityGroup"
     Properties:
       GroupDescription: ECS Security Group
       VpcId: !Ref VpcId
   ECSSecurityGroupHTTPinbound:
-    Type: 'AWS::EC2::SecurityGroupIngress'
+    Type: "AWS::EC2::SecurityGroupIngress"
     Properties:
       GroupId: !Ref ECSSecurityGroup
       IpProtocol: tcp
@@ -100,7 +100,7 @@ Resources:
       ToPort: 80
       CidrIp: 0.0.0.0/0
   ECSSecurityGroupHTTPSinbound:
-    Type: 'AWS::EC2::SecurityGroupIngress'
+    Type: "AWS::EC2::SecurityGroupIngress"
     Properties:
       GroupId: !Ref ECSSecurityGroup
       IpProtocol: tcp
@@ -108,7 +108,7 @@ Resources:
       ToPort: 443
       CidrIp: 0.0.0.0/0
   ECSSecurityGroupSSHinbound:
-    Type: 'AWS::EC2::SecurityGroupIngress'
+    Type: "AWS::EC2::SecurityGroupIngress"
     Properties:
       GroupId: !Ref ECSSecurityGroup
       IpProtocol: tcp
@@ -116,7 +116,7 @@ Resources:
       ToPort: 22
       CidrIp: 0.0.0.0/0
   ECSSecurityGroupALBports:
-    Type: 'AWS::EC2::SecurityGroupIngress'
+    Type: "AWS::EC2::SecurityGroupIngress"
     Properties:
       GroupId: !Ref ECSSecurityGroup
       IpProtocol: tcp
@@ -124,18 +124,19 @@ Resources:
       ToPort: 61000
       SourceSecurityGroupId: !Ref ECSSecurityGroup
   CloudwatchLogsGroup:
-    Type: 'AWS::Logs::LogGroup'
+    Type: "AWS::Logs::LogGroup"
     Properties:
-      LogGroupName: !Join 
-        - '-'
+      LogGroupName: !Join
+        - "-"
         - - ECSLogGroup
-          - !Ref 'AWS::StackName'
+          - !Ref "AWS::StackName"
       RetentionInDays: 14
+  # dependent container ordering: chainlink (ip=172.17.0.2), exporter (...3), prometheus (...4), grafana (...5), ipfs (...6), arbol-ea (...7), dclimate-ea (...8)
   taskdefinitionChainlink:
-    Type: 'AWS::ECS::TaskDefinition'
+    Type: "AWS::ECS::TaskDefinition"
     Properties:
       Family: dapp-task-chainlink
-      ExecutionRoleArn: !GetAtt 
+      ExecutionRoleArn: !GetAtt
         - ECSTaskExecutionRole
         - Arn
       ContainerDefinitions:
@@ -144,48 +145,37 @@ Resources:
           Memory: 1024
           Essential: true
           Image: smartcontract/chainlink:1.1.0
-          EntryPoint: [ "chainlink", "local", "node", "-p", "/chainlink/password", "-a", "/chainlink/api" ]
-          # Environment:
-            # - Name: SECURE_COOKIES
-            #   Value: false
-            # - Name: CHAINLINK_TLS_PORT
-            #   Value: 0
-            # - Name: INSECURE_SKIP_VERIFY
-            #   Value: true
-            # - Name: CHAINLINK_DEV
-            #   Value: true
-            # - Name: LOG_TO_DISK
-            #   Value: false
-            # - Name: ROOT
-            #   Value: "/chainlink"
-            # - Name: TLS_CERT_PATH
-            #   Value: /tls/chainlink.crt
-            # - Name: TLS_KEY_PATH
-            #   Value: /tls/chainlink.key
-            # - Name: CHAINLINK_TLS_REDIRECT
-            #   Value: true
-            # - Name: DATABASE_TIMEOUT
-            #   Value: 0
-            # - Name: DEFAULT_HTTP_TIMEOUT
-            #   Value: "10m"
-            # - Name: MIN_OUTGOING_CONFIRMATIONS
-            #   Value: 2
-            # - Name: FEATURE_WEBHOOK_V2
-            #   Value: true
-            # - Name: JSON_CONSOLE
-            #   Value: true
-            # - Name: LOG_LEVEL
-            #   Value: "debug"
-            # - Name: MINIMUM_CONTRACT_PAYMENT_LINK_JUELS
-            #   Value: 0
+          EntryPoint:
+            [
+              "chainlink",
+              "local",
+              "node",
+              "-p",
+              "/chainlink/password",
+              "-a",
+              "/chainlink/api",
+            ]
+          # Environment: # Override/Add Environment Variables to the chainlink node
+          # - Name: CHAINLINK_DEV
+          #   Value: true
+          # - Name: DATABASE_TIMEOUT
+          #   Value: 0
+          # - Name: DEFAULT_HTTP_TIMEOUT
+          #   Value: "10m"
+          # - Name: MIN_OUTGOING_CONFIRMATIONS
+          #   Value: 2
+          # - Name: LOG_LEVEL
+          #   Value: "debug"
+          # - Name: MINIMUM_CONTRACT_PAYMENT_LINK_JUELS
+          #   Value: 0
           EnvironmentFiles:
             - Type: s3
-              Value: 'arn:aws:s3:::dapp-files/S3Links/chainlink/.env'
+              Value: "arn:aws:s3:::dapp-files/S3Links/chainlink/.env"
           LogConfiguration:
             LogDriver: awslogs
             Options:
               awslogs-group: !Ref CloudwatchLogsGroup
-              awslogs-region: !Ref 'AWS::Region'
+              awslogs-region: !Ref "AWS::Region"
               awslogs-stream-prefix: dapp-chainlink
           MountPoints:
             - ContainerPath: /chainlink
@@ -202,48 +192,59 @@ Resources:
             SourcePath: /home/ec2-user/S3Imports/chainlink
           Name: Chainlink
   taskdefinitionMonitor:
-    Type: 'AWS::ECS::TaskDefinition'
+    Type: "AWS::ECS::TaskDefinition"
+    DependsOn: taskdefinitionChainlink
     Properties:
       Family: dapp-task-monitor
       ContainerDefinitions:
         - Name: node-exporter
+          DependsOn:
+            - Condition: START
+              ContainerName: chainlink-node
           Cpu: 512
           Memory: 1024
           User: 0
           Essential: true
           Image: prom/node-exporter:latest
-          Command: [ "--path.rootfs=/node-exporter", "--web.config=/node-exporter/exporterweb.yml" ]
+          Command:
+            [
+              "--path.rootfs=/node-exporter",
+              "--web.config=/node-exporter/exporterweb.yml",
+            ]
           LogConfiguration:
             LogDriver: awslogs
             Options:
               awslogs-group: !Ref CloudwatchLogsGroup
-              awslogs-region: !Ref 'AWS::Region'
+              awslogs-region: !Ref "AWS::Region"
               awslogs-stream-prefix: dapp-node-exporter
           MountPoints:
             - ContainerPath: /node-exporter
               SourceVolume: NodeExporter
-            # - ContainerPath: /tls
-            #   SourceVolume: NodeExporterTLS
           PortMappings:
             - ContainerPort: 9100
         - Name: prometheus
+          DependsOn:
+            - Condition: START
+              ContainerName: node-exporter
           Cpu: 512
           Memory: 1024
           User: 0
           Essential: true
           Image: prom/prometheus:latest
-          Command: [ "--config.file=/prometheus/prometheus.yml", "--web.config.file=/prometheus/prometheusweb.yml" ]
+          Command:
+            [
+              "--config.file=/prometheus/prometheus.yml",
+              "--web.config.file=/prometheus/prometheusweb.yml",
+            ]
           LogConfiguration:
             LogDriver: awslogs
             Options:
               awslogs-group: !Ref CloudwatchLogsGroup
-              awslogs-region: !Ref 'AWS::Region'
+              awslogs-region: !Ref "AWS::Region"
               awslogs-stream-prefix: dapp-prometheus
           MountPoints:
             - ContainerPath: /prometheus
               SourceVolume: Prometheus
-            # - ContainerPath: /tls
-            #   SourceVolume: PrometheusTLS
           PortMappings:
             - ContainerPort: 9090
         # - Name: loki
@@ -285,6 +286,9 @@ Resources:
         #   PortMappings:
         #     - ContainerPort: 9080
         - Name: grafana
+          DependsOn:
+            - Condition: START
+              ContainerName: prometheus
           Cpu: 512
           Memory: 1024
           User: 0
@@ -297,7 +301,7 @@ Resources:
             LogDriver: awslogs
             Options:
               awslogs-group: !Ref CloudwatchLogsGroup
-              awslogs-region: !Ref 'AWS::Region'
+              awslogs-region: !Ref "AWS::Region"
               awslogs-stream-prefix: dapp-grafana
           MountPoints:
             - ContainerPath: /grafana
@@ -310,15 +314,9 @@ Resources:
         - Host:
             SourcePath: /home/ec2-user/S3Imports/monitoring/node-exporter
           Name: NodeExporter
-        # - Host:
-        #     SourcePath: /home/ec2-user/S3Imports/tls/node-exporter
-        #   Name: NodeExporterTLS
         - Host:
             SourcePath: /home/ec2-user/S3Imports/monitoring/prometheus
           Name: Prometheus
-        # - Host:
-        #     SourcePath: /home/ec2-user/S3Imports/tls/prometheus
-        #   Name: PrometheusTLS
         # - Host:
         #     SourcePath: /home/ec2-user/S3Imports/monitoring/loki/
         #   Name: Loki
@@ -406,7 +404,7 @@ Resources:
   #     #     SourcePath: /smart_contracts/hardhat/SROs
   #     #   Name: SmartContractsHardhatSros
   NodeALB:
-    Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+    Type: "AWS::ElasticLoadBalancingV2::LoadBalancer"
     Properties:
       Name: NodeALB
       Scheme: internet-facing
@@ -417,7 +415,7 @@ Resources:
       SecurityGroups:
         - !Ref ECSSecurityGroup
   NodeHTTPSListener:
-    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Type: "AWS::ElasticLoadBalancingV2::Listener"
     DependsOn: ECSServiceRole
     Properties:
       DefaultActions:
@@ -436,16 +434,16 @@ Resources:
         - Type: redirect
           RedirectConfig:
             Protocol: HTTPS
-            Port: '443'
-            Host: '#{host}'
+            Port: "443"
+            Host: "#{host}"
             Path: /#{path}
-            Query: '#{query}'
+            Query: "#{query}"
             StatusCode: HTTP_301
       LoadBalancerArn: !Ref NodeALB
       Port: 80
       Protocol: HTTP
   NodeListenerRule:
-    Type: 'AWS::ElasticLoadBalancingV2::ListenerRule'
+    Type: "AWS::ElasticLoadBalancingV2::ListenerRule"
     DependsOn: NodeHTTPSListener
     Properties:
       Actions:
@@ -458,7 +456,7 @@ Resources:
       ListenerArn: !Ref NodeHTTPSListener
       Priority: 1
   NodeTG:
-    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+    Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
     DependsOn: NodeALB
     Properties:
       HealthCheckIntervalSeconds: 10
@@ -472,7 +470,7 @@ Resources:
       UnhealthyThresholdCount: 2
       VpcId: !Ref VpcId
   NodeRecordSet:
-    Type: 'AWS::Route53::RecordSet'
+    Type: "AWS::Route53::RecordSet"
     DependsOn: NodeALB
     Properties:
       AliasTarget:
@@ -483,7 +481,7 @@ Resources:
       Name: chainlink.dapp.arbol.cloud
       Type: A
   DashALB:
-    Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+    Type: "AWS::ElasticLoadBalancingV2::LoadBalancer"
     Properties:
       Name: DashALB
       Scheme: internet-facing
@@ -494,7 +492,7 @@ Resources:
       SecurityGroups:
         - !Ref ECSSecurityGroup
   DashHTTPSListener:
-    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Type: "AWS::ElasticLoadBalancingV2::Listener"
     DependsOn: ECSServiceRole
     Properties:
       DefaultActions:
@@ -513,16 +511,16 @@ Resources:
         - Type: redirect
           RedirectConfig:
             Protocol: HTTPS
-            Port: '443'
-            Host: '#{host}'
+            Port: "443"
+            Host: "#{host}"
             Path: /#{path}
-            Query: '#{query}'
+            Query: "#{query}"
             StatusCode: HTTP_301
       LoadBalancerArn: !Ref DashALB
       Port: 80
       Protocol: HTTP
   DashListenerRule:
-    Type: 'AWS::ElasticLoadBalancingV2::ListenerRule'
+    Type: "AWS::ElasticLoadBalancingV2::ListenerRule"
     DependsOn: DashHTTPSListener
     Properties:
       Actions:
@@ -535,7 +533,7 @@ Resources:
       ListenerArn: !Ref DashHTTPSListener
       Priority: 1
   DashTG:
-    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+    Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
     DependsOn: NodeALB
     Properties:
       HealthCheckIntervalSeconds: 10
@@ -549,7 +547,7 @@ Resources:
       UnhealthyThresholdCount: 2
       VpcId: !Ref VpcId
   DashRecordSet:
-    Type: 'AWS::Route53::RecordSet'
+    Type: "AWS::Route53::RecordSet"
     DependsOn: DashALB
     Properties:
       AliasTarget:
@@ -560,7 +558,7 @@ Resources:
       Name: dashboard.dapp.arbol.cloud
       Type: A
   ECSAutoScalingGroup:
-    Type: 'AWS::AutoScaling::AutoScalingGroup'
+    Type: "AWS::AutoScaling::AutoScalingGroup"
     Properties:
       VPCZoneIdentifier: !Ref SubnetId
       LaunchConfigurationName: !Ref ContainerInstances
@@ -574,11 +572,11 @@ Resources:
       AutoScalingReplacingUpdate:
         WillReplace: true
   ContainerInstances:
-    Type: 'AWS::AutoScaling::LaunchConfiguration'
+    Type: "AWS::AutoScaling::LaunchConfiguration"
     Properties:
-      ImageId: !FindInMap 
+      ImageId: !FindInMap
         - AWSRegionToAMI
-        - !Ref 'AWS::Region'
+        - !Ref "AWS::Region"
         - AMIID
       SecurityGroups:
         - !Ref ECSSecurityGroup
@@ -602,7 +600,7 @@ Resources:
           aws s3 cp s3://dapp-files/S3Imports /home/ec2-user/S3Imports --recursive
           ls -R /home/ec2-user/S3Imports
   serviceChainlink:
-    Type: 'AWS::ECS::Service'
+    Type: "AWS::ECS::Service"
     DependsOn: NodeHTTPSListener
     Properties:
       ServiceName: dapp-service-chainlink
@@ -615,7 +613,7 @@ Resources:
       Role: !Ref ECSServiceRole
       TaskDefinition: !Ref taskdefinitionChainlink
   serviceMonitor:
-    Type: 'AWS::ECS::Service'
+    Type: "AWS::ECS::Service"
     DependsOn: DashHTTPSListener
     Properties:
       ServiceName: dapp-service-monitor
@@ -654,7 +652,7 @@ Resources:
   #     Role: !Ref ECSServiceRole
   #     TaskDefinition: !Ref taskdefinitionAdapter
   ECSServiceRole:
-    Type: 'AWS::IAM::Role'
+    Type: "AWS::IAM::Role"
     Properties:
       AssumeRolePolicyDocument:
         Statement:
@@ -663,7 +661,7 @@ Resources:
               Service:
                 - ecs.amazonaws.com
             Action:
-              - 'sts:AssumeRole'
+              - "sts:AssumeRole"
       Path: /
       Policies:
         - PolicyName: ecs-service
@@ -671,36 +669,36 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'elasticloadbalancing:DeregisterInstancesFromLoadBalancer'
-                  - 'elasticloadbalancing:DeregisterTargets'
-                  - 'elasticloadbalancing:Describe*'
-                  - 'elasticloadbalancing:RegisterInstancesWithLoadBalancer'
-                  - 'elasticloadbalancing:RegisterTargets'
-                  - 'ec2:Describe*'
-                  - 'ec2:AuthorizeSecurityGroupIngress'
-                  - 'ecr:*'
-                Resource: '*'
+                  - "elasticloadbalancing:DeregisterInstancesFromLoadBalancer"
+                  - "elasticloadbalancing:DeregisterTargets"
+                  - "elasticloadbalancing:Describe*"
+                  - "elasticloadbalancing:RegisterInstancesWithLoadBalancer"
+                  - "elasticloadbalancing:RegisterTargets"
+                  - "ec2:Describe*"
+                  - "ec2:AuthorizeSecurityGroupIngress"
+                  - "ecr:*"
+                Resource: "*"
   ServiceScalingTargetChainlink:
-    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
+    Type: "AWS::ApplicationAutoScaling::ScalableTarget"
     DependsOn: serviceChainlink
     Properties:
       MaxCapacity: 2
       MinCapacity: 1
-      ResourceId: !Join 
-        - ''
+      ResourceId: !Join
+        - ""
         - - service/
           - !Ref ECSCluster
           - /
-          - !GetAtt 
+          - !GetAtt
             - serviceChainlink
             - Name
-      RoleARN: !GetAtt 
+      RoleARN: !GetAtt
         - AutoscalingRole
         - Arn
-      ScalableDimension: 'ecs:service:DesiredCount'
+      ScalableDimension: "ecs:service:DesiredCount"
       ServiceNamespace: ecs
   ServiceScalingPolicyChainlink:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+    Type: "AWS::ApplicationAutoScaling::ScalingPolicy"
     Properties:
       PolicyName: AStepPolicy
       PolicyType: StepScaling
@@ -713,26 +711,26 @@ Resources:
           - MetricIntervalLowerBound: 0
             ScalingAdjustment: 200
   ServiceScalingTargetMonitor:
-    Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
+    Type: "AWS::ApplicationAutoScaling::ScalableTarget"
     DependsOn: serviceMonitor
     Properties:
       MaxCapacity: 2
       MinCapacity: 1
-      ResourceId: !Join 
-        - ''
+      ResourceId: !Join
+        - ""
         - - service/
           - !Ref ECSCluster
           - /
-          - !GetAtt 
+          - !GetAtt
             - serviceMonitor
             - Name
-      RoleARN: !GetAtt 
+      RoleARN: !GetAtt
         - AutoscalingRole
         - Arn
-      ScalableDimension: 'ecs:service:DesiredCount'
+      ScalableDimension: "ecs:service:DesiredCount"
       ServiceNamespace: ecs
   ServiceScalingPolicyMonitor:
-    Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
+    Type: "AWS::ApplicationAutoScaling::ScalingPolicy"
     Properties:
       PolicyName: AStepPolicy
       PolicyType: StepScaling
@@ -750,15 +748,15 @@ Resources:
   #   Properties:
   #     MaxCapacity: 2
   #     MinCapacity: 1
-  #     ResourceId: !Join 
+  #     ResourceId: !Join
   #       - ''
   #       - - service/
   #         - !Ref ECSCluster
   #         - /
-  #         - !GetAtt 
+  #         - !GetAtt
   #           - serviceIPFS
   #           - Name
-  #     RoleARN: !GetAtt 
+  #     RoleARN: !GetAtt
   #       - AutoscalingRole
   #       - Arn
   #     ScalableDimension: 'ecs:service:DesiredCount'
@@ -782,15 +780,15 @@ Resources:
   #   Properties:
   #     MaxCapacity: 2
   #     MinCapacity: 1
-  #     ResourceId: !Join 
+  #     ResourceId: !Join
   #       - ''
   #       - - service/
   #         - !Ref ECSCluster
   #         - /
-  #         - !GetAtt 
+  #         - !GetAtt
   #           - serviceAdapter
   #           - Name
-  #     RoleARN: !GetAtt 
+  #     RoleARN: !GetAtt
   #       - AutoscalingRole
   #       - Arn
   #     ScalableDimension: 'ecs:service:DesiredCount'
@@ -821,13 +819,13 @@ Resources:
   #     Namespace: AWS/ApplicationELB
   #     Dimensions:
   #       - Name: LoadBalancer
-  #         Value: !GetAtt 
+  #         Value: !GetAtt
   #           - ECSALB
   #           - LoadBalancerFullName
   #     ComparisonOperator: GreaterThanThreshold
   #     MetricName: HTTPCode_ELB_5XX_Count
   ECSTaskExecutionRole:
-    Type: 'AWS::IAM::Role'
+    Type: "AWS::IAM::Role"
     Properties:
       AssumeRolePolicyDocument:
         Statement:
@@ -836,28 +834,28 @@ Resources:
               Service:
                 - ecs-tasks.amazonaws.com
             Action:
-              - 'sts:AssumeRole'
+              - "sts:AssumeRole"
       ManagedPolicyArns:
-        - 'arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy'
+        - "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
       Policies:
         - PolicyName: s3-filereader
           PolicyDocument:
             Statement:
               - Effect: Allow
-                Action: 
-                  - 's3:GetBucketLocation'
-                  - 's3:ListAllMyBuckets'
-                Resource: '*'
+                Action:
+                  - "s3:GetBucketLocation"
+                  - "s3:ListAllMyBuckets"
+                Resource: "*"
               - Effect: Allow
                 Action:
-                  - 's3:ListBucket'
-                Resource: 'arn:aws:s3:::dapp-files'
+                  - "s3:ListBucket"
+                Resource: "arn:aws:s3:::dapp-files"
               - Effect: Allow
                 Action:
-                  - 's3:GetObject'
-                Resource: 'arn:aws:s3:::dapp-files/*'
+                  - "s3:GetObject"
+                Resource: "arn:aws:s3:::dapp-files/*"
   EC2Role:
-    Type: 'AWS::IAM::Role'
+    Type: "AWS::IAM::Role"
     Properties:
       AssumeRolePolicyDocument:
         Statement:
@@ -866,7 +864,7 @@ Resources:
               Service:
                 - ec2.amazonaws.com
             Action:
-              - 'sts:AssumeRole'
+              - "sts:AssumeRole"
       Path: /
       Policies:
         - PolicyName: ecs-service
@@ -874,35 +872,35 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'ecs:CreateCluster'
-                  - 'ecs:DeregisterContainerInstance'
-                  - 'ecs:DiscoverPollEndpoint'
-                  - 'ecs:Poll'
-                  - 'ecs:RegisterContainerInstance'
-                  - 'ecs:StartTelemetrySession'
-                  - 'ecs:Submit*'
-                  - 'ecr:*'
-                  - 'logs:CreateLogStream'
-                  - 'logs:PutLogEvents'
-                Resource: '*'
+                  - "ecs:CreateCluster"
+                  - "ecs:DeregisterContainerInstance"
+                  - "ecs:DiscoverPollEndpoint"
+                  - "ecs:Poll"
+                  - "ecs:RegisterContainerInstance"
+                  - "ecs:StartTelemetrySession"
+                  - "ecs:Submit*"
+                  - "ecr:*"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "*"
         - PolicyName: s3-filereader
           PolicyDocument:
             Statement:
               - Effect: Allow
-                Action: 
-                  - 's3:GetBucketLocation'
-                  - 's3:ListAllMyBuckets'
-                Resource: '*'
+                Action:
+                  - "s3:GetBucketLocation"
+                  - "s3:ListAllMyBuckets"
+                Resource: "*"
               - Effect: Allow
                 Action:
-                  - 's3:ListBucket'
-                Resource: 'arn:aws:s3:::dapp-files'
+                  - "s3:ListBucket"
+                Resource: "arn:aws:s3:::dapp-files"
               - Effect: Allow
                 Action:
-                  - 's3:GetObject'
-                Resource: 'arn:aws:s3:::dapp-files/*'
+                  - "s3:GetObject"
+                Resource: "arn:aws:s3:::dapp-files/*"
   AutoscalingRole:
-    Type: 'AWS::IAM::Role'
+    Type: "AWS::IAM::Role"
     Properties:
       AssumeRolePolicyDocument:
         Statement:
@@ -911,7 +909,7 @@ Resources:
               Service:
                 - application-autoscaling.amazonaws.com
             Action:
-              - 'sts:AssumeRole'
+              - "sts:AssumeRole"
       Path: /
       Policies:
         - PolicyName: service-autoscaling
@@ -919,14 +917,14 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'application-autoscaling:*'
-                  - 'cloudwatch:DescribeAlarms'
-                  - 'cloudwatch:PutMetricAlarm'
-                  - 'ecs:DescribeServices'
-                  - 'ecs:UpdateService'
-                Resource: '*'
+                  - "application-autoscaling:*"
+                  - "cloudwatch:DescribeAlarms"
+                  - "cloudwatch:PutMetricAlarm"
+                  - "ecs:DescribeServices"
+                  - "ecs:UpdateService"
+                Resource: "*"
   EC2InstanceProfile:
-    Type: 'AWS::IAM::InstanceProfile'
+    Type: "AWS::IAM::InstanceProfile"
     Properties:
       Path: /
       Roles:
@@ -936,16 +934,16 @@ Outputs:
     Value: !Ref ECSCluster
   NodeALB:
     Description: Your ALB DNS URL
-    Value: !Join 
-      - ''
-      - - !GetAtt 
+    Value: !Join
+      - ""
+      - - !GetAtt
           - NodeALB
           - DNSName
   DashALB:
     Description: Your ALB DNS URL
-    Value: !Join 
-      - ''
-      - - !GetAtt 
+    Value: !Join
+      - ""
+      - - !GetAtt
           - DashALB
           - DNSName
   taskdefChainlink:

@@ -8,14 +8,14 @@ class Adapter:
     ''' External Adapter class that implements the evaluation and conditional
         executione of Arbol weather contracts based on weather data on IPFS
     '''
-    def __init__(self, input):
+    def __init__(self, data):
         ''' Each call to the adapter creates a new Adapter
             instance to handle the request
 
-            Parameters: input (dict), the received request body
+            Parameters: data (dict), the received request body
         '''
-        self.id = input.get('id', '1')
-        self.request_data = input.get('data')
+        self.id = data.get('id', '1')
+        self.request_data = data.get('data')
         if self.validate_request_data():
             self.execute_request()
         else:

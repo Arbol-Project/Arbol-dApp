@@ -7,14 +7,14 @@ from program_catalog.tools.wrapper import parse_request, handle_request
 class API:
     ''' External Adapter class that implements retrieval of dClimate weather data on IPFS '''
 
-    def __init__(self, input):
+    def __init__(self, data):
         ''' Each call to the adapter creates a new Adapter
             instance to handle the request
 
             Parameters: input (dict), the received request body
         '''
-        self.id = input.get('id', '2')
-        self.request_data = input.get('data')
+        self.id = data.get('id', '2')
+        self.request_data = data.get('data')
         if self.validate_request_data():
             self.execute_request()
         else:

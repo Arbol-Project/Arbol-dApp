@@ -8,7 +8,10 @@ from dweather.dweather_client import client, http_queries
 
 
 '''
-NOT IMPLEMENTED
+n.b. making change to schema at drought_monitoring ({state}-{county} changed to {state}_{county} as elsewhere),
+     the importance being that it is now assumed that '-' is not a separating character for parameters in a request URL
+
+not implemented
 
 rma-code-lookups/valid_counties
 rma-code-lookups/valid_states
@@ -30,32 +33,32 @@ def get_tropical_storms_wrapper(args):
 
 
 def get_cme_station_history_wrapper(args):
-    args = {"desired_units": None, "ipfs_timeout": None}
-    args.update(args)
+    default_args = {"desired_units": None, "ipfs_timeout": None}
+    default_args.update(args)
     return client.get_cme_station_history(**args)
 
 
 def get_dutch_station_history_wrapper(args):
-    args = {"dataset": "dutch_stations-daily", "desired_units": None, "ipfs_timeout": None}
-    args.update(args)
+    default_args = {"dataset": "dutch_stations-daily", "desired_units": None, "ipfs_timeout": None}
+    default_args.update(args)
     return client.get_european_station_history(**args)
 
 
 def get_forecasts_wrapper(args):
-    args = {"also_return_metadata": False, "also_return_snapped_coordinates": True, "use_imperial_units": True, "desired_units": None, "ipfs_timeout": None, "convert_to_local_time": True}
-    args.update(args)
+    default_args = {"also_return_metadata": False, "also_return_snapped_coordinates": True, "use_imperial_units": True, "desired_units": None, "ipfs_timeout": None, "convert_to_local_time": True}
+    default_args.update(args)
     return client.get_forecasts(**args)
 
 
 def get_german_station_history_wrapper(args):
-    args = {"dataset": "dwd_stations-daily", "desired_units": None, "ipfs_timeout": None}
-    args.update(args)
+    default_args = {"dataset": "dwd_stations-daily", "desired_units": None, "ipfs_timeout": None}
+    default_args.update(args)
     return client.get_european_station_history(**args)
 
 
 def get_irrigation_data_wrapper(args):
-    args = {"ipfs_timeout": None}
-    args.update(args)
+    default_args = {"ipfs_timeout": None}
+    default_args.update(args)
     return client.get_irrigation_data(**args)
 
 
@@ -64,8 +67,8 @@ def get_transitional_yield_history_wrapper(args):
         args['dataset'] = 'rma_t_yield_imputed-single-value'
     else:
         args['dataset'] = 'rma_t_yield-single-value'
-    other_args = {"impute": False}
-    other_args.update(args)
+    default_args = {"impute": False}
+    default_args.update(args)
     return client.get_yield_history(**args)
 
 
@@ -76,14 +79,14 @@ def get_yield_history_wrapper(args):
         args['dataset'] = 'sco_vhi_imputed-yearly'
     else:
         args['dataset'] = 'sco-yearly'
-    other_args = {"impute": False, "fill": False}
-    other_args.update(args)
+    default_args = {"impute": False, "fill": False}
+    default_args.update(args)
     return client.get_yield_history(**args)
 
 
 def get_station_history_wrapper(args):
-    args = {"dataset": "ghcnd", "station_id": "USW00003016", "use_imperial_units": True, "desired_units": None, "ipfs_timeout": None}
-    args.update(args)
+    default_args = {"dataset": "ghcnd", "station_id": "USW00003016", "use_imperial_units": True, "desired_units": None, "ipfs_timeout": None}
+    default_args.update(args)
     data = client.get_station_history(**args)
     data = pd.Series(data)
     if data.empty:
@@ -93,8 +96,8 @@ def get_station_history_wrapper(args):
 
 
 def get_gridcell_history_wrapper(args):
-    args = {"also_return_metadata": False, "also_return_snapped_coordinates": True, "use_imperial_units": True, "desired_units": None, "ipfs_timeout": None, "as_of": None, "convert_to_local_time": True}
-    args.update(args)
+    default_args = {"also_return_metadata": False, "also_return_snapped_coordinates": True, "use_imperial_units": True, "desired_units": None, "ipfs_timeout": None, "as_of": None, "convert_to_local_time": True}
+    default_args.update(args)
     data = client.get_gridcell_history(**args)
     if isinstance(data, tuple):
         data = pd.Series(data[0])
@@ -154,7 +157,7 @@ def get_api_mapping(file_path):
     # parse swagger and get parameters and url endpoints
     api_map = {'basePath': api['basePath'] + '/', 'paths': {}}
     for path in api['paths'].keys():
-        if 'user' in path:
+        if 'user' in path or 'valid' in path:
             continue
         key = path[:path.find('/{')][1:] if '/{' in path else path[1:]
         types = {}
@@ -167,7 +170,6 @@ def get_api_mapping(file_path):
                 secondary.append(param['name'])
                 types[param['name']] = param['type']
         api_map['paths'][key] = {'name': path, 'primary': primary, 'secondary': secondary, 'types': types, 'function': client_wrapper[key]}
-    # making note of difference in schema at drought_monitoring ({state}-{county} vs {state}_{county} as elsewhere)
     return api_map
 
 
@@ -185,28 +187,31 @@ def parse_request(data):
 
     # get endpoint
     request_parsed = urlparse(request_data)
-    request_paths = re.split('_|/', request_parsed[2])
-    if 'valid' in request_paths[1]:
-        request_paths = [request_paths[0] + '/' + request_paths[1]] + request_paths[2:]
+    request_paths = re.split('/', request_parsed[2])
     key = request_paths[0]
-    params = request_paths[1:]
-    queries = request_parsed[4].split('&')
     api_endpoint = API_MAP['paths'].get(key, None)
     if api_endpoint is None:
         valid = False
         return 'Improperly formatted request URL, endpoint not found', valid
 
     # get primary parameters
+    args = {}
     endpoint_primaries = api_endpoint['primary']
     endpoint_secondaries = api_endpoint['secondary']
-    args = {}
+    if 'dataset' in endpoint_primaries:
+        params = [request_paths[1]]
+        for req in request_paths[2:]:
+            params += re.split('_', req)
+    else:
+        params = re.split('_|/', request_parsed[2])[1:]
+    queries = request_parsed[4].split('&')
     if len(params) != len(endpoint_primaries):
         valid = False
         return 'Improperly formatted request URL, incompatible parameters', valid
 
     # cast floats
     floats = ['lat', 'lon', 'radius', 'max_lat', 'max_lon', 'min_lat', 'min_lon']
-    for i in range(len(params)):
+    for i in range(len(endpoint_primaries)):
         param = endpoint_primaries[i]
         if param in floats:
             args[param] = float(params[i])

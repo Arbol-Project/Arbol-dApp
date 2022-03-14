@@ -152,7 +152,7 @@
                 ]
             }
         },
-        "/drought-monitor/{state}-{county}": {
+        "/drought-monitor/{state}_{county}": {
             "parameters": [
                 {
                     "name": "state",

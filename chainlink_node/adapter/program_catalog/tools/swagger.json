@@ -1,0 +1,1344 @@
+{
+    "swagger": "2.0",
+    "basePath": "/apiv3",
+    "paths": {
+        "/ceda-biomass/{year}/{lat}_{lon}/{unit}": {
+            "parameters": [
+                {
+                    "enum": [
+                        "AGB",
+                        "AGB_SD"
+                    ],
+                    "in": "path",
+                    "description": "'AGB' (above-ground biomass) or 'AGB_SD' (above-ground biomass + standing dead)",
+                    "name": "unit",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "in": "path",
+                    "description": "Longitude for west boundary of desired square. Should be multiple of 10 between -180 and 180",
+                    "name": "lon",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "in": "path",
+                    "description": "Latitude for north boundary of desired square. Should be multiple of 10 between -40 and 80",
+                    "name": "lat",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "enum": [
+                        "2010",
+                        "2017",
+                        "2018",
+                        "2018-2010",
+                        "2018-2017"
+                    ],
+                    "in": "path",
+                    "description": "Year or year difference for which to get data",
+                    "name": "year",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "GeoTiff file with biomass data for parameters"
+                    },
+                    "404": {
+                        "description": "Invalid paramaters with which to get biomass data"
+                    }
+                },
+                "summary": "GeoTiff file with biomass data for parameters",
+                "description": "Note that lat/lons for squares entirely over water will yield a 404",
+                "operationId": "get_ceda_biomass_request",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "type": "string",
+                        "description": "enter your token"
+                    }
+                ],
+                "produces": [
+                    "image/tiff"
+                ],
+                "tags": [
+                    "Biomass"
+                ]
+            }
+        },
+        "/cme-history/{station_id}/{weather_variable}": {
+            "parameters": [
+                {
+                    "enum": [
+                        "TMAX",
+                        "TMIN",
+                        "TAVG"
+                    ],
+                    "in": "path",
+                    "description": "variable for which to get data",
+                    "name": "weather_variable",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "enum": [
+                        "03927",
+                        "13874",
+                        "14732",
+                        "14922",
+                        "23169",
+                        "23232",
+                        "24229",
+                        "93814",
+                        "94846",
+                        "47662",
+                        "03772",
+                        "06240"
+                    ],
+                    "in": "path",
+                    "description": "WMO station id",
+                    "name": "station_id",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "responses": {
+                    "500": {
+                        "description": "unknown error"
+                    },
+                    "404": {
+                        "description": "invalid dataset or station"
+                    },
+                    "200": {
+                        "description": "json with weather data for station"
+                    }
+                },
+                "summary": "get history from station dataset",
+                "operationId": "get history from station dataset",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "type": "string",
+                        "description": "enter your token"
+                    },
+                    {
+                        "name": "use_imperial_units",
+                        "in": "query",
+                        "type": "boolean",
+                        "description": "whether to convert values to imperial units. set to 'true' by default",
+                        "default": true
+                    },
+                    {
+                        "name": "desired_units",
+                        "in": "query",
+                        "type": "string",
+                        "description": "override use_imperial_units and attempt to convert the result into the specified  unit"
+                    }
+                ],
+                "produces": [
+                    "text/csv",
+                    "application/json"
+                ],
+                "tags": [
+                    "CME Station History"
+                ]
+            }
+        },
+        "/drought-monitor/{state}-{county}": {
+            "parameters": [
+                {
+                    "name": "state",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "county",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "responses": {
+                    "404": {
+                        "description": "invalid state/county combination"
+                    }
+                },
+                "summary": "get drought monitor percentages",
+                "operationId": "get_drought_monitor_request",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "type": "string",
+                        "description": "enter your token"
+                    }
+                ],
+                "tags": [
+                    "Drought Monitor"
+                ]
+            }
+        },
+        "/dutch-station-history/{station_id}/{weather_variable}": {
+            "parameters": [
+                {
+                    "enum": [
+                        "WINDSPEED",
+                        "RADIATION",
+                        "TMAX",
+                        "TMIN",
+                        "TAVG"
+                    ],
+                    "in": "path",
+                    "description": "variable for which to get data",
+                    "name": "weather_variable",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "enum": [
+                        "209",
+                        "210",
+                        "215",
+                        "225",
+                        "229",
+                        "235",
+                        "240",
+                        "242",
+                        "248",
+                        "249",
+                        "251",
+                        "257",
+                        "258",
+                        "260",
+                        "265",
+                        "267",
+                        "269",
+                        "270",
+                        "273",
+                        "275",
+                        "277",
+                        "278",
+                        "279",
+                        "280",
+                        "283",
+                        "285",
+                        "286",
+                        "290",
+                        "308",
+                        "310",
+                        "311",
+                        "312",
+                        "313",
+                        "315",
+                        "316",
+                        "319",
+                        "323",
+                        "324",
+                        "330",
+                        "331",
+                        "340",
+                        "343",
+                        "344",
+                        "348",
+                        "350",
+                        "356",
+                        "370",
+                        "375",
+                        "377",
+                        "380",
+                        "391"
+                    ],
+                    "in": "path",
+                    "description": "dutch station id",
+                    "name": "station_id",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "responses": {
+                    "500": {
+                        "description": "unknown error"
+                    },
+                    "404": {
+                        "description": "invalid dataset or station"
+                    },
+                    "200": {
+                        "description": "json with weather data for station"
+                    }
+                },
+                "summary": "get history from station dataset",
+                "operationId": "get history from station dataset",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "type": "string",
+                        "description": "enter your token"
+                    },
+                    {
+                        "name": "use_imperial_units",
+                        "in": "query",
+                        "type": "boolean",
+                        "description": "whether to convert values to imperial units. set to 'true' by default",
+                        "default": true
+                    },
+                    {
+                        "name": "desired_units",
+                        "in": "query",
+                        "type": "string",
+                        "description": "override use_imperial_units and attempt to convert the result into the specified  unit"
+                    }
+                ],
+                "produces": [
+                    "text/csv",
+                    "application/json"
+                ],
+                "tags": [
+                    "Dutch Station History"
+                ]
+            }
+        },
+        "/forecasts/{dataset}/{lat}_{lon}": {
+            "parameters": [
+                {
+                    "enum": [
+                        "gfs_10m_wind_u-hourly",
+                        "gfs_10m_wind_v-hourly",
+                        "gfs_pcp_rate-hourly",
+                        "gfs_relative_humidity-hourly",
+                        "gfs_tmax-hourly",
+                        "gfs_tmin-hourly",
+                        "gfs_volumetric_soil_moisture-hourly"
+                    ],
+                    "in": "path",
+                    "description": "select a dataset",
+                    "name": "dataset",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "in": "path",
+                    "description": "latitude",
+                    "name": "lat",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "in": "path",
+                    "description": "longitude",
+                    "name": "lon",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "responses": {
+                    "500": {
+                        "description": "unknown error"
+                    },
+                    "404": {
+                        "description": "invalid dataset or coordinate"
+                    },
+                    "200": {
+                        "description": "json with weather data for coordinate"
+                    }
+                },
+                "summary": "get forecast data from gfs dataset",
+                "operationId": "get forecast data from gfs dataset",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "type": "string",
+                        "description": "enter your token"
+                    },
+                    {
+                        "name": "forecast_date",
+                        "in": "query",
+                        "type": "string",
+                        "format": "date",
+                        "required": true,
+                        "description": "forecast date from which to get data"
+                    },
+                    {
+                        "name": "also_return_metadata",
+                        "in": "query",
+                        "type": "boolean",
+                        "description": "set to true to return dataset metadata",
+                        "default": false
+                    },
+                    {
+                        "name": "use_imperial_units",
+                        "in": "query",
+                        "type": "boolean",
+                        "description": "set to 'true' by default",
+                        "default": true
+                    },
+                    {
+                        "name": "desired_units",
+                        "in": "query",
+                        "type": "string",
+                        "description": "override use_imperial_units and attempt to convert the result into the specified  unit"
+                    },
+                    {
+                        "name": "also_return_snapped_coordinates",
+                        "in": "query",
+                        "type": "boolean",
+                        "description": "set to 'true' by default",
+                        "default": true
+                    },
+                    {
+                        "name": "convert_to_local_time",
+                        "in": "query",
+                        "type": "boolean",
+                        "description": "set to 'true' by default",
+                        "default": true
+                    }
+                ],
+                "produces": [
+                    "text/csv",
+                    "application/json"
+                ],
+                "tags": [
+                    "GFS Forecasts"
+                ]
+            }
+        },
+        "/german-station-history/{station_id}/{weather_variable}": {
+            "parameters": [
+                {
+                    "enum": [
+                        "TMAX",
+                        "TMIN",
+                        "TAVG",
+                        "TMINGROUND",
+                        "PRCP"
+                    ],
+                    "in": "path",
+                    "description": "variable for which to get data",
+                    "name": "weather_variable",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "in": "path",
+                    "description": "german station id",
+                    "name": "station_id",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "responses": {
+                    "500": {
+                        "description": "unknown error"
+                    },
+                    "404": {
+                        "description": "invalid dataset or station"
+                    },
+                    "200": {
+                        "description": "json with weather data for station"
+                    }
+                },
+                "summary": "get history from station dataset",
+                "operationId": "get history from station dataset",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "type": "string",
+                        "description": "enter your token"
+                    },
+                    {
+                        "name": "use_imperial_units",
+                        "in": "query",
+                        "type": "boolean",
+                        "description": "whether to convert values to imperial units. set to 'true' by default",
+                        "default": true
+                    },
+                    {
+                        "name": "desired_units",
+                        "in": "query",
+                        "type": "string",
+                        "description": "override use_imperial_units and attempt to convert the result into the specified  unit"
+                    }
+                ],
+                "produces": [
+                    "text/csv",
+                    "application/json"
+                ],
+                "tags": [
+                    "German Station History"
+                ]
+            }
+        },
+        "/ghcn-history/{station_id}/{weather_variable}": {
+            "parameters": [
+                {
+                    "enum": [
+                        "SNWD",
+                        "SNOW",
+                        "WESD",
+                        "TMAX",
+                        "TMIN",
+                        "PRCP"
+                    ],
+                    "in": "path",
+                    "description": "variable for which to get data",
+                    "name": "weather_variable",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "default": "USW00003016",
+                    "in": "path",
+                    "description": "GHCN station id",
+                    "name": "station_id",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "responses": {
+                    "500": {
+                        "description": "unknown error"
+                    },
+                    "404": {
+                        "description": "invalid dataset or station"
+                    },
+                    "200": {
+                        "description": "json with weather data for station"
+                    }
+                },
+                "summary": "get history from station dataset",
+                "operationId": "get history from station dataset",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "type": "string",
+                        "description": "enter your token"
+                    },
+                    {
+                        "name": "use_imperial_units",
+                        "in": "query",
+                        "type": "boolean",
+                        "description": "whether to convert values to imperial units. set to 'true' by default",
+                        "default": true
+                    },
+                    {
+                        "name": "desired_units",
+                        "in": "query",
+                        "type": "string",
+                        "description": "override use_imperial_units and attempt to convert the result into the specified  unit"
+                    },
+                    {
+                        "name": "dataset",
+                        "in": "query",
+                        "type": "string",
+                        "description": "which dClimate dataset to pull data from",
+                        "default": "ghcnd",
+                        "enum": [
+                            "ghcnd",
+                            "ghcnd-imputed-daily"
+                        ]
+                    }
+                ],
+                "produces": [
+                    "text/csv",
+                    "application/json"
+                ],
+                "tags": [
+                    "GHCN Dataset History"
+                ]
+            }
+        },
+        "/grid-history/{dataset}/{lat}_{lon}": {
+            "parameters": [
+                {
+                    "enum": [
+                        "vhi",
+                        "prismc-tmax-daily",
+                        "prismc-tmin-daily",
+                        "prismc-precip-daily",
+                        "rtma_dew_point-hourly",
+                        "rtma_gust-hourly",
+                        "rtma_pcp-hourly",
+                        "rtma_temp-hourly",
+                        "rtma_wind_u-hourly",
+                        "rtma_wind_v-hourly",
+                        "cpcc_precip_us-daily",
+                        "cpcc_precip_global-daily",
+                        "cpcc_temp_max-daily",
+                        "cpcc_temp_min-daily",
+                        "chirpsc_final_05-daily",
+                        "chirpsc_final_25-daily",
+                        "chirpsc_prelim_05-daily",
+                        "era5_land_2m_temp-hourly",
+                        "era5_land_precip-hourly",
+                        "era5_land_surface_solar_radiation_downwards-hourly",
+                        "era5_land_snowfall-hourly",
+                        "era5_land_wind_u-hourly",
+                        "era5_land_wind_v-hourly",
+                        "era5_land_dewpoint_temp_2m-hourly",
+                        "era5_instantaneous_10m_wind_gust-hourly",
+                        "era5_surface_runoff-hourly",
+                        "era5_wind_100m_u-hourly",
+                        "era5_wind_100m_v-hourly",
+                        "era5_volumetric_soil_water_layer_1-hourly"
+                    ],
+                    "in": "path",
+                    "description": "select a dataset",
+                    "name": "dataset",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "in": "path",
+                    "description": "latitude",
+                    "name": "lat",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "in": "path",
+                    "description": "longitude",
+                    "name": "lon",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "responses": {
+                    "500": {
+                        "description": "unknown error"
+                    },
+                    "404": {
+                        "description": "invalid dataset or coordinate"
+                    },
+                    "200": {
+                        "description": "json with weather data for coordinate"
+                    }
+                },
+                "summary": "get history from grid file dataset",
+                "operationId": "get history from grid file dataset",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "type": "string",
+                        "description": "enter your token"
+                    },
+                    {
+                        "name": "also_return_metadata",
+                        "in": "query",
+                        "type": "boolean",
+                        "description": "set to true to return dataset metadata",
+                        "default": false
+                    },
+                    {
+                        "name": "use_imperial_units",
+                        "in": "query",
+                        "type": "boolean",
+                        "description": "set to 'true' by default",
+                        "default": true
+                    },
+                    {
+                        "name": "desired_units",
+                        "in": "query",
+                        "type": "string",
+                        "description": "override use_imperial_units and attempt to convert the result into the specified  unit"
+                    },
+                    {
+                        "name": "also_return_snapped_coordinates",
+                        "in": "query",
+                        "type": "boolean",
+                        "description": "set to 'true' by default",
+                        "default": true
+                    },
+                    {
+                        "name": "convert_to_local_time",
+                        "in": "query",
+                        "type": "boolean",
+                        "description": "set to 'true' by default",
+                        "default": true
+                    },
+                    {
+                        "name": "as_of",
+                        "in": "query",
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Truncate updates generated after `as_of`"
+                    }
+                ],
+                "produces": [
+                    "text/csv",
+                    "application/json"
+                ],
+                "tags": [
+                    "Grid File Dataset History"
+                ]
+            }
+        },
+        "/irrigation_splits/{commodity}": {
+            "parameters": [
+                {
+                    "in": "path",
+                    "description": "four digit RMA commodity code",
+                    "name": "commodity",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "responses": {
+                    "500": {
+                        "description": "unknown error"
+                    },
+                    "404": {
+                        "description": "invalid parameters"
+                    }
+                },
+                "summary": "Get irrigation data for all states/counties where a commodity is grown",
+                "operationId": "Get irrigation data for all states/counties where a commodity is grown",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "type": "string",
+                        "description": "enter your token"
+                    }
+                ],
+                "produces": [
+                    "text/csv"
+                ],
+                "tags": [
+                    "FSA Irrigation Data"
+                ]
+            }
+        },
+        "/metadata/{dataset}": {
+            "parameters": [
+                {
+                    "enum": [
+                        "aemo-semihourly",
+                        "alberta_power-hourly",
+                        "atcf_btk-seasonal",
+                        "ceda_biomass",
+                        "chirpsc_final_05-daily",
+                        "chirpsc_final_25-daily",
+                        "chirpsc_prelim_05-daily",
+                        "cme_temperature_stations-daily",
+                        "cpcc_precip_global-daily",
+                        "cpcc_precip_us-daily",
+                        "cpcc_temp_max-daily",
+                        "cpcc_temp_min-daily",
+                        "drought_monitor-weekly",
+                        "dutch_stations-daily",
+                        "dwd_stations-daily",
+                        "edd-daily",
+                        "era5_instantaneous_10m_wind_gust-hourly",
+                        "era5_land_2m_temp-hourly",
+                        "era5_land_dewpoint_temp_2m-hourly",
+                        "era5_land_precip-hourly",
+                        "era5_land_snowfall-hourly",
+                        "era5_land_surface_solar_radiation_downwards-hourly",
+                        "era5_land_wind_u-hourly",
+                        "era5_land_wind_v-hourly",
+                        "era5_surface_runoff-hourly",
+                        "era5_volumetric_soil_water_layer_1-hourly",
+                        "era5_wind_100m_u-hourly",
+                        "era5_wind_100m_v-hourly",
+                        "fsa_irrigation_splits",
+                        "gfs_10m_wind_u-hourly",
+                        "gfs_10m_wind_v-hourly",
+                        "gfs_pcp_rate-hourly",
+                        "gfs_relative_humidity-hourly",
+                        "gfs_tmax-hourly",
+                        "gfs_tmin-hourly",
+                        "gfs_volumetric_soil_moisture-hourly",
+                        "ghcnd",
+                        "ghcnd-imputed-daily",
+                        "ibtracs_storm_basins",
+                        "nass_corn-yearly",
+                        "nass_soybeans-yearly",
+                        "prismc-precip-daily",
+                        "prismc-tmax-daily",
+                        "prismc-tmin-daily",
+                        "rma_t_yield-single-value",
+                        "rma_t_yield_imputed-single-value",
+                        "rmasco_imputed-yearly",
+                        "rtma_dew_point-hourly",
+                        "rtma_gust-hourly",
+                        "rtma_pcp-hourly",
+                        "rtma_temp-hourly",
+                        "rtma_wind_u-hourly",
+                        "rtma_wind_v-hourly",
+                        "sco-yearly",
+                        "sco_sales_dates",
+                        "sco_vhi_imputed-yearly",
+                        "storm-simulated-hurricane",
+                        "teleconnections-el-nino-monthly",
+                        "us_counties_geo_json",
+                        "vhi"
+                    ],
+                    "in": "path",
+                    "description": "select a dataset",
+                    "name": "dataset",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "responses": {
+                    "500": {
+                        "description": "unknown error"
+                    },
+                    "404": {
+                        "description": "invalid dataset"
+                    },
+                    "200": {
+                        "description": "json or csv with dataset metadata"
+                    }
+                },
+                "summary": "get dataset metadata infromation for a given dataset",
+                "operationId": "get dataset metadata infromation for a given dataset",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "type": "string",
+                        "description": "enter your token"
+                    },
+                    {
+                        "name": "full_metadata",
+                        "in": "query",
+                        "type": "boolean",
+                        "description": "set to true to return datasets full metadata",
+                        "default": false
+                    }
+                ],
+                "produces": [
+                    "application/json",
+                    "text/csv"
+                ],
+                "tags": [
+                    "Dataset Information"
+                ]
+            }
+        },
+        "/rma-code-lookups/valid_counties/{state}": {
+            "parameters": [
+                {
+                    "in": "path",
+                    "description": "State code",
+                    "name": "state",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "get county name and codes for yield datasets",
+                "operationId": "get county name and codes for yield datasets",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "USDA RMA Codes"
+                ]
+            }
+        },
+        "/rma-code-lookups/valid_states": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "get state name and codes for yield datasets",
+                "operationId": "get state name and codes for yield datasets",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "USDA RMA Codes"
+                ]
+            }
+        },
+        "/storms/{source}/{basin}": {
+            "parameters": [
+                {
+                    "in": "path",
+                    "description": "storm basin for which to get data. \n        if source is 'atcf', one of: 'AL', 'CP', 'EP', 'SL'. \n        if source is 'simulated', one of: 'EP', 'NA', 'NI', 'SI', 'SP' 'WP'. \n        if source is 'historical', one of: 'NI', 'SI', 'NA', 'EP', 'WP', 'SP', 'SA'.",
+                    "name": "basin",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "default": "historical",
+                    "enum": [
+                        "atcf",
+                        "historical",
+                        "simulated"
+                    ],
+                    "in": "path",
+                    "description": "source from which to pull storm data",
+                    "name": "source",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "responses": {
+                    "500": {
+                        "description": "unknown error"
+                    },
+                    "404": {
+                        "description": "invalid source, basin or geographic args"
+                    },
+                    "200": {
+                        "description": "time series csv with points along tropical storm routes"
+                    }
+                },
+                "summary": "get data on the tracks of tropical storms",
+                "description": "Note: for this endpoint (radius, lat, lon) and (min_lat, min_lon, max_lat, max_lon) are incompatible parameters.\ni.e., if given parameters containing members from both tuples, return 404\nin addition, the function's args must contain either all members of one of the above tuples, or none\ni.e., if given parameters containing some but not all of the members of one of the above tuples, return 404",
+                "operationId": "get data from storms dataset",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "type": "string",
+                        "description": "enter your token"
+                    },
+                    {
+                        "name": "radius",
+                        "in": "query",
+                        "type": "string",
+                        "description": "if given radius, lat, lon, will subset csv to only include points within radius in km of the point (lat, lon)"
+                    },
+                    {
+                        "name": "lat",
+                        "in": "query",
+                        "type": "string",
+                        "description": "if given radius, lat, lon, will subset csv to only include points within radius in km of the point (lat, lon)"
+                    },
+                    {
+                        "name": "lon",
+                        "in": "query",
+                        "type": "string",
+                        "description": "if given radius, lat, lon, will subset csv to only include points within radius in km of the point (lat, lon)"
+                    },
+                    {
+                        "name": "min_lat",
+                        "in": "query",
+                        "type": "string",
+                        "description": "if given min_lat, min_lon, max_lat, max_lon, selects points within a bounding box."
+                    },
+                    {
+                        "name": "min_lon",
+                        "in": "query",
+                        "type": "string",
+                        "description": "if given min_lat, min_lon, max_lat, max_lon, selects points within a bounding box."
+                    },
+                    {
+                        "name": "max_lat",
+                        "in": "query",
+                        "type": "string",
+                        "description": "if given min_lat, min_lon, max_lat, max_lon, selects points within a bounding box."
+                    },
+                    {
+                        "name": "max_lon",
+                        "in": "query",
+                        "type": "string",
+                        "description": "if given min_lat, min_lon, max_lat, max_lon, selects points within a bounding box."
+                    }
+                ],
+                "produces": [
+                    "text/csv"
+                ],
+                "tags": [
+                    "Tropical Storms Data"
+                ]
+            }
+        },
+        "/transitional_yield/valid_commodities/{state}_{county}": {
+            "parameters": [
+                {
+                    "in": "path",
+                    "description": "County code",
+                    "name": "county",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "in": "path",
+                    "description": "State code",
+                    "name": "state",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "get valid commodity names and codes for yield datasets",
+                "operationId": "get valid commodity names and codes for transitional yield datasets",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transitional Yield Values"
+                ]
+            }
+        },
+        "/transitional_yield/{commodity}_{state}_{county}": {
+            "parameters": [
+                {
+                    "in": "path",
+                    "description": "County code",
+                    "name": "county",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "in": "path",
+                    "description": "State code",
+                    "name": "state",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "in": "path",
+                    "description": "Commodity code",
+                    "name": "commodity",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "responses": {
+                    "500": {
+                        "description": "unknown error"
+                    },
+                    "404": {
+                        "description": "invalid parameters"
+                    },
+                    "200": {
+                        "description": "csv with yield data for the parameters"
+                    }
+                },
+                "summary": "get history from rma transitional yield dataset",
+                "operationId": "get history from rma transitional yield dataset",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "type": "string",
+                        "description": "enter your token"
+                    },
+                    {
+                        "name": "impute",
+                        "in": "query",
+                        "type": "boolean",
+                        "description": "set to true to use Arbol-calculated multipliers on all soybean values",
+                        "default": false
+                    }
+                ],
+                "produces": [
+                    "text/csv"
+                ],
+                "tags": [
+                    "Transitional Yield Values"
+                ]
+            }
+        },
+        "/user/get_token": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "lookup a user account and associated api key",
+                "operationId": "lookup a user account and associated api key",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "type": "string",
+                        "description": "enter your token"
+                    },
+                    {
+                        "name": "email",
+                        "in": "query",
+                        "type": "string",
+                        "format": "email",
+                        "required": true,
+                        "description": "enter your email"
+                    },
+                    {
+                        "name": "password",
+                        "in": "query",
+                        "type": "string",
+                        "required": true,
+                        "description": "enter password"
+                    }
+                ],
+                "tags": [
+                    "Account Registration"
+                ]
+            }
+        },
+        "/user/register": {
+            "post": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "register a new user",
+                "operationId": "register a new user",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "type": "string",
+                        "description": "enter your token"
+                    },
+                    {
+                        "name": "email",
+                        "in": "query",
+                        "type": "string",
+                        "format": "email",
+                        "required": true,
+                        "description": "enter your email"
+                    },
+                    {
+                        "name": "password",
+                        "in": "query",
+                        "type": "string",
+                        "required": true,
+                        "description": "enter password"
+                    },
+                    {
+                        "name": "first_name",
+                        "in": "query",
+                        "type": "string",
+                        "required": true,
+                        "description": "enter your first name"
+                    },
+                    {
+                        "name": "last_name",
+                        "in": "query",
+                        "type": "string",
+                        "required": true,
+                        "description": "enter your last name"
+                    },
+                    {
+                        "name": "country",
+                        "in": "query",
+                        "type": "string",
+                        "required": true,
+                        "description": "enter your country"
+                    },
+                    {
+                        "name": "organization",
+                        "in": "query",
+                        "type": "string",
+                        "required": true,
+                        "description": "enter your organization"
+                    }
+                ],
+                "tags": [
+                    "Account Registration"
+                ]
+            }
+        },
+        "/yield/valid_commodities/{state}_{county}": {
+            "parameters": [
+                {
+                    "in": "path",
+                    "description": "County code",
+                    "name": "county",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "in": "path",
+                    "description": "State code",
+                    "name": "state",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "summary": "get valid commodity names and codes for yield datasets",
+                "operationId": "get valid commodity names and codes for sco yield dataset",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "SCO Yield History"
+                ]
+            }
+        },
+        "/yield/{commodity}_{state}_{county}": {
+            "parameters": [
+                {
+                    "in": "path",
+                    "description": "County code",
+                    "name": "county",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "in": "path",
+                    "description": "State code",
+                    "name": "state",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "in": "path",
+                    "description": "Commodity code",
+                    "name": "commodity",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "responses": {
+                    "500": {
+                        "description": "unknown error"
+                    },
+                    "404": {
+                        "description": "invalid parameters"
+                    },
+                    "200": {
+                        "description": "csv with yield data for the parameters"
+                    }
+                },
+                "summary": "get history from sco yield dataset",
+                "operationId": "get history from sco yield dataset",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "type": "string",
+                        "description": "enter your token"
+                    },
+                    {
+                        "name": "impute",
+                        "in": "query",
+                        "type": "boolean",
+                        "description": "set to true to use Arbol-calculated multipliers on all soybean values",
+                        "default": false
+                    },
+                    {
+                        "name": "fill",
+                        "in": "query",
+                        "type": "boolean",
+                        "description": "set to true to use vhi-imputed yield values to fill gaps in sco",
+                        "default": false
+                    }
+                ],
+                "produces": [
+                    "text/csv"
+                ],
+                "tags": [
+                    "SCO Yield History"
+                ]
+            }
+        }
+    },
+    "info": {
+        "title": "dClimate API",
+        "version": "v3",
+        "description": "<center> <h2>  Get decentralized weather data from dClimate IPFS Database. Using dWeather-Python-Client version: <b>2.1.3</b></h2> </center>\n\n---\n&nbsp;\n#### Getting started:\n#### [API Registration Walkthrough](https://www.youtube.com/watch?v=ixbhdFToEPI)\n#### [dClimate API Walkthough](https://www.youtube.com/watch?v=qrtGGbvLj40)\n&nbsp;\n#### Learn more about dClimate:\n#### [dClimate Home Page](https://www.dclimate.net/)\n#### [dClimate Github](https://github.com/dClimate)\n&nbsp;\n<center> <h2> API Documentation: </h2> </center>\n---"
+    },
+    "produces": [
+        "application/json"
+    ],
+    "consumes": [
+        "application/json"
+    ],
+    "tags": [
+        {
+            "name": "Account Registration"
+        },
+        {
+            "name": "Dataset Information"
+        },
+        {
+            "name": "Grid File Dataset History"
+        },
+        {
+            "name": "GFS Forecasts"
+        },
+        {
+            "name": "GHCN Dataset History"
+        },
+        {
+            "name": "CME Station History"
+        },
+        {
+            "name": "Dutch Station History"
+        },
+        {
+            "name": "German Station History"
+        },
+        {
+            "name": "Tropical Storms Data"
+        },
+        {
+            "name": "USDA RMA Codes"
+        },
+        {
+            "name": "SCO Yield History"
+        },
+        {
+            "name": "Transitional Yield Values"
+        },
+        {
+            "name": "FSA Irrigation Data"
+        },
+        {
+            "name": "Drought Monitor"
+        },
+        {
+            "name": "Biomass"
+        }
+    ],
+    "responses": {
+        "ParseError": {
+            "description": "When a mask can't be parsed"
+        },
+        "MaskError": {
+            "description": "When any error occurs on mask"
+        }
+    }
+}

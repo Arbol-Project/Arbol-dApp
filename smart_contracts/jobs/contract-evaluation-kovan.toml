@@ -1,8 +1,7 @@
 type = "directrequest"
 schemaVersion = 1
-name = "Get Contract Evaluation"
-evmChainID = 137
-contractAddress = "0x76dfA9a36db355F101B241b66e2fA97f7Ca09C24"
+name = "Get Contract Evaluation Kovan"
+contractAddress = "0xf22292B1510dfd6827f7C08d1CEa664C10FC8834"
 maxTaskDuration = "30s"
 observationSource = """
     decode_log   [type=ethabidecodelog
@@ -17,7 +16,8 @@ observationSource = """
                   abi="fulfillOracleRequest(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes32 data)"
                   data="{\\"requestId\\": $(decode_log.requestId), \\"payment\\": $(decode_log.payment), \\"callbackAddress\\": $(decode_log.callbackAddr), \\"callbackFunctionId\\": $(decode_log.callbackFunctionId), \\"expiration\\": $(decode_log.cancelExpiration), \\"data\\": $(encode_data)}"
                  ]
-    submit_tx    [type=ethtx to="0x76dfA9a36db355F101B241b66e2fA97f7Ca09C24" data="$(encode_tx)"]
+    submit_tx    [type=ethtx to="0xf22292B1510dfd6827f7C08d1CEa664C10FC8834" data="$(encode_tx)"]
     decode_log -> decode_cbor -> arbol_dapp -> parse -> encode_data -> encode_tx -> submit_tx
 """
-externalJobID = "ccaf1bfe-97d8-469c-aff3-95a0aaa61e27"
+externalJobID = "90cffafb-05d8-4ee0-8fce-afa2a8f93452"
+evmChainID = 42

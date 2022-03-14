@@ -5,9 +5,10 @@ from datetime import datetime, timedelta
 from dweather.dweather_client import client
 
 
-class dAppLoader:
-    ''' Base loader class for Arbol dApp weather contracts. Uses dWeather Python client
-        to get historical weather data from IPFS and computes a single time series 
+class DClimateLoader:
+    ''' Base loader class for dClimate weather data and Arbol dApp weather contracts. 
+        Uses dWeather Python client to get historical weather data from IPFS and,
+        in the case of contract evaluation requests computes a single time series 
         for a specified station or averaged over a number of locations
     '''
     def __init__(self, dataset_name, imperial_units=False, **kwargs):
@@ -28,7 +29,7 @@ class dAppLoader:
         raise NotImplementedError
 
 
-class GFDatasetLoader(dAppLoader):
+class GridcellLoader(DClimateLoader):
     ''' Loader class for grid file datasets. Uses dWeather Python client
         to get historical gridcell data from IPFS for specified locations and
         computes single time series averaged over all locations
@@ -79,7 +80,7 @@ class GFDatasetLoader(dAppLoader):
         return series
 
 
-class GHCNDatasetLoader(dAppLoader):
+class StationLoader(DClimateLoader):
     ''' Loader class for GHCN station datasets. Uses dWeather Python client
         to get historical GHCN data from IPFS for specified weather station
     '''

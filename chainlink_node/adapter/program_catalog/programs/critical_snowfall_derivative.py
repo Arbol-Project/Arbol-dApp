@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from program_catalog.tools.loaders import GHCNDatasetLoader
+from program_catalog.tools.loaders import StationLoader
 
 
 class CriticalSnowfallDerivative:
@@ -45,7 +45,7 @@ class CriticalSnowfallDerivative:
             Parameters: params (dict), dictionary of required contract parameters
             Returns: number, the determined payout (0 if not awarded)
         '''
-        loader = GHCNDatasetLoader(params['dates'],
+        loader = StationLoader(params['dates'],
                                     params['station_id'],
                                     params['weather_variable'],
                                     dataset_name=params['dataset'],

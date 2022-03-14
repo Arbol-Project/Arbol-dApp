@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from program_catalog.tools.loaders import GFDatasetLoader
+from program_catalog.tools.loaders import GridcellLoader
 
 
 class RainfallDerivative:
@@ -45,7 +45,7 @@ class RainfallDerivative:
             Parameters: params (dict), dictionary of required contract parameters
             Returns: number, the determined payout (0 if not awarded)
         '''
-        loader = GFDatasetLoader(params['locations'],
+        loader = GridcellLoader(params['locations'],
                                 params['dataset'],
                                 imperial_units=params.get('imperial_units', False)
                                 )

@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 
 from adapter import Adapter
+from api import API
 
 
 def build_app():
@@ -19,8 +20,17 @@ def build_app():
         data = request.get_json()
         if data == '':
             data = {}
-        adapter = Adapter(data)
-        return jsonify(adapter.result)    
+        response = Adapter(data)
+        return jsonify(response.result)    
+
+    @app.route('/api', methods=['POST'])
+    def call_api():
+        ''' Primary route for dClimate API requests to the adapter '''
+        data = request.get_json()
+        if data == '':
+            data = {}
+        response = API(data)
+        return jsonify(response.result)    
 
     @app.route('/health', methods=['POST'])
     def health_check():

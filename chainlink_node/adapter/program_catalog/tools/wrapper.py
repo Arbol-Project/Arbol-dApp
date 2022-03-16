@@ -21,48 +21,59 @@ yield/valid_commodities
 
 
 def get_drought_monitor_history_wrapper(args):
+    ''' Returns Dict '''
     return client.get_drought_monitor_history(**args)
 
 
 def get_ceda_biomass_wrapper(args):
+    ''' Returns BytesIO '''
     return client.get_ceda_biomass(**args)
 
 
 def get_tropical_storms_wrapper(args):
-    return client.get_tropical_storms(**args)
+    ''' Returns String '''
+    data = client.get_tropical_storms(**args)
+    data = data.to_json()
+    return data
 
 
 def get_cme_station_history_wrapper(args):
+    ''' Returns Dict '''
     default_args = {"desired_units": None, "ipfs_timeout": None}
     default_args.update(args)
     return client.get_cme_station_history(**args)
 
 
 def get_dutch_station_history_wrapper(args):
+    ''' Returns Dict '''
     default_args = {"dataset": "dutch_stations-daily", "desired_units": None, "ipfs_timeout": None}
     default_args.update(args)
     return client.get_european_station_history(**args)
 
 
 def get_forecasts_wrapper(args):
+    ''' Returns Dict '''
     default_args = {"also_return_metadata": False, "also_return_snapped_coordinates": True, "use_imperial_units": True, "desired_units": None, "ipfs_timeout": None, "convert_to_local_time": True}
     default_args.update(args)
     return client.get_forecasts(**args)
 
 
 def get_german_station_history_wrapper(args):
+    ''' Returns Dict '''
     default_args = {"dataset": "dwd_stations-daily", "desired_units": None, "ipfs_timeout": None}
     default_args.update(args)
     return client.get_european_station_history(**args)
 
 
 def get_irrigation_data_wrapper(args):
+    ''' Returns String '''
     default_args = {"ipfs_timeout": None}
     default_args.update(args)
     return client.get_irrigation_data(**args)
 
 
 def get_transitional_yield_history_wrapper(args):
+    ''' Returns String '''
     if args.get('impute', False):
         args['dataset'] = 'rma_t_yield_imputed-single-value'
     else:
@@ -73,6 +84,7 @@ def get_transitional_yield_history_wrapper(args):
 
 
 def get_yield_history_wrapper(args):
+    ''' Returns String '''
     if args.get('impute', False):
         args['dataset'] = 'rmasco_imputed-yearly'
     elif args.get('fill', False):
@@ -85,6 +97,7 @@ def get_yield_history_wrapper(args):
 
 
 def get_station_history_wrapper(args):
+    ''' Returns String '''
     default_args = {"dataset": "ghcnd", "station_id": "USW00003016", "use_imperial_units": True, "desired_units": None, "ipfs_timeout": None}
     default_args.update(args)
     data = client.get_station_history(**args)
@@ -92,10 +105,12 @@ def get_station_history_wrapper(args):
     if data.empty:
         raise ValueError('No data returned for request')
     data = data.set_axis(pd.to_datetime(data.index)).sort_index()
+    data = data.to_json()
     return data
 
 
 def get_gridcell_history_wrapper(args):
+    ''' Returns String '''
     default_args = {"also_return_metadata": False, "also_return_snapped_coordinates": True, "use_imperial_units": True, "desired_units": None, "ipfs_timeout": None, "as_of": None, "convert_to_local_time": True}
     default_args.update(args)
     data = client.get_gridcell_history(**args)
@@ -104,10 +119,12 @@ def get_gridcell_history_wrapper(args):
     else:
         data = pd.Series(data)
     data = data.set_axis(pd.to_datetime(data.index, utc=True)).sort_index()
+    data = data.to_json()
     return data
 
 
 def get_metadata_wrapper(args):
+    ''' Returns Dict '''
     hash = client.get_heads()[args['dataset']]
     metadata = client.get_metadata(hash)
     if args.get('full_metadata', False):
@@ -186,7 +203,7 @@ def parse_request(data):
     request_data = data.removeprefix(API_MAP['basePath'])
 
     # get endpoint
-    request_parsed = urlparse(request_data)
+    request_parsed = list(urlparse(request_data))
     request_paths = re.split('/', request_parsed[2])
     key = request_paths[0]
     api_endpoint = API_MAP['paths'].get(key, None)
@@ -204,18 +221,22 @@ def parse_request(data):
             params += re.split('_', req)
     else:
         params = re.split('_|/', request_parsed[2])[1:]
-    queries = request_parsed[4].split('&')
+    if request_parsed[4] == '':
+        queries = []
+    else:
+        queries = request_parsed[4].split('&')
     if len(params) != len(endpoint_primaries):
         valid = False
         return 'Improperly formatted request URL, incompatible parameters', valid
 
-    # cast floats
+    # cast floats and set primary args
     floats = ['lat', 'lon', 'radius', 'max_lat', 'max_lon', 'min_lat', 'min_lon']
     for i in range(len(endpoint_primaries)):
         param = endpoint_primaries[i]
         if param in floats:
             args[param] = float(params[i])
-        args[param] = params[i]
+        else:
+            args[param] = params[i]
 
     # parse secondary parameters
     for j in range(len(queries)):
@@ -226,7 +247,7 @@ def parse_request(data):
             valid = False
             return 'Improperly formatted request URL, incompatible parameters', valid
 
-        # type check parameters
+        # type check parameters and set secondary args
         if param in floats:
             args[param] = float(params[i])
         if param_type != 'string':

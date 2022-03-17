@@ -19,7 +19,6 @@ transitional_yield/valid_commodities
 yield/valid_commodities
 '''
 
-
 def get_drought_monitor_history_wrapper(args):
     ''' Returns Dict '''
     return client.get_drought_monitor_history(**args)
@@ -105,7 +104,7 @@ def get_station_history_wrapper(args):
     if data.empty:
         raise ValueError('No data returned for request')
     data = data.set_axis(pd.to_datetime(data.index)).sort_index()
-    data = data.to_json()
+    data = data.astype(str).to_json()
     return data
 
 
@@ -119,7 +118,7 @@ def get_gridcell_history_wrapper(args):
     else:
         data = pd.Series(data)
     data = data.set_axis(pd.to_datetime(data.index, utc=True)).sort_index()
-    data = data.to_json()
+    data = data.astype(str).to_json()
     return data
 
 

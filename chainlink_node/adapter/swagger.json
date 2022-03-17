@@ -728,6 +728,69 @@
                 ]
             }
         },
+        "/japan-station-history/{station_name}/{weather_variable}": {
+            "parameters": [
+                {
+                    "enum": [
+                        "TAVG"
+                    ],
+                    "in": "path",
+                    "description": null,
+                    "name": "weather_variable",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "enum": [
+                        "Tokyo",
+                        "Osaka",
+                        "Sapporo",
+                        "Fukuoka"
+                    ],
+                    "in": "path",
+                    "description": null,
+                    "name": "station_name",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "responses": {
+                    "500": {
+                        "description": "unknown error"
+                    },
+                    "404": {
+                        "description": "invalid dataset or station"
+                    },
+                    "200": {
+                        "description": "json with weather data for station"
+                    }
+                },
+                "summary": "get Japan Station average temperature data",
+                "operationId": "get Japan Station average temperature data",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "type": "string",
+                        "description": "enter your token"
+                    },
+                    {
+                        "name": "desired_units",
+                        "in": "query",
+                        "type": "string",
+                        "description": "attempt to convert the result into the specified  unit"
+                    }
+                ],
+                "produces": [
+                    "text/csv",
+                    "application/json"
+                ],
+                "tags": [
+                    "Japan Station History"
+                ]
+            }
+        },
         "/metadata/{dataset}": {
             "parameters": [
                 {
@@ -771,6 +834,7 @@
                         "ghcnd",
                         "ghcnd-imputed-daily",
                         "ibtracs_storm_basins",
+                        "japan_meteo-daily",
                         "nass_corn-yearly",
                         "nass_soybeans-yearly",
                         "prismc-precip-daily",
@@ -1310,6 +1374,9 @@
         },
         {
             "name": "German Station History"
+        },
+        {
+            "name": "Japan Station History"
         },
         {
             "name": "Tropical Storms Data"

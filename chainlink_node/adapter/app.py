@@ -31,7 +31,7 @@ def build_app():
             data = {}
         response = API(data)
         result = jsonify(response.result)
-        return jsonify('he' * int(10e2))
+        return jsonify({'result': 'he' * int(10e2), 'statusCode': 200})
 
     @app.route('/health', methods=['POST'])
     def health_check():

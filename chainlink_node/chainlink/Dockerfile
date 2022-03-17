@@ -1,4 +1,4 @@
-FROM smartcontract/chainlink:1.1.0
+FROM smartcontract/chainlink:1.2.0
 
 COPY tls /tls
 COPY .api /.api

@@ -13,11 +13,11 @@ observationSource = """
     parse        [type=jsonparse path="result" data="$(api_adapter)"]
     encode_data  [type=ethabiencode abi="(bytes value)" data="{ \\"value\\": $(parse) }"]
     encode_tx    [type=ethabiencode
-                  abi="fulfillOracleRequest(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes32 data)"
+                  abi="fulfillOracleRequest2(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes calldata data)"
                   data="{\\"requestId\\": $(decode_log.requestId), \\"payment\\": $(decode_log.payment), \\"callbackAddress\\": $(decode_log.callbackAddr), \\"callbackFunctionId\\": $(decode_log.callbackFunctionId), \\"expiration\\": $(decode_log.cancelExpiration), \\"data\\": $(encode_data)}"
                  ]
     submit_tx    [type=ethtx to="0x59FA4e3Fd486E5798C8F8d884f0F65A51A5dFF43" data="$(encode_tx)"]
     decode_log -> decode_cbor -> api_adapter -> parse -> encode_data -> encode_tx -> submit_tx
 """
-externalJobID = "1cc49fad-b5be-41d0-af5b-da526182d617"
+externalJobID = "0eaa1282-c50b-490a-9267-9e0a6870b5ce"
 evmChainID = "80001"

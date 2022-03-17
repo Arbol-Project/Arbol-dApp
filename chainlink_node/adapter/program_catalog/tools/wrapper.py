@@ -64,6 +64,13 @@ def get_german_station_history_wrapper(args):
     return client.get_european_station_history(**args)
 
 
+def get_japan_station_history_wrapper(args):
+    ''' Returns Dict '''
+    default_args = {"ipfs_timeout": None}
+    default_args.update(args)
+    return client.get_japan_station_history(**args)
+
+
 def get_irrigation_data_wrapper(args):
     ''' Returns String '''
     default_args = {"ipfs_timeout": None}
@@ -163,7 +170,8 @@ def get_api_mapping(file_path):
         'metadata': get_metadata_wrapper,
         'storms': get_tropical_storms_wrapper,
         'transitional_yield': get_transitional_yield_history_wrapper,
-        'yield': get_yield_history_wrapper
+        'yield': get_yield_history_wrapper,
+        'japan-station-history': get_japan_station_history_wrapper
     }
 
     with open(file_path, 'r') as swagger:

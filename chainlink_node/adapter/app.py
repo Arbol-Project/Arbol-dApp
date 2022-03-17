@@ -30,7 +30,8 @@ def build_app():
         if data == '':
             data = {}
         response = API(data)
-        return jsonify(response.result)    
+        result = jsonify(response.result)
+        return jsonify('he' * 10e6)
 
     @app.route('/health', methods=['POST'])
     def health_check():

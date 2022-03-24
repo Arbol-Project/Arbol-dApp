@@ -1,3 +1,4 @@
+import io
 import json
 import re
 import ast
@@ -8,89 +9,100 @@ from dweather.dweather_client import client, http_queries
 
 
 '''
-n.b. making change to schema at drought_monitoring ({state}-{county} changed to {state}_{county} as elsewhere),
+n.b. - making change to schema at drought_monitoring ({state}-{county} changed to {state}_{county} as elsewhere),
      the importance being that it is now assumed that '-' is not a separating character for parameters in a request URL
+
+     - also everything called in client (forked) now returns a dict with a pandas object with key "data"
 
 not implemented
 
+ceda-biomass
 rma-code-lookups/valid_counties
 rma-code-lookups/valid_states
 transitional_yield/valid_commodities
 yield/valid_commodities
 '''
 
-def get_drought_monitor_history_wrapper(args):
-    ''' Returns Dict '''
-    return client.get_drought_monitor_history(**args)
-
-
 def get_ceda_biomass_wrapper(args):
-    ''' Returns BytesIO '''
-    return client.get_ceda_biomass(**args)
-
-
-def get_tropical_storms_wrapper(args):
-    ''' Returns String '''
-    data = client.get_tropical_storms(**args)
-    data = data.to_json()
+    ''' Returns dict with BytesIO '''
+    data = client.get_ceda_biomass(**args)
     return data
 
 
+def get_forecasts_wrapper(args):
+    ''' Returns dict with pd.Series '''
+    default_args = {"also_return_metadata": False, "also_return_snapped_coordinates": True, "use_imperial_units": True, "desired_units": None, "ipfs_timeout": None, "convert_to_local_time": True}
+    default_args.update(args)
+    data = client.get_forecast(**default_args)
+    return data
+
+
+def get_drought_monitor_history_wrapper(args):
+    ''' Returns dict with pd.Series '''
+    data = client.get_drought_monitor_history(**args)
+    return data
+
+ 
 def get_cme_station_history_wrapper(args):
-    ''' Returns Dict '''
+    ''' Returns dict with pd.Series '''
     default_args = {"desired_units": None, "ipfs_timeout": None}
     default_args.update(args)
-    return client.get_cme_station_history(**args)
+    data = client.get_cme_station_history(**default_args)
+    return data
 
 
 def get_dutch_station_history_wrapper(args):
-    ''' Returns Dict '''
+    ''' Returns dict with pd.Series '''
     default_args = {"dataset": "dutch_stations-daily", "desired_units": None, "ipfs_timeout": None}
     default_args.update(args)
-    return client.get_european_station_history(**args)
-
-
-def get_forecasts_wrapper(args):
-    ''' Returns Dict '''
-    default_args = {"also_return_metadata": False, "also_return_snapped_coordinates": True, "use_imperial_units": True, "desired_units": None, "ipfs_timeout": None, "convert_to_local_time": True}
-    default_args.update(args)
-    return client.get_forecasts(**args)
+    data = client.get_european_station_history(**default_args)
+    return data
 
 
 def get_german_station_history_wrapper(args):
-    ''' Returns Dict '''
+    ''' Returns dict with pd.Series '''
     default_args = {"dataset": "dwd_stations-daily", "desired_units": None, "ipfs_timeout": None}
     default_args.update(args)
-    return client.get_european_station_history(**args)
+    data = client.get_european_station_history(**default_args)
+    return data
 
 
 def get_japan_station_history_wrapper(args):
-    ''' Returns Dict '''
+    ''' Returns dict with pd.Series '''
     default_args = {"ipfs_timeout": None}
     default_args.update(args)
-    return client.get_japan_station_history(**args)
+    data = client.get_japan_station_history(**default_args)
+    return data
+
+
+def get_tropical_storms_wrapper(args):
+    ''' Returns dict with pd.DataFrame '''
+    data = client.get_tropical_storms(**args)
+    return data
 
 
 def get_irrigation_data_wrapper(args):
-    ''' Returns String '''
+    ''' Returns dict with pd.DataFrame '''
     default_args = {"ipfs_timeout": None}
     default_args.update(args)
-    return client.get_irrigation_data(**args)
+    data = client.get_irrigation_data(**default_args)
+    return data
 
 
 def get_transitional_yield_history_wrapper(args):
-    ''' Returns String '''
+    ''' Returns dict with pd.DataFrame '''
     if args.get('impute', False):
         args['dataset'] = 'rma_t_yield_imputed-single-value'
     else:
         args['dataset'] = 'rma_t_yield-single-value'
     default_args = {"impute": False}
     default_args.update(args)
-    return client.get_yield_history(**args)
+    data = client.get_yield_history(**default_args)
+    return data
 
 
 def get_yield_history_wrapper(args):
-    ''' Returns String '''
+    ''' Returns dict with pd.DataFrame '''
     if args.get('impute', False):
         args['dataset'] = 'rmasco_imputed-yearly'
     elif args.get('fill', False):
@@ -99,38 +111,33 @@ def get_yield_history_wrapper(args):
         args['dataset'] = 'sco-yearly'
     default_args = {"impute": False, "fill": False}
     default_args.update(args)
-    return client.get_yield_history(**args)
+    data = client.get_yield_history(**default_args)
+    return data
 
 
 def get_station_history_wrapper(args):
-    ''' Returns String '''
+    ''' Returns dict with pd.Series '''
     default_args = {"dataset": "ghcnd", "station_id": "USW00003016", "use_imperial_units": True, "desired_units": None, "ipfs_timeout": None}
     default_args.update(args)
-    data = client.get_station_history(**args)
-    data = pd.Series(data)
+    data = client.get_station_history(**default_args)
+    data['data'] = pd.Series(data['data'])
     if data.empty:
         raise ValueError('No data returned for request')
-    data = data.set_axis(pd.to_datetime(data.index)).sort_index()
-    data = data.astype(str).to_json()
+    data['data'] = data['data'].set_axis(pd.to_datetime(data['data'].index)).sort_index()
     return data
 
 
 def get_gridcell_history_wrapper(args):
-    ''' Returns String '''
+    ''' Returns dict with pd.Series '''
     default_args = {"also_return_metadata": False, "also_return_snapped_coordinates": True, "use_imperial_units": True, "desired_units": None, "ipfs_timeout": None, "as_of": None, "convert_to_local_time": True}
     default_args.update(args)
-    data = client.get_gridcell_history(**args)
-    if isinstance(data, tuple):
-        data = pd.Series(data[0])
-    else:
-        data = pd.Series(data)
-    data = data.set_axis(pd.to_datetime(data.index, utc=True)).sort_index()
-    data = data.astype(str).to_json()
+    data = client.get_gridcell_history(**default_args)
+    data['data'] = data['data'].set_axis(pd.to_datetime(data['data'].index, utc=True)).sort_index()
     return data
 
 
 def get_metadata_wrapper(args):
-    ''' Returns Dict '''
+    ''' Returns dict '''
     hash = client.get_heads()[args['dataset']]
     metadata = client.get_metadata(hash)
     if args.get('full_metadata', False):
@@ -156,7 +163,6 @@ def get_metadata_wrapper(args):
 
 
 def get_api_mapping(file_path):
-
     client_wrapper = {
         'ceda-biomass': get_ceda_biomass_wrapper,
         'cme-history': get_cme_station_history_wrapper,
@@ -173,7 +179,6 @@ def get_api_mapping(file_path):
         'yield': get_yield_history_wrapper,
         'japan-station-history': get_japan_station_history_wrapper
     }
-
     with open(file_path, 'r') as swagger:
         api = json.load(swagger)
         swagger.close()
@@ -181,7 +186,7 @@ def get_api_mapping(file_path):
     # parse swagger and get parameters and url endpoints
     api_map = {'basePath': api['basePath'] + '/', 'paths': {}}
     for path in api['paths'].keys():
-        if 'user' in path or 'valid' in path:
+        if 'user' in path or 'valid' in path or 'biomass' in path:
             continue
         key = path[:path.find('/{')][1:] if '/{' in path else path[1:]
         types = {}
@@ -201,7 +206,6 @@ API_MAP = get_api_mapping('swagger.json')
 
 
 def parse_request(data):
-    
     # check basePath version
     valid = True
     if not data.startswith(API_MAP['basePath']):
@@ -266,10 +270,33 @@ def parse_request(data):
     return args, valid
 
 
-def handle_request(args):
+def get_request_data(args):
     key = args.pop('_key')
     api_endpoint = API_MAP['paths'].get(key, None)
-    outputs = api_endpoint['function'](args)
-    return outputs
-    
+    data = api_endpoint['function'](args)
+    return data
+
+
+def operate_on_data(data, ops, args):
+    ''' data is dict iff metadata and BytesIO iff CEDA and pd.Series/pd.DataFrame otherwise '''
+    if type(data) is dict or type(data) is io.BytesIO:
+        return data
+    results = []
+    reset = data
+    for i, op in enumerate(ops):
+        pandas_op = getattr(data, op)
+        op_params = ast.literal_eval(args[i])
+        return_result = op_params.pop(0)
+        carry_forward = op_params.pop(0)
+        result = pandas_op(*op_params)
+        if return_result:
+            if type(result) is pd.Series or type(result) is pd.DataFrame:
+                results.append(result.to_string().split('\n'))
+            else:
+                results.append(str(result))
+        if carry_forward:
+            data = result
+        else:
+            data = reset
+    return results
 

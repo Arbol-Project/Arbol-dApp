@@ -1,8 +1,8 @@
 import sys, os
+from functools import partial
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'dweather'))
 
-from program_catalog.tools.wrapper import parse_request, handle_request
-
+from program_catalog.tools.wrapper import parse_request, get_request_data, operate_on_data
 
 class API:
     ''' External Adapter class that implements retrieval of dClimate weather data on IPFS '''
@@ -35,20 +35,23 @@ class API:
             self.request_error = 'no request url specified'
             return False
         result, valid = parse_request(request_url)
-        if valid:
-            self.request_args = result
-            return True
-        else:
+        if not valid:
             self.request_error = result
             return False
+        self.request_args = result
+        self.request_operations = self.request_data.get('request_ops', None)
+        self.request_parameters = self.request_data.get('request_params', [])
+        return True
 
     def execute_request(self):
         ''' Get the designated program and determine whether the associated
             contract should payout and if so then for how much
         '''
         try:
-            data = handle_request(self.request_args)
-            self.result_success(data)
+            result = get_request_data(self.request_args)
+            if self.request_operations is not None:
+                result['data'] = operate_on_data(result['data'], self.request_operations, self.request_parameters)
+            self.result_success(result)
         except Exception as e:
             self.result_error(e)
 

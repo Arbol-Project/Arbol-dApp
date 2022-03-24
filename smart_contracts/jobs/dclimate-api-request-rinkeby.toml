@@ -1,7 +1,7 @@
 type = "directrequest"
 schemaVersion = 1
-name = "dclimate-api-request-mumbai"
-contractAddress = "0x59FA4e3Fd486E5798C8F8d884f0F65A51A5dFF43"
+name = "dclimate-api-request-rinkeby"
+contractAddress = "0xA3ee2ccC1D79023E2b02d411a0408A0340fea252"
 maxTaskDuration = "30s"
 observationSource = """
     decode_log   [type=ethabidecodelog
@@ -16,8 +16,8 @@ observationSource = """
                   abi="fulfillOracleRequest2(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes calldata data)"
                   data="{\\"requestId\\": $(decode_log.requestId), \\"payment\\": $(decode_log.payment), \\"callbackAddress\\": $(decode_log.callbackAddr), \\"callbackFunctionId\\": $(decode_log.callbackFunctionId), \\"expiration\\": $(decode_log.cancelExpiration), \\"data\\": $(encode_data)}"
                  ]
-    submit_tx    [type=ethtx evmChainID="80001" to="0x59FA4e3Fd486E5798C8F8d884f0F65A51A5dFF43" data="$(encode_tx)"]
+    submit_tx    [type=ethtx evmChainID="4" to="0xA3ee2ccC1D79023E2b02d411a0408A0340fea252" data="$(encode_tx)"]
     decode_log -> decode_cbor -> api_adapter -> parse -> encode_data -> encode_tx -> submit_tx
 """
-externalJobID = "b886eeae-31f7-46ac-898c-5b568a9a5503"
-evmChainID = "80001"
+externalJobID = "c248067f-ed5c-484f-9076-90165535601a"
+evmChainID = "4"

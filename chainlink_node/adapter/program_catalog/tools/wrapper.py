@@ -3,6 +3,7 @@ import json
 import re
 import ast
 import pandas as pd
+from datetime import timezone, datetime
 from urllib.parse import urlparse
 
 from dweather.dweather_client import client, http_queries
@@ -21,6 +22,12 @@ rma-code-lookups/valid_counties
 rma-code-lookups/valid_states
 transitional_yield/valid_commodities
 yield/valid_commodities
+
+
+need to try
+    irrigation
+    yield
+    tropical storms
 '''
 
 def get_ceda_biomass_wrapper(args):
@@ -278,7 +285,11 @@ def get_request_data(args):
 
 
 def operate_on_data(data, ops, args):
-    ''' data is dict iff metadata and BytesIO iff CEDA and pd.Series/pd.DataFrame otherwise '''
+    ''' 
+        data is dict iff metadata and BytesIO iff CEDA and pd.Series/pd.DataFrame otherwise 
+        18 digits of precision on decimals 
+        ms on timestamps
+    '''
     if type(data) is dict or type(data) is io.BytesIO:
         return data
     results = []
@@ -290,8 +301,12 @@ def operate_on_data(data, ops, args):
         carry_forward = op_params.pop(0)
         result = pandas_op(*op_params)
         if return_result:
-            if type(result) is pd.Series or type(result) is pd.DataFrame:
-                results.append(result.to_string().split('\n'))
+            if type(result) is datetime:
+                results.append(str(int(result.replace(tzinfo=timezone.utc).timestamp() * 1000)))
+            elif 'float' in str(type(result)) or 'int' in str(type(result)):
+                results.append(str(int(float(result) * 1e18)))
+            elif type(result) is pd.Series or type(result) is pd.DataFrame:
+                results.append(result.to_string())
             else:
                 results.append(str(result))
         if carry_forward:

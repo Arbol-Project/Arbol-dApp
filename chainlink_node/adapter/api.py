@@ -52,7 +52,8 @@ class API:
             if self.request_operations is not None:
                 result['data'] = operate_on_data(result['data'], self.request_operations, self.request_parameters)
             # string list, currently only supporting return values and units, not metadata, snapped cooordinates, etc
-            payload = (['unit', result.get('unit', None)] if 'unit' in result else []) + ['data'] + result['data']
+            # also first just one return value at a time (along with unit)
+            payload = {'unit': result.get('unit', 'no unit'), 'data': result['data']}
             self.result_success(payload)
         except Exception as e:
             self.result_error(e)

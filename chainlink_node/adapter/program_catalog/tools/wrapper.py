@@ -292,7 +292,7 @@ def operate_on_data(data, ops, args):
     '''
     if type(data) is dict or type(data) is io.BytesIO:
         return data
-    results = []
+    # results = []
     reset = data
     for i, op in enumerate(ops):
         pandas_op = getattr(data, op)
@@ -302,16 +302,20 @@ def operate_on_data(data, ops, args):
         result = pandas_op(*op_params)
         if return_result:
             if type(result) is datetime:
-                results.append(str(int(result.replace(tzinfo=timezone.utc).timestamp() * 1000)))
+                # results.append(str(int(result.replace(tzinfo=timezone.utc).timestamp() * 1000)))
+                return str(int(result.replace(tzinfo=timezone.utc).timestamp() * 1000))
             elif 'float' in str(type(result)) or 'int' in str(type(result)):
-                results.append(str(int(float(result) * 1e18)))
+                # results.append(str(int(float(result) * 1e18)))
+                 return str(int(float(result) * 1e18))
             elif type(result) is pd.Series or type(result) is pd.DataFrame:
-                results.append(result.to_string())
+                # results.append(result.to_string())
+                 return result.to_string()
             else:
-                results.append(str(result))
+                # results.append(str(result))
+                return str(result)
         if carry_forward:
             data = result
         else:
             data = reset
-    return results
+    return ["No Return Specified"]
 

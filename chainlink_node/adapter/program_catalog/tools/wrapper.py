@@ -303,15 +303,17 @@ def operate_on_data(data, ops, args):
         if return_result:
             if type(result) is datetime:
                 # results.append(str(int(result.replace(tzinfo=timezone.utc).timestamp() * 1000)))
-                return str(int(result.replace(tzinfo=timezone.utc).timestamp() * 1000))
+                return int(result.replace(tzinfo=timezone.utc).timestamp() * 1000)
             elif 'float' in str(type(result)) or 'int' in str(type(result)):
                 # results.append(str(int(float(result) * 1e18)))
-                 return str(int(float(result) * 1e18))
+                 return int(float(result) * 1e18)
             elif type(result) is pd.Series or type(result) is pd.DataFrame:
                 # results.append(result.to_string())
+                # need to route this through a separate job
                  return result.to_string()
             else:
                 # results.append(str(result))
+                # need to route this through a separate job
                 return str(result)
         if carry_forward:
             data = result

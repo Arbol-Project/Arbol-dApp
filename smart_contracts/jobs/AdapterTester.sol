@@ -33,7 +33,7 @@ contract MumbaiTester is ChainlinkClient {
 
     /**
      * @dev Callback function for chainlink oracle requests
-        expected output ~0.13754 inch
+        expected output ~0.13754 inch (x1e18)
      */
     function fulfillRequest(bytes32 _requestId, uint256 _result, string memory _unit)
         public

@@ -22,6 +22,7 @@ This Chainlink node supports the following jobs and chains:
         - `string memory unit`: the unit for the returned final value, if applicable. 
 
 Examples can be found in `AdapterTester.sol`.
+
 Explorer pages for Operator contracts:
-- (Mumbai)[https://mumbai.polygonscan.com/address/0x59FA4e3Fd486E5798C8F8d884f0F65A51A5dFF43]
-- (Rinkeby)[https://rinkeby.etherscan.io/address/0xa3ee2ccc1d79023e2b02d411a0408a0340fea252]
+- [Mumbai](https://mumbai.polygonscan.com/address/0x59FA4e3Fd486E5798C8F8d884f0F65A51A5dFF43)
+- [Rinkeby](https://rinkeby.etherscan.io/address/0xa3ee2ccc1d79023e2b02d411a0408a0340fea252)

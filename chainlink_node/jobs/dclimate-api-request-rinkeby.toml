@@ -24,7 +24,7 @@ observationSource           = """
                   abi="fulfillOracleRequest2(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes calldata data)"
                   data="{\\"requestId\\": $(decode_log.requestId), \\"payment\\": $(decode_log.payment), \\"callbackAddress\\": $(decode_log.callbackAddr), \\"callbackFunctionId\\": $(decode_log.callbackFunctionId), \\"expiration\\": $(decode_log.cancelExpiration), \\"data\\": $(encode_data)}"
                  ]
-    submit_tx    [type=ethtx evmChainID="4" fromAddresses="0x4506F70e253DEccCC1a419954606cB3D1E6a9a70" to="0xA3ee2ccC1D79023E2b02d411a0408A0340fea252" data="$(encode_tx)"]
+    submit_tx    [type=ethtx evmChainID="4" from="[\\"0x4506F70e253DEccCC1a419954606cB3D1E6a9a70\\", \\"0x9734bf42238117885a637B852820AE0b8ac8e812\\"]" to="0xA3ee2ccC1D79023E2b02d411a0408A0340fea252" data="$(encode_tx)"]
     
     api_adapter -> unit_parse -> encode_data
     api_adapter -> data_parse -> encode_data

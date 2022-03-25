@@ -50,7 +50,7 @@ contract RinkebyTester is ChainlinkClient {
     uint256 private constant ORACLE_PAYMENT = 0 * 10**2;
     address constant LINK_ADDRESS = 0x01BE23585060835E02B77ef475b0Cc51aA1e0709;
     address constant OPERATOR_ADDRESS = 0xA3ee2ccC1D79023E2b02d411a0408A0340fea252;
-    bytes32 constant JOB_ID = "c248067fed5c484f907690165535601a";
+    bytes32 constant JOB_ID = "0b638cc2bdf84feb8466ddf188ed50b6";
     string request_URL = "/apiv3/dutch-station-history/209/WINDSPEED?use_imperial_units=true";
     string[] request_ops = ["last", "max"];
     string[] request_params = ["[False, True, '1M']", "[True, False]"];

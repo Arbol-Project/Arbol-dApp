@@ -53,7 +53,7 @@ contract RinkebyTester is ChainlinkClient {
     bytes32 constant JOB_ID = "c248067fed5c484f907690165535601a";
     string request_URL = "/apiv3/dutch-station-history/209/WINDSPEED?use_imperial_units=true";
     string[] request_ops = ["last", "max"];
-    string[] request_params = ["[False, True, '1M']", "[True, False]" ,"2"];
+    string[] request_params = ["[False, True, '1M']", "[True, False]"];
     uint256 public data;
     string public unit;
 

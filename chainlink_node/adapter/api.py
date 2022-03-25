@@ -41,8 +41,6 @@ class API:
         self.request_args = result
         self.request_operations = self.request_data.get('request_ops', None)
         self.request_parameters = self.request_data.get('request_params', [])
-        if self.request_operations is None:
-            return False
         return True
 
     def execute_request(self):

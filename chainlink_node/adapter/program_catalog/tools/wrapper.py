@@ -3,7 +3,7 @@ import json
 import re
 import ast
 import pandas as pd
-from datetime import timezone, datetime
+from datetime import timezone, datetime, date, time
 from urllib.parse import urlparse
 
 from dweather.dweather_client import client, http_queries
@@ -286,8 +286,11 @@ def get_request_data(args):
 
 def operate_on_data(data, ops, args):
     ''' 
-        data is dict iff metadata and BytesIO iff CEDA and pd.Series/pd.DataFrame otherwise 
+        data is dict iff metadata and BytesIO iff CEDA (basically not supported)
+            and pd.Series/pd.DataFrame otherwise 
         18 digits of precision on decimals 
+        times are returned as timestamps starting at beginning of unix epoch
+        dates are returned as timestamps starting at beginning of unix epoch to start of date
         ms on timestamps
     '''
     if type(data) is dict or type(data) is io.BytesIO:
@@ -301,9 +304,15 @@ def operate_on_data(data, ops, args):
         carry_forward = op_params.pop(0)
         result = pandas_op(*op_params)
         if return_result:
+            if type(result) is date:
+                result = datetime(result.year, result.month, result.day)
+            if type(result) is time:
+                result = datetime(0, 0, 0, result.hour, result.minute, result.second, result.microsecond)
             if type(result) is datetime:
                 # results.append(str(int(result.replace(tzinfo=timezone.utc).timestamp() * 1000)))
                 return int(result.replace(tzinfo=timezone.utc).timestamp() * 1000)
+            elif type(result) is time:
+                return ""
             elif 'float' in str(type(result)) or 'int' in str(type(result)):
                 # results.append(str(int(float(result) * 1e18)))
                  return int(float(result) * 1e18)

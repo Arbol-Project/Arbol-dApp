@@ -4,6 +4,8 @@ chainlink_node/adapter/tests/payouts
 
 chainlink_node/chainlink/.env
 chainlink_node/chainlink/s3.env
+chainlink_node/chainlink/dclimate.env
+chainlink_node/chainlink/polygon-mainnet.json
 chainlink_node/chainlink/.api
 chainlink_node/chainlink/.password
 chainlink_node/chainlink/secrets*
@@ -31,4 +33,3 @@ __pycache__
 *marketplace*
 *old.readme.md
 nft
-*arbol-contract-evaluation-v0*

@@ -144,7 +144,7 @@ Resources:
           Cpu: 512
           Memory: 1024
           Essential: true
-          Image: smartcontract/chainlink:1.1.0
+          Image: smartcontract/chainlink:1.2.1
           EntryPoint:
             [
               "chainlink",
@@ -183,7 +183,7 @@ Resources:
             - ContainerPath: /tls
               SourceVolume: ChainlinkTLS
           PortMappings:
-            - ContainerPort: 6689
+            - ContainerPort: 6688
       Volumes:
         - Host:
             SourcePath: /home/ec2-user/S3Imports/tls/chainlink
@@ -193,7 +193,7 @@ Resources:
           Name: Chainlink
   taskdefinitionMonitor:
     Type: "AWS::ECS::TaskDefinition"
-    DependsOn: taskdefinitionChainlink
+    DependsOn: serviceChainlink
     Properties:
       Family: dapp-task-monitor
       ContainerDefinitions:
@@ -375,6 +375,9 @@ Resources:
   #         Essential: true
   #         Image: 574269834288.dkr.ecr.us-east-1.amazonaws.com/external-adapter
   #         Memory: 1024
+          # EnvironmentFiles:
+          #   - Type: s3
+          #     Value: "arn:aws:s3:::dapp-files/S3Links/adapter/.env"
   #         # Environment:
   #         # - Name: 'PYTHONUNBUFFERED'
   #         #   Value: '1'
@@ -461,12 +464,12 @@ Resources:
     Properties:
       HealthCheckIntervalSeconds: 10
       HealthCheckPath: /health
-      HealthCheckProtocol: HTTPS
+      HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
       Name: NodeTG
       Port: 443
-      Protocol: HTTPS
+      Protocol: HTTP
       UnhealthyThresholdCount: 2
       VpcId: !Ref VpcId
   NodeRecordSet:
@@ -608,7 +611,7 @@ Resources:
       DesiredCount: 1
       LoadBalancers:
         - ContainerName: chainlink-node
-          ContainerPort: 6689
+          ContainerPort: 6688
           TargetGroupArn: !Ref NodeTG
       Role: !Ref ECSServiceRole
       TaskDefinition: !Ref taskdefinitionChainlink

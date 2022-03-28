@@ -1,24 +1,28 @@
 import sys, os
-from functools import partial
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'dweather'))
 
-from program_catalog.tools.wrapper import parse_request, get_request_data, operate_on_data
+from program_catalog.tools.utils import verify_request, get_contract_payout
 
-class API:
-    ''' External Adapter class that implements retrieval of dClimate weather data on IPFS '''
+
+class Evaluator:
+    ''' External Adapter class that for computing payout evaluations for
+        Arbol weather contracts using dClimate weather data on IPFS
+        and verified contract terms
+    '''
 
     def __init__(self, data):
         ''' Each call to the adapter creates a new Adapter
             instance to handle the request
 
-            Parameters: input (dict), the received request body
+            Parameters: data (dict), the received request body
         '''
-        self.id = data.get('id', '2')
+        self.id = data.get('id', '3')
         self.request_data = data.get('data')
-        if self.validate_request_data():
+        self.validate_request_data()
+        if self.valid:
             self.execute_request()
         else:
-            self.result_error(f'Bad Request: {self.request_error}')
+            self.result_error()
 
     def validate_request_data(self):
         ''' Validate that the received request is properly formatted and includes
@@ -28,33 +32,34 @@ class API:
             Returns: bool, whether the request is valid
         '''
         if self.request_data is None or self.request_data == {}:
-            self.request_error = 'request is empty'
-            return False
-        request_url = self.request_data.get('request_url', None)
-        if request_url is None:
-            self.request_error = 'no request url specified'
-            return False
-        result, valid = parse_request(request_url)
-        if not valid:
-            self.request_error = result
-            return False
-        self.request_args = result
-        self.request_operations = self.request_data.get('request_ops', None)
-        self.request_parameters = self.request_data.get('request_params', [])
-        return True
+            self.request_error = 'request data empty'
+            self.valid = False
+        else:
+            request_uri = self.request_data.get('uri', None)
+            if request_uri is None:
+                self.request_error = 'token URI missing'
+                self.valid =  False
+            else:
+                try:
+                    result, valid = verify_request(request_uri)
+                    if not valid:
+                        self.request_error = result
+                        self.valid = False
+                    else:
+                        self.request_args = result
+                        self.valid = True
+                except Exception as e:
+                    self.valid = False
+                    self.request_error = e.__name__
 
     def execute_request(self):
         ''' Get the designated program and determine whether the associated
             contract should payout and if so then for how much
         '''
         try:
-            result = get_request_data(self.request_args)
-            if self.request_operations is not None:
-                result['data'] = operate_on_data(result['data'], self.request_operations, self.request_parameters)
-            # string list, currently only supporting return values and units, not metadata, snapped cooordinates, etc
-            # also first just one return value at a time (along with unit)
-            payload = {'unit': result.get('unit', 'no unit'), 'data': result['data']}
-            self.result_success(payload)
+            payout = get_contract_payout(self.request_args)
+            self.request_data['result'] = payout
+            self.result_success(payout)
         except Exception as e:
             self.result_error(e)
 

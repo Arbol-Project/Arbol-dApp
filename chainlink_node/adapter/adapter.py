@@ -5,9 +5,10 @@ from program_catalog.directory import get_program
 
 
 class Adapter:
-    ''' External Adapter class that implements the evaluation and conditional
+    ''' V1 External Adapter class that implements the evaluation and conditional
         executione of Arbol weather contracts based on weather data on IPFS
     '''
+    
     def __init__(self, data):
         ''' Each call to the adapter creates a new Adapter
             instance to handle the request

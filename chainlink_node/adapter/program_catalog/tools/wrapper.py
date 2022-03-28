@@ -23,8 +23,7 @@ rma-code-lookups/valid_states
 transitional_yield/valid_commodities
 yield/valid_commodities
 
-
-need to try
+should try
     irrigation
     yield
     tropical storms
@@ -214,10 +213,8 @@ API_MAP = get_api_mapping('swagger.json')
 
 def parse_request(data):
     # check basePath version
-    valid = True
     if not data.startswith(API_MAP['basePath']):
-        valid = False
-        return 'Incompatible API version, please use ' + API_MAP['basePath'], valid
+        return 'Incompatible API version, please use ' + API_MAP['basePath'], False
     request_data = data.removeprefix(API_MAP['basePath'])
 
     # get endpoint
@@ -226,8 +223,7 @@ def parse_request(data):
     key = request_paths[0]
     api_endpoint = API_MAP['paths'].get(key, None)
     if api_endpoint is None:
-        valid = False
-        return 'Improperly formatted request URL, endpoint not found', valid
+        return 'Improperly formatted request URL, endpoint not found', False
 
     # get primary parameters
     args = {}
@@ -244,8 +240,7 @@ def parse_request(data):
     else:
         queries = request_parsed[4].split('&')
     if len(params) != len(endpoint_primaries):
-        valid = False
-        return 'Improperly formatted request URL, incompatible parameters', valid
+        return 'Improperly formatted request URL, incompatible parameters', False
 
     # cast floats and set primary args
     floats = ['lat', 'lon', 'radius', 'max_lat', 'max_lon', 'min_lat', 'min_lon']
@@ -262,8 +257,7 @@ def parse_request(data):
         value = queries[j][queries[j].find('='):][1:]
         param_type = API_MAP['paths'][key]['types'][param]
         if not param in endpoint_secondaries:
-            valid = False
-            return 'Improperly formatted request URL, incompatible parameters', valid
+            return 'Improperly formatted request URL, incompatible parameters', False
 
         # type check parameters and set secondary args
         if param in floats:
@@ -274,7 +268,7 @@ def parse_request(data):
             value = ast.literal_eval(value)
         args[param] = value
     args['_key'] = key
-    return args, valid
+    return args, True
 
 
 def get_request_data(args):
@@ -294,8 +288,7 @@ def operate_on_data(data, ops, args):
         ms on timestamps
     '''
     if type(data) is dict or type(data) is io.BytesIO:
-        return data
-    # results = []
+        return 0, "Request not supported"
     reset = data
     for i, op in enumerate(ops):
         pandas_op = getattr(data, op)
@@ -304,29 +297,21 @@ def operate_on_data(data, ops, args):
         carry_forward = op_params.pop(0)
         result = pandas_op(*op_params)
         if return_result:
+            if type(result) is pd.Series or type(result) is pd.DataFrame:
+                result = result.mean()
             if type(result) is date:
                 result = datetime(result.year, result.month, result.day)
             if type(result) is time:
                 result = datetime(0, 0, 0, result.hour, result.minute, result.second, result.microsecond)
             if type(result) is datetime:
-                # results.append(str(int(result.replace(tzinfo=timezone.utc).timestamp() * 1000)))
-                return int(result.replace(tzinfo=timezone.utc).timestamp() * 1000)
-            elif type(result) is time:
-                return ""
+                return int(result.replace(tzinfo=timezone.utc).timestamp() * 1000), None
             elif 'float' in str(type(result)) or 'int' in str(type(result)):
-                # results.append(str(int(float(result) * 1e18)))
-                 return int(float(result) * 1e18)
-            elif type(result) is pd.Series or type(result) is pd.DataFrame:
-                # results.append(result.to_string())
-                # need to route this through a separate job
-                 return result.to_string()
+                return int(float(result) * 1e18), None
             else:
-                # results.append(str(result))
-                # need to route this through a separate job
-                return str(result)
+                return 0, "Incompatible return type"
         if carry_forward:
             data = result
         else:
             data = reset
-    return ["No Return Specified"]
+    return 0, "No return specified"
 

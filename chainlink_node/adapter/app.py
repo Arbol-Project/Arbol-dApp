@@ -1,7 +1,8 @@
 from flask import Flask, request, jsonify
 
 from adapter import Adapter
-from api import API
+from retriever import Retriever
+from evaluator import Evaluator
 
 
 def build_app():
@@ -16,7 +17,7 @@ def build_app():
 
     @app.route('/', methods=['POST'])
     def call_adapter():
-        ''' Primary route for requests to the adapter '''
+        ''' Primary route for V1 requests to the adapter '''
         data = request.get_json()
         if data == '':
             data = {}
@@ -24,12 +25,21 @@ def build_app():
         return jsonify(response.result)    
 
     @app.route('/api', methods=['POST'])
-    def call_api():
-        ''' Primary route for dClimate API requests to the adapter '''
+    def call_retriever():
+        ''' Primary route for dClimate API requests '''
         data = request.get_json()
         if data == '':
             data = {}
-        response = API(data)
+        response = Retriever(data)
+        return jsonify(response.result)
+
+    @app.route('/eval', methods=['POST'])
+    def call_evaluator():
+        ''' Primary route for payout evaluation (V2) requests '''
+        data = request.get_json()
+        if data == '':
+            data = {}
+        response = Evaluator(data)
         return jsonify(response.result)
 
     @app.route('/health', methods=['POST'])

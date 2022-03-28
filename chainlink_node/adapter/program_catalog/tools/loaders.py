@@ -71,10 +71,6 @@ class GridcellLoader(DClimateLoader):
         '''
         data = client.get_gridcell_history(lat, lon, self._dataset_name, **self._request_params)
         series = data['data']
-        # if isinstance(data, tuple):
-        #     series = pd.Series(data[0])
-        # else:
-        #     series = pd.Series(data)
         if series.empty:
             raise ValueError('No data returned for request')
         series = series.set_axis(pd.to_datetime(series.index, utc=True)).sort_index()
@@ -114,7 +110,6 @@ class StationLoader(DClimateLoader):
             Returns: Pandas Series, time series for station weather data for covered dates
         '''
         data = client.get_station_history(self._station_id, self._weather_variable, **self._request_params)
-        # series = pd.Series(data)
         series = data['data']
         if series.empty:
             raise ValueError('No data returned for request')

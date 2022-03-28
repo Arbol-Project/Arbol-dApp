@@ -2,7 +2,7 @@
 
 This Chainlink node supports the following jobs and chains:
 
-- Weather Metrics Reporting (dClimate-api-request)
+- [Weather Metrics Reporting](https://github.com/Arbol-Project/Arbol-dApp/blob/master/chainlink_node/adapter/retriever.py) (dClimate-api-request)
     - This Chainlink job allows a user to make a request for dClimate weather data on IPFS and operate on it as a Pandas object to compute and return a desired numerical metric.
     - Configs
         - Mumbai: 
@@ -21,8 +21,8 @@ This Chainlink node supports the following jobs and chains:
         - `string[] request_params`: the request parameters is a list of strings representing method configurations for each of the requested operations. Method configs must be strings of lists of Python inputs where the first two elements are Boolean values for whether the output of the associated operation should be returned or not, and whether it should be carried forward to be used as the input for the next operation (or not). Note: at this time only one computed value can be returned per request, so if multiple method configurations specify to return the result, then the first such result is returned only.
     - Outputs:
         - `uint256 metric`: the final value returned after executing the given Pandas operations on the requested data. All numerical values that are not timestamps are multiplied by `1e18` and cast to integers before being returned on-chain.
-        - `string memory unit`: the unit for the returned final value, if applicable. 
-- Contract Payout Evaluation V2 (arbol-payout-evaluation)
+        - `string memory unit`: the unit for the returned final value, if applicable. If the request fails, the adapter attempts to return an error message in the unit slot.
+- [Contract Payout Evaluation V2](https://github.com/Arbol-Project/Arbol-dApp/blob/master/chainlink_node/adapter/evaluator.py) (arbol-payout-evaluation)
     - This Chainlink job allows a user to make a request for a payout evaluation for an Arbol parametric weather derivative contract.
     - Configs
         - Polygon: 
@@ -44,7 +44,7 @@ This Chainlink node supports the following jobs and chains:
         - `string uri`: the token URI of the NFT associated with the contract to be evaluated. The `uri` is the concatenation of the hashed contract SRO and the contract ID in Arbol's database. At evaluation, the contract terms are fetched from the DB and their hash is verified against the hash in the URI to guarantee that the contract terms have not changed since sale.
     - Outputs:
         - `uint256 payout`: the computed payout computed using dClimate weather data on IPFS and Arbol pricing and evaluation logic.
-- Contract Payout Evaluation V1 (arbol-contract-evaluation)
+- [Contract Payout Evaluation V1](https://github.com/Arbol-Project/Arbol-dApp/blob/master/chainlink_node/adapter/adapter.py) (arbol-contract-evaluation)
     - This Chainlink job allows a user to make a V1 request for a payout evaluation for an Arbol parametric weather derivative contract.
     - Configs
         - Polygon: 

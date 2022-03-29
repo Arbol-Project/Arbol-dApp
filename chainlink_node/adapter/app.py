@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 
 from adapterV1 import ArbolAdapterV1
-from adapterV2 import ArbolAdapter
+from adapter import ArbolAdapter
 from api import dClimateAdapter
 
 

@@ -5,7 +5,7 @@ from program_catalog.tools.utils import verify_request, get_contract_payout
 
 
 class ArbolAdapter:
-    ''' External Adapter class that for computing payout evaluations for
+    ''' External Adapter class for computing payout evaluations for
         Arbol weather contracts using dClimate weather data on IPFS
         and verified contract terms
     '''
@@ -28,8 +28,6 @@ class ArbolAdapter:
         ''' Validate that the received request is properly formatted and includes
             all necessary paramters. In the case of an illegal request error
             information is logged to the output
-
-            Returns: bool, whether the request is valid
         '''
         if self.request_data is None or self.request_data == {}:
             self.request_error = 'request data empty'

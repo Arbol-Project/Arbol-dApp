@@ -16,7 +16,7 @@ def build_app():
         app.logger.debug('Body: %s', request.get_data())
 
     @app.route('/', methods=['POST'])
-    def call_adapter():
+    def call_adapterV1():
         ''' Primary route for V1 requests to the adapter '''
         data = request.get_json()
         if data == '':
@@ -25,7 +25,7 @@ def build_app():
         return jsonify(response.result)    
 
     @app.route('/api', methods=['POST'])
-    def call_retriever():
+    def call_api_adapter():
         ''' Primary route for dClimate API requests '''
         data = request.get_json()
         if data == '':
@@ -34,7 +34,7 @@ def build_app():
         return jsonify(response.result)
 
     @app.route('/eval', methods=['POST'])
-    def call_evaluator():
+    def call_adapterV2():
         ''' Primary route for payout evaluation (V2) requests '''
         data = request.get_json()
         if data == '':

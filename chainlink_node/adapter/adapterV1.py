@@ -1,28 +1,26 @@
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'dweather'))
 
-from program_catalog.tools.utils import verify_request, get_contract_payout
+from program_catalog.directory import get_program
 
 
-class Evaluator:
-    ''' External Adapter class that for computing payout evaluations for
-        Arbol weather contracts using dClimate weather data on IPFS
-        and verified contract terms
+class ArbolAdapterV1:
+    ''' V1 External Adapter class that implements the evaluation and conditional
+        executione of Arbol weather contracts based on weather data on IPFS
     '''
-
+    
     def __init__(self, data):
         ''' Each call to the adapter creates a new Adapter
             instance to handle the request
 
             Parameters: data (dict), the received request body
         '''
-        self.id = data.get('id', '3')
+        self.id = data.get('id', '1')
         self.request_data = data.get('data')
-        self.validate_request_data()
-        if self.valid:
+        if self.validate_request_data():
             self.execute_request()
         else:
-            self.result_error()
+            self.result_error(f'Bad Request: {self.request_error}')
 
     def validate_request_data(self):
         ''' Validate that the received request is properly formatted and includes
@@ -32,32 +30,27 @@ class Evaluator:
             Returns: bool, whether the request is valid
         '''
         if self.request_data is None or self.request_data == {}:
-            self.request_error = 'request data empty'
-            self.valid = False
-        else:
-            request_uri = self.request_data.get('uri', None)
-            if request_uri is None:
-                self.request_error = 'token URI missing'
-                self.valid =  False
-            else:
-                try:
-                    result, valid = verify_request(request_uri)
-                    if not valid:
-                        self.request_error = result
-                        self.valid = False
-                    else:
-                        self.request_args = result
-                        self.valid = True
-                except Exception as e:
-                    self.valid = False
-                    self.request_error = e.__name__
+            self.request_error = 'request is empty'
+            return False
+        parameters = self.request_data.get('params', None)
+        if parameters is None:
+            self.request_error = 'no parameters specified'
+            return False
+        # see utils/preload_adapter.py for example parameters format
+        self.parameters = {parameters[i]:parameters[i+1] for i in range(0, len(parameters), 2)}
+        self.program = get_program(self.parameters)
+        if self.program is None:
+            self.request_error = 'invalid program specified'
+            return False
+        valid, self.request_error = self.program.validate_request(self.parameters)
+        return valid
 
     def execute_request(self):
         ''' Get the designated program and determine whether the associated
             contract should payout and if so then for how much
         '''
         try:
-            payout = get_contract_payout(self.request_args)
+            payout = self.program.serve_evaluation(self.parameters)
             self.request_data['result'] = payout
             self.result_success(payout)
         except Exception as e:

@@ -1,8 +1,8 @@
 from flask import Flask, request, jsonify
 
-from adapter import Adapter
-from retriever import Retriever
-from evaluator import Evaluator
+from adapterV1 import ArbolAdapterV1
+from adapterV2 import ArbolAdapter
+from api import dClimateAdapter
 
 
 def build_app():
@@ -21,7 +21,7 @@ def build_app():
         data = request.get_json()
         if data == '':
             data = {}
-        response = Adapter(data)
+        response = ArbolAdapterV1(data)
         return jsonify(response.result)    
 
     @app.route('/api', methods=['POST'])
@@ -30,7 +30,7 @@ def build_app():
         data = request.get_json()
         if data == '':
             data = {}
-        response = Retriever(data)
+        response = dClimateAdapter(data)
         return jsonify(response.result)
 
     @app.route('/eval', methods=['POST'])
@@ -39,7 +39,7 @@ def build_app():
         data = request.get_json()
         if data == '':
             data = {}
-        response = Evaluator(data)
+        response = ArbolAdapter(data)
         return jsonify(response.result)
 
     @app.route('/health', methods=['POST'])

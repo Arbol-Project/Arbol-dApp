@@ -42,8 +42,8 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_DEFAULT_REGION: us-east-1
       run: |
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG ./adapter
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG ./ipfs
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:latest ./adapter
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:latest ./ipfs
 
     - name: Push External Adapter to Amazon ECR
       id: push-adapter-image
@@ -91,4 +91,4 @@ jobs:
     #     task-definition: ${{ steps.render-adapter-container.outputs.task-definition }}
     #     service: dapp-service-adapters
     #     cluster: dapp-cluster
-        # wait-for-service-stability: true -- Gotta figure out volume path issue before uncommenting this
+    #     wait-for-service-stability: true

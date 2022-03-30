@@ -1,34 +1,35 @@
-# on:
-#   push:
-#     branches:
-#       - feat/*
+on:
+  push:
+    branches:
+    #   - feat/*
+      - master
 
-# name: Deployment
+name: Deployment
 
-# jobs:
-#   deploy:
-#     name: Build
-#     runs-on: ubuntu-latest
+jobs:
+  deploy:
+    name: Build
+    runs-on: ubuntu-latest
 
-#     steps:
-#     - name: Check out Git repository
-#       uses: actions/checkout@v2
-#       with:
-#         submodules: true
+    steps:
+    - name: Check out Git repository
+      uses: actions/checkout@v2
+      with:
+        submodules: true
 
-#     - name: Configure AWS credentials
-#       uses: aws-actions/configure-aws-credentials@v1
-#       with:
-#         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#         aws-region: us-east-1
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
 
-#     - name: Get ECS Integration
-#       run: curl -L https://raw.githubusercontent.com/docker/compose-cli/main/scripts/install/install_linux.sh | sh
+    - name: Get ECS Integration
+      run: curl -L https://raw.githubusercontent.com/docker/compose-cli/main/scripts/install/install_linux.sh | sh
 
-#     - name: Login to Amazon ECR
-#       id: login-ecr
-#       uses: aws-actions/amazon-ecr-login@v1
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
 
 #     - name: Get .env secrets
 #       uses: say8425/aws-secrets-manager-actions@v1
@@ -86,29 +87,29 @@
     #     TLS_KEY_SECRET: ${{ secrets.PROMETHEUS_KEY }}
     #   run: echo "$TLS_KEY_SECRET" base64 --decode > ./chainlink_node/monitor/prometheus/tls/prometheus.key
 
-    # - name: Build
-    #   working-directory: chainlink_node
-    #   env: 
-    #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-    #     ECR_REPOSITORY_CHAINLINK: chainlink-node
-    #     # ECR_REPOSITORY_EXPORTER: node-exporter
-    #     ECR_REPOSITORY_PROMETHEUS: prometheus
-    #     IMAGE_TAG: ${{ github.sha }}
-    #     # ECR_REPOSITORY_ADAPTER: external-adapter
-    #     # ECR_REPOSITORY_IPFS: ipfs-daemon
-    #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-    #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    #     AWS_DEFAULT_REGION: us-east-1
-    #     # PROMETHEUS_AUTH: ${{ secrets.PROMETHEUS_AUTH }}
-    #     # PROMETHEUS_PASSWORD: ${{ secrets.PROMETHEUS_PASSWORD }}
-        
-    #     # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG ./adapter
-    #     # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG ./ipfs
-    #     # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_EXPORTER:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_EXPORTER:latest ./monitor/node-exporter
-    #     #  --build-arg password=${PROMETHEUS_PASSWORD} --build-arg auth=${PROMETHEUS_AUTH}
-    #   run: |
-    #     docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:latest ./chainlink
-    #     docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_PROMETHEUS:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_PROMETHEUS:latest ./monitor/prometheus
+    - name: Build
+      working-directory: chainlink_node
+      env: 
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        # ECR_REPOSITORY_CHAINLINK: chainlink-node
+        # ECR_REPOSITORY_EXPORTER: node-exporter
+        # ECR_REPOSITORY_PROMETHEUS: prometheus
+        IMAGE_TAG: ${{ github.sha }}
+        ECR_REPOSITORY_ADAPTER: external-adapter
+        # ECR_REPOSITORY_IPFS: ipfs-daemon
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: us-east-1
+        # PROMETHEUS_AUTH: ${{ secrets.PROMETHEUS_AUTH }}
+        # PROMETHEUS_PASSWORD: ${{ secrets.PROMETHEUS_PASSWORD }}
+
+        # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG ./ipfs
+        # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_EXPORTER:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_EXPORTER:latest ./monitor/node-exporter
+        #  --build-arg password=${PROMETHEUS_PASSWORD} --build-arg auth=${PROMETHEUS_AUTH}
+        # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_CHAINLINK:latest ./chainlink
+        # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_PROMETHEUS:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_PROMETHEUS:latest ./monitor/prometheus
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG ./adapter
 
     # - name: Push Chainlink Node to Amazon ECR
     #   id: push-chainlink-image
@@ -151,22 +152,22 @@
 #         docker push $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG
 #         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG"
 
-#     - name: Push External Adapter to Amazon ECR
-#       id: push-adapter-image
-#       env:
-#         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-#         IMAGE_TAG: ${{ github.sha }}
-#         ECR_REPOSITORY_ADAPTER: external-adapter
-#       run: |
-#         docker push $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG
-#         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG"
+    - name: Push External Adapter to Amazon ECR
+      id: push-adapter-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.sha }}
+        ECR_REPOSITORY_ADAPTER: external-adapter
+      run: |
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG
+        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG"
   
-    # - name: Download Task Definitions
-    # # aws ecs describe-task-definition --task-definition dapp-task-ipfs --query taskDefinition > task-definition-ipfs.json
-    # # aws ecs describe-task-definition --task-definition dapp-task-adapter --query taskDefinition > task-definition-adapter.json
-    #   run: |
-    #     aws ecs describe-task-definition --task-definition dapp-task-chainlink --query taskDefinition > task-definition-chainlink.json
-    #     aws ecs describe-task-definition --task-definition dapp-task-monitor --query taskDefinition > task-definition-monitor.json
+    - name: Download Task Definitions
+    # aws ecs describe-task-definition --task-definition dapp-task-ipfs --query taskDefinition > task-definition-ipfs.json
+    # aws ecs describe-task-definition --task-definition dapp-task-chainlink --query taskDefinition > task-definition-chainlink.json
+    # aws ecs describe-task-definition --task-definition dapp-task-monitor --query taskDefinition > task-definition-monitor.json
+      run: |
+        aws ecs describe-task-definition --task-definition dapp-task-adapters --query taskDefinition > task-definition-adapters.json
     
     # - name: Modify Amazon ECS task definition with Chainlink container
     #   id: render-chainlink-container
@@ -184,13 +185,13 @@
 #         container-name: ipfs-daemon
 #         image: ${{ steps.push-ipfs-image.outputs.image }}
       
-#     - name: Modify Amazon ECS task definition with External Adapter container
-#       id: render-adapter-container
-#       uses: aws-actions/amazon-ecs-render-task-definition@v1
-#       with:
-#         task-definition: task-definition-adapter.json
-#         container-name: external-adapter
-#         image: ${{ steps.push-adapter-image.outputs.image }}
+    - name: Modify Amazon ECS task definition with External Adapter container
+      id: render-adapter-container
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: task-definition-adapters.json
+        container-name: external-adapter
+        image: ${{ steps.push-adapter-image.outputs.image }}
       
     # - name: Deploy Chainlink Node to Amazon ECS service
     #   uses: aws-actions/amazon-ecs-deploy-task-definition@v1
@@ -208,10 +209,10 @@
 #         cluster: dapp-cluster
 #         # wait-for-service-stability: true
 
-#     - name: Deploy External Adapter to Amazon ECS service
-#       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-#       with:
-#         task-definition: ${{ steps.render-adapter-container.outputs.task-definition }}
-#         service: dapp-service-adapter
-#         cluster: dapp-cluster
-#         # wait-for-service-stability: true -- Gotta figure out volume path issue before uncommenting this
+    - name: Deploy External Adapters to Amazon ECS service
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: ${{ steps.render-adapter-container.outputs.task-definition }}
+        service: dapp-service-adapters
+        cluster: dapp-cluster
+        # wait-for-service-stability: true -- Gotta figure out volume path issue before uncommenting this

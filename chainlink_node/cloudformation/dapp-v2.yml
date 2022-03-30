@@ -155,19 +155,6 @@ Resources:
               "-a",
               "/chainlink/api",
             ]
-          # Environment: # Override/Add Environment Variables to the chainlink node
-          # - Name: CHAINLINK_DEV
-          #   Value: true
-          # - Name: DATABASE_TIMEOUT
-          #   Value: 0
-          # - Name: DEFAULT_HTTP_TIMEOUT
-          #   Value: "10m"
-          # - Name: MIN_OUTGOING_CONFIRMATIONS
-          #   Value: 2
-          # - Name: LOG_LEVEL
-          #   Value: "debug"
-          # - Name: MINIMUM_CONTRACT_PAYMENT_LINK_JUELS
-          #   Value: 0
           EnvironmentFiles:
             - Type: s3
               Value: "arn:aws:s3:::dapp-files/S3Links/chainlink/.env"
@@ -180,14 +167,9 @@ Resources:
           MountPoints:
             - ContainerPath: /chainlink
               SourceVolume: Chainlink
-            - ContainerPath: /tls
-              SourceVolume: ChainlinkTLS
           PortMappings:
             - ContainerPort: 6688
       Volumes:
-        - Host:
-            SourcePath: /home/ec2-user/S3Imports/tls/chainlink
-          Name: ChainlinkTLS
         - Host:
             SourcePath: /home/ec2-user/S3Imports/chainlink
           Name: Chainlink
@@ -198,9 +180,6 @@ Resources:
       Family: dapp-task-monitor
       ContainerDefinitions:
         - Name: node-exporter
-          DependsOn:
-            - Condition: START
-              ContainerName: chainlink-node
           Cpu: 512
           Memory: 1024
           User: 0
@@ -247,44 +226,6 @@ Resources:
               SourceVolume: Prometheus
           PortMappings:
             - ContainerPort: 9090
-        # - Name: loki
-        #   Cpu: 512
-        #   Memory: 1024
-        #   Essential: true
-        #   Image: grafana/loki:2.3.0
-        #   Command: [ "-config.file=/loki/loki.yml" ]
-        #   LogConfiguration:
-        #     LogDriver: awslogs
-        #     Options:
-        #       awslogs-group: !Ref CloudwatchLogsGroup
-        #       awslogs-region: !Ref 'AWS::Region'
-        #       awslogs-stream-prefix: dapp-loki
-        #   MountPoints:
-        #     - ContainerPath: /loki
-        #       SourceVolume: Loki
-        #   PortMappings:
-        #     - ContainerPort: 3100
-        # - Name: promtail
-        #   Cpu: 512
-        #   Memory: 1024
-        #   Essential: true
-        #   Image: grafana/promtail:1.4.1
-        #   Command: [ "-config.file=/promtail/promtail.yml" ]
-        #   LogConfiguration:
-        #     LogDriver: awslogs
-        #     Options:
-        #       awslogs-group: !Ref CloudwatchLogsGroup
-        #       awslogs-region: !Ref 'AWS::Region'
-        #       awslogs-stream-prefix: dapp-promtail
-        #   MountPoints:
-        #     - ContainerPath: /promtail
-        #       SourceVolume: Promtail
-        #     - ContainerPath: /var/lib/docker/containers
-        #       SourceVolume: Containers
-        #     - ContainerPath: /var/log
-        #       SourceVolume: Logs
-        #   PortMappings:
-        #     - ContainerPort: 9080
         - Name: grafana
           DependsOn:
             - Condition: START
@@ -306,8 +247,6 @@ Resources:
           MountPoints:
             - ContainerPath: /grafana
               SourceVolume: Grafana
-            - ContainerPath: /tls
-              SourceVolume: GrafanaTLS
           PortMappings:
             - ContainerPort: 3000
       Volumes:
@@ -317,95 +256,89 @@ Resources:
         - Host:
             SourcePath: /home/ec2-user/S3Imports/monitoring/prometheus
           Name: Prometheus
-        # - Host:
-        #     SourcePath: /home/ec2-user/S3Imports/monitoring/loki/
-        #   Name: Loki
-        # - Host:
-        #     SourcePath: /home/ec2-user/S3Imports/monitoring/promtail
-        #   Name: Promtail
-        # - Host:
-        #     SourcePath: /var/lib/docker/containers
-        #   Name: Containers
-        # - Host:
-        #     SourcePath: /var/log
-        #   Name: Logs
         - Host:
             SourcePath: /home/ec2-user/S3Imports/monitoring/grafana
           Name: Grafana
-        - Host:
-            SourcePath: /home/ec2-user/S3Imports/tls/grafana
-          Name: GrafanaTLS
-  # taskdefinitionIPFS:
-  #   Type: 'AWS::ECS::TaskDefinition'
-  #   Properties:
-  #     Family: dapp-task-ipfs
-  #     ContainerDefinitions:
-  #       - Name: ipfs-daemon
-  #         Cpu: 512
-  #         Essential: true
-  #         Image: 574269834288.dkr.ecr.us-east-1.amazonaws.com/ipfs-daemon
-  #         Memory: 1024
-  #         LogConfiguration:
-  #           LogDriver: awslogs
-  #           Options:
-  #             awslogs-group: !Ref CloudwatchLogsGroup
-  #             awslogs-region: !Ref 'AWS::Region'
-  #             awslogs-stream-prefix: dapp-ipfs
-  #         MountPoints:
-  #           - ContainerPath: /export
-  #             SourceVolume: Export
-  #           - ContainerPath: /data/ipfs
-  #             SourceVolume: DataIpfs
-  #         PortMappings:
-  #           - ContainerPort: 5001
-  #     Volumes:
-  #     - Host:
-  #         SourcePath: export
-  #       Name: Export
-  #     - Host:
-  #         SourcePath: /data/ipfs
-  #       Name: DataIpfs
-  # taskdefinitionAdapter:
-  #   Type: 'AWS::ECS::TaskDefinition'
-  #   Properties:
-  #     Family: dapp-task-adapter
-  #     ContainerDefinitions:
-  #       - Name: external-adapter
-  #         Cpu: 512
-  #         Essential: true
-  #         Image: 574269834288.dkr.ecr.us-east-1.amazonaws.com/external-adapter
-  #         Memory: 1024
-          # EnvironmentFiles:
-          #   - Type: s3
-          #     Value: "arn:aws:s3:::dapp-files/S3Links/adapter/.env"
-  #         # Environment:
-  #         # - Name: 'PYTHONUNBUFFERED'
-  #         #   Value: '1'
-  #         LogConfiguration:
-  #           LogDriver: awslogs
-  #           Options:
-  #             awslogs-group: !Ref CloudwatchLogsGroup
-  #             awslogs-region: !Ref 'AWS::Region'
-  #             awslogs-stream-prefix: dapp-adapter
-  #         MountPoints:
-  #           - ContainerPath: /adapter
-  #             SourceVolume: Adapter
-  #           # - ContainerPath: /adapter/logs
-  #           #   SourceVolume: WebAppPackagesContractsSrcLogs
-  #           # - ContainerPath: /adapter/SROs
-  #           #   SourceVolume: SmartContractsHardhatSros
-  #         PortMappings:
-  #           - ContainerPort: 8000
-  #     Volumes:
-  #     - Host:
-  #         SourcePath: adapter
-  #       Name: Adapter
-  #     # - Host:
-  #     #     SourcePath: /web_app/packages/contracts/src/logs
-  #     #   Name: WebAppPackagesContractsSrcLogs
-  #     # - Host:
-  #     #     SourcePath: /smart_contracts/hardhat/SROs
-  #     #   Name: SmartContractsHardhatSros
+  taskdefinitionAdapters:
+    Type: 'AWS::ECS::TaskDefinition'
+    DependsOn: serviceMonitor
+    Properties:
+      Family: dapp-task-adapters
+      ContainerDefinitions:
+        - Name: ipfs-daemon
+          Cpu: 512
+          Memory: 1024
+          User: 0
+          Essential: true
+          Image: ipfs/go-ipfs:v0.7.0
+          Entrypoint:
+            [ 
+              "ipfs init && ipfs bootstrap rm --all && ipfs bootstrap add '/ip4/198.211.104.50/tcp/4001/p2p/QmWsAFSDajELyneR7LkMsgfaRk2ib1y3SEU7nQuXSNPsQV' && ipfs config Addresses.API /ip4/0.0.0.0/tcp/5001 && ipfs daemon"
+            ]
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref CloudwatchLogsGroup
+              awslogs-region: !Ref 'AWS::Region'
+              awslogs-stream-prefix: dapp-ipfs
+          MountPoints:
+            - ContainerPath: /export
+              SourceVolume: IPFSExport
+            - ContainerPath: /data/ipfs
+              SourceVolume: IPFSData
+          PortMappings:
+            - ContainerPort: 5001
+            - ContainerPort: 8080
+            - ContainerPort: 4001
+            - ContainerPort: 4001
+              Protocl: udp
+        - Name: external-adapter
+          DependsOn: 
+            - Condition: START
+              ContainerName: ipfs-daemon
+          Cpu: 512
+          Memory: 1024
+          User: 0
+          Essential: true
+          Image: 574269834288.dkr.ecr.us-east-1.amazonaws.com/external-adapter
+          EnvironmentFiles:
+            - Type: s3
+              Value: "arn:aws:s3:::dapp-files/S3Links/mongo/.env"
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref CloudwatchLogsGroup
+              awslogs-region: !Ref 'AWS::Region'
+              awslogs-stream-prefix: dapp-external-adapter
+          PortMappings:
+            - ContainerPort: 8000
+        - Name: dclimate-adapter
+          DependsOn: 
+            - Condition: START
+              ContainerName: external-adapter
+          Cpu: 512
+          Memory: 1024
+          User: 0
+          Essential: true
+          Image: 574269834288.dkr.ecr.us-east-1.amazonaws.com/dclimate-adapter
+          EnvironmentFiles:
+            - Type: s3
+              Value: "arn:aws:s3:::dapp-files/S3Links/dclimate/.env"
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref CloudwatchLogsGroup
+              awslogs-region: !Ref 'AWS::Region'
+              awslogs-stream-prefix: dapp-dcliamte-adapter
+          PortMappings:
+            - ContainerPort: 8081
+      Volumes:
+      - Host:
+          SourcePath: /home/ec2-user/S3Imports/ipfs/export
+        Name: IPFSExport
+      - Host:
+          SourcePath: /home/ec2-user/S3Imports/ipfs/data
+        Name: IPFSData
   NodeALB:
     Type: "AWS::ElasticLoadBalancingV2::LoadBalancer"
     Properties:
@@ -541,12 +474,12 @@ Resources:
     Properties:
       HealthCheckIntervalSeconds: 10
       HealthCheckPath: /api/health
-      HealthCheckProtocol: HTTPS
+      HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
       Name: DashTG
       Port: 443
-      Protocol: HTTPS
+      Protocol: HTTP
       UnhealthyThresholdCount: 2
       VpcId: !Ref VpcId
   DashRecordSet:
@@ -628,32 +561,15 @@ Resources:
           TargetGroupArn: !Ref DashTG
       Role: !Ref ECSServiceRole
       TaskDefinition: !Ref taskdefinitionMonitor
-  # serviceIPFS:
-  #   Type: 'AWS::ECS::Service'
-  #   DependsOn: ALBListener
-  #   Properties:
-  #     ServiceName: dapp-service-ipfs
-  #     Cluster: !Ref ECSCluster
-  #     DesiredCount: 1
-  #     LoadBalancers:
-  #       - ContainerName: ipfs-daemon
-  #         ContainerPort: 5001
-  #         TargetGroupArn: !Ref ECSTG
-  #     Role: !Ref ECSServiceRole
-  #     TaskDefinition: !Ref taskdefinitionIPFS
-  # serviceAdapter:
-  #   Type: 'AWS::ECS::Service'
-  #   DependsOn: ALBListener
-  #   Properties:
-  #     ServiceName: dapp-service-adapter
-  #     Cluster: !Ref ECSCluster
-  #     DesiredCount: 1
-  #     LoadBalancers:
-  #       - ContainerName: external-adapter
-  #         ContainerPort: 8000
-  #         TargetGroupArn: !Ref ECSTG
-  #     Role: !Ref ECSServiceRole
-  #     TaskDefinition: !Ref taskdefinitionAdapter
+  serviceAdapters:
+    Type: 'AWS::ECS::Service'
+    DependsOn: ALBListener
+    Properties:
+      ServiceName: dapp-service-adapters
+      Cluster: !Ref ECSCluster
+      DesiredCount: 1
+      # Role: !Ref ECSServiceRole
+      TaskDefinition: !Ref taskdefinitionAdapters
   ECSServiceRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -745,41 +661,9 @@ Resources:
         StepAdjustments:
           - MetricIntervalLowerBound: 0
             ScalingAdjustment: 200
-  # ServiceScalingTargetIPFS:
+  # ServiceScalingTargetAdapters:
   #   Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-  #   DependsOn: serviceIPFS
-  #   Properties:
-  #     MaxCapacity: 2
-  #     MinCapacity: 1
-  #     ResourceId: !Join
-  #       - ''
-  #       - - service/
-  #         - !Ref ECSCluster
-  #         - /
-  #         - !GetAtt
-  #           - serviceIPFS
-  #           - Name
-  #     RoleARN: !GetAtt
-  #       - AutoscalingRole
-  #       - Arn
-  #     ScalableDimension: 'ecs:service:DesiredCount'
-  #     ServiceNamespace: ecs
-  # ServiceScalingPolicyIPFS:
-  #   Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
-  #   Properties:
-  #     PolicyName: AStepPolicy
-  #     PolicyType: StepScaling
-  #     ScalingTargetId: !Ref ServiceScalingTargetIPFS
-  #     StepScalingPolicyConfiguration:
-  #       AdjustmentType: PercentChangeInCapacity
-  #       Cooldown: 60
-  #       MetricAggregationType: Average
-  #       StepAdjustments:
-  #         - MetricIntervalLowerBound: 0
-  #           ScalingAdjustment: 200
-  # ServiceScalingTargetAdapter:
-  #   Type: 'AWS::ApplicationAutoScaling::ScalableTarget'
-  #   DependsOn: serviceAdapter
+  #   DependsOn: serviceAdapters
   #   Properties:
   #     MaxCapacity: 2
   #     MinCapacity: 1
@@ -796,7 +680,7 @@ Resources:
   #       - Arn
   #     ScalableDimension: 'ecs:service:DesiredCount'
   #     ServiceNamespace: ecs
-  # ServiceScalingPolicyAdapter:
+  # ServiceScalingPolicyAdapters:
   #   Type: 'AWS::ApplicationAutoScaling::ScalingPolicy'
   #   Properties:
   #     PolicyName: AStepPolicy
@@ -809,24 +693,6 @@ Resources:
   #       StepAdjustments:
   #         - MetricIntervalLowerBound: 0
   #           ScalingAdjustment: 200
-  # ALB500sAlarmScaleUp:
-  #   Type: 'AWS::CloudWatch::Alarm'
-  #   Properties:
-  #     EvaluationPeriods: 1
-  #     Statistic: Average
-  #     Threshold: 10
-  #     AlarmDescription: Alarm if our ALB generates too many HTTP 500s.
-  #     Period: 60
-  #     AlarmActions:
-  #       - !Ref ServiceScalingPolicy
-  #     Namespace: AWS/ApplicationELB
-  #     Dimensions:
-  #       - Name: LoadBalancer
-  #         Value: !GetAtt
-  #           - ECSALB
-  #           - LoadBalancerFullName
-  #     ComparisonOperator: GreaterThanThreshold
-  #     MetricName: HTTPCode_ELB_5XX_Count
   ECSTaskExecutionRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -953,7 +819,5 @@ Outputs:
     Value: !Ref taskdefinitionChainlink
   taskdefMonitor:
     Value: !Ref taskdefinitionMonitor
-  # taskdefIPFS:
-  #   Value: !Ref taskdefinitionIPFS
-  # taskdefAdapter:
-  #   Value: !Ref taskdefinitionAdapter
+  taskdefAdapters:
+    Value: !Ref taskdefinitionAdapters

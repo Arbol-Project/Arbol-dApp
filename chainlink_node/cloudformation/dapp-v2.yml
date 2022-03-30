@@ -247,6 +247,8 @@ Resources:
           MountPoints:
             - ContainerPath: /grafana
               SourceVolume: Grafana
+            - ContainerPath: /tls
+              SourceVolume: GrafanaTLS
           PortMappings:
             - ContainerPort: 3000
       Volumes:
@@ -259,6 +261,9 @@ Resources:
         - Host:
             SourcePath: /home/ec2-user/S3Imports/monitoring/grafana
           Name: Grafana
+        - Host:
+            SourcePath: /home/ec2-user/S3Imports/tls/grafana
+          Name: GrafanaTLS
   taskdefinitionAdapters:
     Type: 'AWS::ECS::TaskDefinition'
     DependsOn: serviceMonitor

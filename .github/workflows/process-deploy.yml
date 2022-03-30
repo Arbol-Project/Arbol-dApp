@@ -69,30 +69,30 @@ jobs:
         docker push $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:latest
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_IPFS:latest"
   
-    # - name: Download Task Definitions
-    #   run: |
-    #     aws ecs describe-task-definition --task-definition dapp-task-adapters --query taskDefinition > task-definition-adapters.json
+    - name: Download Task Definitions
+      run: |
+        aws ecs describe-task-definition --task-definition dapp-task-adapters --query taskDefinition > task-definition-adapters.json
       
-    # - name: Modify Amazon ECS task definition with External Adapter container
-    #   id: render-adapter-container
-    #   uses: aws-actions/amazon-ecs-render-task-definition@v1
-    #   with:
-    #     task-definition: task-definition-adapters.json
-    #     container-name: external-adapter
-    #     image: ${{ steps.push-adapter-image.outputs.image }}
+    - name: Modify Amazon ECS task definition with External Adapter container
+      id: render-adapter-container
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: task-definition-adapters.json
+        container-name: external-adapter
+        image: ${{ steps.push-adapter-image.outputs.image }}
 
-    # - name: Modify Amazon ECS task definition with IPFS container
-    #   id: render-ipfs-container
-    #   uses: aws-actions/amazon-ecs-render-task-definition@v1
-    #   with:
-    #     task-definition: task-definition-adapters.json
-    #     container-name: ipfs-daemon
-    #     image: ${{ steps.push-ipfs-image.outputs.image }}
+    - name: Modify Amazon ECS task definition with IPFS container
+      id: render-ipfs-container
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: task-definition-adapters.json
+        container-name: ipfs-daemon
+        image: ${{ steps.push-ipfs-image.outputs.image }}
       
-    # - name: Deploy External Adapters to Amazon ECS service
-    #   uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-    #   with:
-    #     task-definition: ${{ steps.render-adapter-container.outputs.task-definition }}
-    #     service: dapp-service-adapters
-    #     cluster: dapp-cluster
-    #     wait-for-service-stability: true
+    - name: Deploy External Adapters to Amazon ECS service
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: ${{ steps.render-adapter-container.outputs.task-definition }}
+        service: dapp-service-adapters
+        cluster: dapp-cluster
+        wait-for-service-stability: true

@@ -54,6 +54,8 @@ jobs:
       run: |
         docker push $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG"
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:latest
+        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:latest"
 
     - name: Push IPFS Daemon to Amazon ECR
       id: push-ipfs-image
@@ -64,6 +66,8 @@ jobs:
       run: |
         docker push $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG"
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:latest
+        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_IPFS:latest"
   
     # - name: Download Task Definitions
     #   run: |

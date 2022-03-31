@@ -12,6 +12,9 @@ Parameters:
   DashSSLCert:
     Type: String
     Description: ARN of SSL certificate for Dashboard endpoint
+  DBSecretARN:
+    Type: String
+    Description: ARN of DB Secret
   SubnetId:
     Type: "List<AWS::EC2::Subnet::Id>"
     Description: Select at least two subnets in your selected VPC.
@@ -305,9 +308,12 @@ Resources:
           User: 0
           Essential: true
           Image: 574269834288.dkr.ecr.us-east-1.amazonaws.com/external-adapter
-          EnvironmentFiles:
-            - Type: s3
-              Value: "arn:aws:s3:::dapp-files/S3Links/mongo/.env"
+          Secrets:
+            - Name: MONGO_PROD_CONNECTION_STRING
+              ValueFrom: !Ref DBSecretARN
+          # EnvironmentFiles:
+          #   - Type: s3
+          #     Value: "arn:aws:s3:::dapp-files/S3Links/mongo/.env"
           LogConfiguration:
             LogDriver: awslogs
             Options:
@@ -316,26 +322,26 @@ Resources:
               awslogs-stream-prefix: dapp-external-adapter
           PortMappings:
             - ContainerPort: 8000
-        - Name: dclimate-adapter
-          DependsOn: 
-            - Condition: START
-              ContainerName: external-adapter
-          Cpu: 512
-          Memory: 1024
-          User: 0
-          Essential: true
-          Image: 574269834288.dkr.ecr.us-east-1.amazonaws.com/dclimate-adapter
-          EnvironmentFiles:
-            - Type: s3
-              Value: "arn:aws:s3:::dapp-files/S3Links/dclimate/.env"
-          LogConfiguration:
-            LogDriver: awslogs
-            Options:
-              awslogs-group: !Ref CloudwatchLogsGroup
-              awslogs-region: !Ref 'AWS::Region'
-              awslogs-stream-prefix: dapp-dcliamte-adapter
-          PortMappings:
-            - ContainerPort: 8081
+        # - Name: dclimate-adapter
+        #   DependsOn: 
+        #     - Condition: START
+        #       ContainerName: external-adapter
+        #   Cpu: 512
+        #   Memory: 1024
+        #   User: 0
+        #   # Essential: true
+        #   Image: 574269834288.dkr.ecr.us-east-1.amazonaws.com/dclimate-adapter
+        #   EnvironmentFiles:
+        #     - Type: s3
+        #       Value: "arn:aws:s3:::dapp-files/S3Links/dclimate/.env"
+        #   LogConfiguration:
+        #     LogDriver: awslogs
+        #     Options:
+        #       awslogs-group: !Ref CloudwatchLogsGroup
+        #       awslogs-region: !Ref 'AWS::Region'
+        #       awslogs-stream-prefix: dapp-dcliamte-adapter
+        #   PortMappings:
+        #     - ContainerPort: 8081
       Volumes:
       - Host:
           SourcePath: /home/ec2-user/S3Imports/ipfs/export
@@ -725,6 +731,10 @@ Resources:
                 Action:
                   - "s3:GetObject"
                 Resource: "arn:aws:s3:::dapp-files/*"
+              - Effect: Allow
+                Action:
+                  - "secretsmanager:GetSecretValue"
+                Resource: !Ref DBSecretARN
   EC2Role:
     Type: "AWS::IAM::Role"
     Properties:

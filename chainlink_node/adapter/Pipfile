@@ -16,6 +16,7 @@ astropy = "*"
 timezonefinder = "*"
 Flask = "==1.1.1"
 pymongo = "*"
+multiaddr = "*"
 
 [dev-packages]
 

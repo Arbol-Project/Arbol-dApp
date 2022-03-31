@@ -37,13 +37,13 @@ jobs:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         IMAGE_TAG: ${{ github.sha }}
         ECR_REPOSITORY_ADAPTER: external-adapter
-        ECR_REPOSITORY_IPFS: ipfs-daemon
+        # ECR_REPOSITORY_IPFS: ipfs-daemon
+        # docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:latest ./ipfs
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_DEFAULT_REGION: us-east-1
       run: |
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:latest ./adapter
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:latest ./ipfs
 
     - name: Push External Adapter to Amazon ECR
       id: push-adapter-image
@@ -57,17 +57,17 @@ jobs:
         docker push $ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:latest
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_ADAPTER:latest"
 
-    - name: Push IPFS Daemon to Amazon ECR
-      id: push-ipfs-image
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY_IPFS: ipfs-daemon
-        IMAGE_TAG: ${{ github.sha }}
-      run: |
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG
-        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG"
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:latest
-        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_IPFS:latest"
+    # - name: Push IPFS Daemon to Amazon ECR
+    #   id: push-ipfs-image
+    #   env:
+    #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+    #     ECR_REPOSITORY_IPFS: ipfs-daemon
+    #     IMAGE_TAG: ${{ github.sha }}
+    #   run: |
+    #     docker push $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG
+    #     echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_IPFS:$IMAGE_TAG"
+    #     docker push $ECR_REGISTRY/$ECR_REPOSITORY_IPFS:latest
+    #     echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_IPFS:latest"
   
     - name: Download Task Definitions
       run: |
@@ -81,13 +81,13 @@ jobs:
         container-name: external-adapter
         image: ${{ steps.push-adapter-image.outputs.image }}
 
-    - name: Modify Amazon ECS task definition with IPFS container
-      id: render-ipfs-container
-      uses: aws-actions/amazon-ecs-render-task-definition@v1
-      with:
-        task-definition: task-definition-adapters.json
-        container-name: ipfs-daemon
-        image: ${{ steps.push-ipfs-image.outputs.image }}
+    # - name: Modify Amazon ECS task definition with IPFS container
+    #   id: render-ipfs-container
+    #   uses: aws-actions/amazon-ecs-render-task-definition@v1
+    #   with:
+    #     task-definition: task-definition-adapters.json
+    #     container-name: ipfs-daemon
+    #     image: ${{ steps.push-ipfs-image.outputs.image }}
       
     - name: Deploy External Adapters to Amazon ECS service
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
@@ -95,4 +95,4 @@ jobs:
         task-definition: ${{ steps.render-adapter-container.outputs.task-definition }}
         service: dapp-service-adapters
         cluster: dapp-cluster
-        wait-for-service-stability: true
+        # wait-for-service-stability: true

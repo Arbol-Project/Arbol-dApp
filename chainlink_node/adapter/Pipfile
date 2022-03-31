@@ -14,7 +14,7 @@ geopy = "*"
 zeep = "*"
 astropy = "*"
 timezonefinder = "*"
-Flask = "==1.1.1"
+Flask = "*"
 pymongo = "*"
 multiaddr = "*"
 

@@ -12,7 +12,7 @@ RISK_API_ENDPOINT = 'https://temporary.placeholder'
 def verify_request(uri):
     hash = uri[:32]
     id = uri[32:]
-    client = MongoClient(os.getenv('MONGO_PROD_CONNECTION_STRING'))
+    client = MongoClient(os.getenv('PROD_MONGO_URL'))
     contracts_collection = client['meteor']['contracts']
     cursor = contracts_collection.find_one({"_id": id, "lifecycleStatus": "Awaiting Evaluation", "serializedRiskObject": {"$exists": "true", "$ne": "null"}}, {'_id': 1, 'serializedRiskObject': 1, 'lifecycleStatus': 1})
     sro = json.dumps(cursor['serializedRiskObject'], sort_keys=True)

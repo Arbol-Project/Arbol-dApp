@@ -2,7 +2,7 @@
 	path = chainlink_node/adapter/dweather
 	url = https://github.com/dmp267/dWeather-Python-Client.git
 	branch = master
-[submodule "Arbol-dApp-Frontend"]
-	path = frontend
-	url = https://github.com/dmp267/Arbol-dApp-Frontend.git
-	branch = master
+# [submodule "Arbol-dApp-Frontend"]
+# 	path = frontend
+# 	url = https://github.com/dmp267/Arbol-dApp-Frontend.git
+# 	branch = master

@@ -98,7 +98,7 @@ class StationLoader(DClimateLoader):
         super().__init__(dataset_name, imperial_units=imperial_units, **kwargs)
         self._station_id = station_id
         self._weather_variable = weather_variable
-
+        dates = ast.literal_eval(dates)
         start_date = datetime(2022, 2, 18)
         dates = [date for date in dates if datetime.strptime(date, '%Y-%m-%d') < (start_date + timedelta(days=15))]
         self._dates = ast.literal_eval(dates)

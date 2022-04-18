@@ -44,20 +44,23 @@ class CriticalSnowfallDerivative:
 
             Parameters: params (dict), dictionary of required contract parameters
             Returns: number, the determined payout (0 if not awarded)
+
+            N.B.2 Resolving contract without evaluation             [04-18-2022]
         '''
-        loader = StationLoader(params['dates'],
-                                    params['station_id'],
-                                    params['weather_variable'],
-                                    dataset_name=params['dataset'],
-                                    imperial_units=params.get('imperial_units', True)
-                                    )
-        covered_history = loader.load()
-        payout = cls._generate_payouts(data=covered_history,
-                                        threshold=params['threshold'],
-                                        opt_type=params['opt_type'],
-                                        limit=params['limit'],
-                                        )
-        return payout
+        # loader = StationLoader(params['dates'],
+        #                             params['station_id'],
+        #                             params['weather_variable'],
+        #                             dataset_name=params['dataset'],
+        #                             imperial_units=params.get('imperial_units', True)
+        #                             )
+        # covered_history = loader.load()
+        # payout = cls._generate_payouts(data=covered_history,
+        #                                 threshold=params['threshold'],
+        #                                 opt_type=params['opt_type'],
+        #                                 limit=params['limit'],
+        #                                 )
+        # return payout
+        return 0
 
     @classmethod
     def _generate_payouts(cls, data, threshold, opt_type, limit):
@@ -73,23 +76,18 @@ class CriticalSnowfallDerivative:
             Returns: int, generated payout times 10^6 (in order to report back to chain in value of USDC)
 
             N.B.1 Adding change to cut threshold from 6 to 3 inches [01-20-2022]
-            N.B.2 Resolving contract without evaluation             [04-18-2022]
         '''
-        eval = False
-        if eval:
-            threshold = float(threshold) / 2
+        threshold = float(threshold) / 2
 
-            limit = float(limit)
+        limit = float(limit)
 
-            index_value = data.max().value
-            opt_type = opt_type.lower()
-            direction = 1 if opt_type == 'call' else -1
-            
-            payout = (index_value - threshold) * direction
-            if payout < 0:
-                payout = 0
-            if payout > 0:
-                payout = limit
-            return int(payout * cls._OUTPUT_MULTIPLIER)
-        else:
-            return 0
+        index_value = data.max().value
+        opt_type = opt_type.lower()
+        direction = 1 if opt_type == 'call' else -1
+        
+        payout = (index_value - threshold) * direction
+        if payout < 0:
+            payout = 0
+        if payout > 0:
+            payout = limit
+        return int(payout * cls._OUTPUT_MULTIPLIER)

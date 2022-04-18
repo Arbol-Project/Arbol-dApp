@@ -100,8 +100,7 @@ class StationLoader(DClimateLoader):
         self._weather_variable = weather_variable
         dates = ast.literal_eval(dates)
         start_date = datetime(2022, 2, 18)
-        dates = [date for date in dates if datetime.strptime(date, '%Y-%m-%d') < (start_date + timedelta(days=15))]
-        self._dates = ast.literal_eval(dates)
+        self._dates = [date for date in dates if datetime.strptime(date, '%Y-%m-%d') < (start_date + timedelta(days=15))]
 
     def load(self):
         ''' Loads the dataset history from IPFS for the specified station ID

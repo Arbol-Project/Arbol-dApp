@@ -52,6 +52,11 @@ This Chainlink node supports the following jobs and chains:
             - Operator Address (contractAddress)  = `0x76dfA9a36db355F101B241b66e2fA97f7Ca09C24`
             - Chain ID (evmChainID)               = `137`
             - LINK Token Address                  = `0xb0897686c545045aFc77CF20eC7A532E3120E0F1`
+        - Mumbai: 
+            - Job ID (externalJobID)              = `a462d643-c963-4d64-8bfa-605436c2cb08`
+            - Operator Address (contractAddress)  = `0x59FA4e3Fd486E5798C8F8d884f0F65A51A5dFF43`
+            - Chain ID (evmChainID)               = `80001`
+            - LINK Token Address                  = `0x326C977E6efc84E512bB9C30f76E30c160eD06FB`
     - Inputs: 
         - `string[] parameters`: the contract terms as a list of strings, where each parameter value is preceeded by the string name of the parameter (can be thought of as an unrolled dictionary).
     - Outputs:

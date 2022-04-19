@@ -181,11 +181,19 @@ function App() {
 
     if (defaultAddress === collateralAddress) {
 
-      var tx = await usdc.approve(addresses.BlizzardDerivativeProvider, collateralAmount);
+      // var tx = await usdc.approve(addresses.BlizzardDerivativeProvider, collateralAmount);
+      // await tx.wait();
+
+      // tx = await MainContract.depositCollateral();
+      // await tx.wait();
+      var tx = await usdc.approve(addresses.BlizzardDerivativeProvider, premiumAmount);
       await tx.wait();
 
-      tx = await MainContract.depositCollateral();
+      tx = await MainContract.depositPremium();
       await tx.wait();
+
+      const deployedAddress = await MainContract.blizzardContract();
+      console.log(deployedAddress);
     } else if (defaultAddress === premiumAddress) {
 
       tx = await usdc.approve(addresses.BlizzardDerivativeProvider, premiumAmount);

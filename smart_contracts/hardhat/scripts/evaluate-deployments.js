@@ -27,23 +27,25 @@ async function main() {
     
       // const link = new Contract(LinkAddress, abis.erc20, defaultSigner);
 
-      var today = new Date();
-      var cutoff;
-      if (today.getDate() > 16) {
-        cutoff = new Date(today.getYear()+1900, today.getMonth(), 0);
-      } else {
-        if (today.getMonth() == 0) {
-          cutoff = new Date(today.getYear()-1+1900, 11, 0);
-        } else {
-          cutoff = new Date(today.getYear()+1900, today.getMonth()-1, 0);
-        }
-      }      
+      // var today = new Date();
+      // var cutoff;
+      // if (today.getDate() > 16) {
+        // cutoff = new Date(today.getYear()+1900, today.getMonth(), 0);
+      // } else {
+        // if (today.getMonth() == 0) {
+          // cutoff = new Date(today.getYear()-1+1900, 11, 0);
+        // } else {
+          // cutoff = new Date(today.getYear()+1900, today.getMonth()-1, 0);
+      //   }
+      // }      
 
       for (const [cname, caddr] of Object.entries(pdata.contracts)) {
     
-        var end_date = new Date(Contracts[cname].end);
+        // var end_date = new Date(Contracts[cname].end);
 
-        if (caddr == Contracts[cname].address && end_date.getTime() < cutoff.getTime()) {
+        // console.log(end_date, cutoff);
+        //  && end_date.getTime() < cutoff.getTime()
+        if (caddr == Contracts[cname].address) {
           if (Contracts[cname].evaluated) {
             continue;
           }

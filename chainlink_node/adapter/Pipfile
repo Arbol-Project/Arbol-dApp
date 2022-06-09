@@ -17,6 +17,7 @@ timezonefinder = "*"
 Flask = "*"
 pymongo = "*"
 multiaddr = "*"
+nacl = "*"
 
 [dev-packages]
 

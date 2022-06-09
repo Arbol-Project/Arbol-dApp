@@ -50,8 +50,8 @@ class ArbolAdapterV1:
             contract should payout and if so then for how much
         '''
         try:
-            payout = self.program.serve_evaluation(self.parameters)
-            self.request_data['result'] = payout
+            payout = self.program.serve_request(self.parameters)
+            # self.request_data['result'] = payout
             self.result_success(payout)
         except Exception as e:
             self.result_error(e)

@@ -44,7 +44,10 @@ class GridcellLoader(DClimateLoader):
                         kwargs (dict), additional request parameters
         '''
         super().__init__(dataset_name, imperial_units=imperial_units, **kwargs)
-        self._locations = ast.literal_eval(locations)
+        if (type(locations) == str):
+            self._locations = ast.literal_eval(locations)
+        else:
+            self._locations = locations
 
     def load(self):
         ''' Loads the weather data time series from IPFS for each specified

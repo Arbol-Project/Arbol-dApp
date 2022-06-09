@@ -1,33 +1,7 @@
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'dweather'))
 
-import hashlib
-import json
-import requests
-from pymongo import MongoClient
-
-RISK_API_ENDPOINT = 'https://temporary.placeholder'
-
-
-def verify_request(uri):
-    hash = uri[:32]
-    id = uri[32:]
-    client = MongoClient(os.getenv('PROD_MONGO_URL'))
-    contracts_collection = client['meteor']['contracts']
-    cursor = contracts_collection.find_one({"_id": id, "lifecycleStatus": "Awaiting Evaluation", "serializedRiskObject": {"$exists": "true", "$ne": "null"}}, {'_id': 1, 'serializedRiskObject': 1, 'lifecycleStatus': 1})
-    sro = json.dumps(cursor['serializedRiskObject'], sort_keys=True)
-    sro_hash = hashlib.md5(sro.encode("utf-8"))
-    if hash != sro_hash.hexdigest():
-        return 'hash does not match', False
-    result = {'sro': sro, 'id': id}
-    return result, True
-
-
-def get_contract_payout(sro):
-    sro_data = json.loads(sro)
-    payout = requests.post(url=RISK_API_ENDPOINT, data=sro_data)
-    result = int(float(payout) * 1e18)
-    return result
+from program_catalog.directory import parse_and_validate
 
 
 class ArbolAdapter:
@@ -44,46 +18,36 @@ class ArbolAdapter:
         '''
         self.id = data.get('id', '3')
         self.request_data = data.get('data')
-        self.validate_request_data()
-        if self.valid:
+        if self.validate_request_data():
             self.execute_request()
         else:
-            self.result_error()
+            self.result_error(self.request_error)
 
     def validate_request_data(self):
         ''' Validate that the received request is properly formatted and includes
             all necessary paramters. In the case of an illegal request error
             information is logged to the output
         '''
-        if self.request_data is None or self.request_data == {}:
-            self.request_error = 'request data empty'
-            self.valid = False
-        else:
-            request_uri = self.request_data.get('uri', None)
-            if request_uri is None:
-                self.request_error = 'token URI missing'
-                self.valid =  False
+        try:
+            if self.request_data is None or self.request_data == {}:
+                self.request_error = 'request data empty'
+                return False
+            self.parameters, self.program = parse_and_validate(self.request_data)
+            if self.program is None:
+                self.request_error = self.parameters
+                return False
             else:
-                try:
-                    result, valid = verify_request(request_uri)
-                    if not valid:
-                        self.request_error = result
-                        self.valid = False
-                    else:
-                        self.request_args = result
-                        self.valid = True
-                except Exception as e:
-                    self.valid = False
-                    self.request_error = e.__name__
+                return True
+        except Exception as e:
+            self.result_error(e)
 
     def execute_request(self):
         ''' Get the designated program and determine whether the associated
             contract should payout and if so then for how much
         '''
         try:
-            payout = get_contract_payout(self.request_args)
-            self.request_data['result'] = payout
-            self.result_success(payout)
+            result = self.program.serve_request(self.parameters)
+            self.result_success(result)
         except Exception as e:
             self.result_error(e)
 

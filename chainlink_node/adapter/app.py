@@ -16,7 +16,16 @@ def build_app():
         app.logger.debug('Body: %s', request.get_data())
 
     @app.route('/', methods=['POST'])
-    def call_adapterV1():
+    def call_nft_adapter():
+        ''' Primary route for NFT evaluation requests '''
+        data = request.get_json()
+        if data == '':
+            data = {}
+        response = ArbolAdapter(data)
+        return jsonify(response.result)
+
+    @app.route('/v1', methods=['POST'])
+    def call_v1_adapter():
         ''' Primary route for V1 requests to the adapter '''
         data = request.get_json()
         if data == '':
@@ -32,16 +41,7 @@ def build_app():
             data = {}
         response = dClimateAdapter(data)
         return jsonify(response.result)
-
-    @app.route('/eval', methods=['POST'])
-    def call_adapterV2():
-        ''' Primary route for payout evaluation (V2) requests '''
-        data = request.get_json()
-        if data == '':
-            data = {}
-        response = ArbolAdapter(data)
-        return jsonify(response.result)
-
+    
     @app.route('/health', methods=['POST'])
     def health_check():
         ''' Simple health check route '''
@@ -50,6 +50,9 @@ def build_app():
             'statusCode': 200,
         }
         return jsonify(healthy)
+
+
+        
 
     return app
 

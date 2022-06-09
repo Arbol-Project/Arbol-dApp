@@ -27,18 +27,18 @@ class RainfallDerivative:
         result = True
         result_msg = ''
         for param in cls._PROGRAM_PARAMETERS:
-            if not param in params:
+            if params.get(param, None) is None:
                 result_msg += f'missing {param} parameter\n'
                 result = False
         for param in cls._PARAMETER_OPTIONS:
-            if param in params and params.get(param, None) is not None:
+            if params.get(param, None) is not None:
                 return result, result_msg
         result_msg += f'no non-null parameter in {cls._PARAMETER_OPTIONS} detected\n'
         result = False
         return result, result_msg
 
     @classmethod
-    def serve_evaluation(cls, params):
+    def serve_request(cls, params):
         ''' Loads the relevant geospatial historical weather data and computes
             a payout and an index
 

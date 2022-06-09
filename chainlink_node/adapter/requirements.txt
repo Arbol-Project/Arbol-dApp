@@ -11,3 +11,4 @@ zeep
 astropy
 timezonefinder
 pymongo
+pynacl

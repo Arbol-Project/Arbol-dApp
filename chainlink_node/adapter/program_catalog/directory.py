@@ -16,7 +16,7 @@ def get_parameters_and_program(request_data):
     try:
         data = decrypt(request_uri)
     except Exception as e:
-        return f'could not decode: {e.__name__}', None
+        return f'could not decode: {e}', None
     job_type = request_data.get('jobType', None)
     if job_type is None:
         return 'job type (reencryption, evaluation) missing', None
@@ -57,7 +57,7 @@ def parse_and_validate(request_data):
             return request_error, None
         return parameters, program
     except Exception as e:
-        return f'could not parse parameters: {e.__name__}', None
+        return f'could not parse parameters: {e}', None
 
 
 def get_program(params):

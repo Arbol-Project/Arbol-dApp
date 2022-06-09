@@ -8,7 +8,6 @@ from nacl.public import PrivateKey, PublicKey, Box
 PRIVATE_KEY = os.environ.get("NODE_PRIVATE_KEY")
 
 def decrypt(uri, key=PRIVATE_KEY, section=2):
-    print(uri, key, section)
     ''' Decrypts the contents of the supplied NFT URI that are encrypted for 
         the Chainlink node and returns a JSON object
 
@@ -57,10 +56,11 @@ def reencrypt(uri, data, public_key, section=0):
         Parameters: data (dict), unencrypted contract data in json format
         Parameters: public_key (string), public encryption key to be used for encryption
         Parameters: section (number), the section of the URI to reencrypt
-                    the default 2 corresponds to the contents encrypted for
-                    the Chainlink node. Section 0 corresponds to the contents
-                    encrypted for the client/holder. Section 1 corresponds to
-                    the contents encrypted for the associated Arbol representative
+                    the default 0 corresponds to the contents encrypted for
+                    for the client/holder. Section 1 corresponds to the 
+                    contents encrypted for the associated Arbol representative. 
+                    Section 2 corresponds to the contents encrypted for the 
+                    Chainlink node
         Returns: string, the encrypted NFT URI
     '''
     bytes_data = base64.b64decode(uri)

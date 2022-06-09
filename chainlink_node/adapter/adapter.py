@@ -39,7 +39,8 @@ class ArbolAdapter:
             else:
                 return True
         except Exception as e:
-            self.result_error(e)
+            self.request_error = e
+            return False
 
     def execute_request(self):
         ''' Get the designated program and determine whether the associated

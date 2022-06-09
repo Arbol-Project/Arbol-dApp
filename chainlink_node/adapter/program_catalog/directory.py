@@ -53,11 +53,11 @@ def parse_and_validate(request_data):
     try:
         parameters, program = get_parameters_and_program(request_data)
         valid, request_error = program.validate_request(parameters)
+        if not valid:
+            return request_error, None
+        return parameters, program
     except Exception as e:
         return f'could not parse parameters: {e.__name__}', None
-    if not valid:
-        return request_error, None
-    return parameters, program
 
 
 def get_program(params):

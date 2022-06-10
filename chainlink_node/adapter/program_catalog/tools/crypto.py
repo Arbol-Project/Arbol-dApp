@@ -5,7 +5,8 @@ import base64
 import ast
 from nacl.public import PrivateKey, PublicKey, Box
 
-PRIVATE_KEY = os.environ.get("NODE_PRIVATE_KEY")
+# this is a dict for some reason when loading from SecretsManager
+PRIVATE_KEY = os.environ.get("NODE_PRIVATE_KEY")["NODE_PRIVATE_KEY"]
 
 def decrypt(uri, key=PRIVATE_KEY, section=2):
     ''' Decrypts the contents of the supplied NFT URI that are encrypted for 

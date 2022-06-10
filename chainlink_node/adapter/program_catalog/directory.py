@@ -52,6 +52,8 @@ def parse_and_validate(request_data):
     '''
     try:
         parameters, program = get_parameters_and_program(request_data)
+        if program is None:
+            return parameters, None
         valid, request_error = program.validate_request(parameters)
         if not valid:
             return request_error, None

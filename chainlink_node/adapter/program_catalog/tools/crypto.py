@@ -36,7 +36,6 @@ def decrypt(uri, key=PRIVATE_KEY, section=2):
     ephemeral_public_key = base64.b64decode(selected_encryption_payload[1])
     cipher_text = base64.b64decode(selected_encryption_payload[2])
 
-    print(key)
     secret_key_bytes = bytes.fromhex(key)
 
     secret_key = PrivateKey(secret_key_bytes)

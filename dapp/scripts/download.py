@@ -11,7 +11,7 @@ CONTRACTS = 'packages/react-app/src/contracts/hardhat_contracts.json'
 SERIALIZATION_ORDER = 'packages/react-app/src/contracts/serialization_order.json'
 
 NETWORK = os.environ['NETWORK_NAME'] if 'NETWORK_NAME' in os.environ else 'rinkeby'
-WALLET = os.environ['WALLET'] if 'WALLET' in os.environ else '0x69640770407A09B166AED26B778699045B304768'
+WALLET = os.environ['WALLET']
 
 CHAIN_MAP = {
     'rinkeby': '4',

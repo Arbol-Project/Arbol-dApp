@@ -11,7 +11,7 @@ CONTRACTS = 'packages/react-app/src/contracts/hardhat_contracts.json'
 SERIALIZATION_ORDER = 'packages/react-app/src/contracts/serialization_order.json'
 
 NETWORK = os.environ['NETWORK_NAME'] if 'NETWORK_NAME' in os.environ else 'rinkeby'
-WALLET = os.environ['WALLET']
+WALLET = os.environ['PUBLIC_KEY']
 
 CHAIN_MAP = {
     'rinkeby': '4',
@@ -109,7 +109,7 @@ def build_output(data):
 if __name__ == '__main__':
     token_data = get_contract_uris()
 
-    s_key = os.environ['SECRET_KEY']
+    s_key = os.environ['PRIVATE_KEY']
     decryptions = {}
     for t_id in token_data:
         t_uri = token_data[t_id]

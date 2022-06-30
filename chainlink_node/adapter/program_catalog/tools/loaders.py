@@ -5,6 +5,18 @@ from datetime import datetime, timedelta
 from dweather.dweather_client import client
 
 
+
+def parse_timestamp(timestamp):
+    ''' Helper funciton to parse timestamps to Pandas-readable date strings 
+
+        Parameters: timestamp (number), a timestamp in seconds
+        Returns: str, the date parsed to ISO format
+    '''
+    dt = datetime.fromtimestamp(timestamp)
+    iso = dt.isoformat()
+    return iso
+
+
 class DClimateLoader:
     ''' Base loader class for dClimate weather data and Arbol dApp weather contracts. 
         Uses dWeather Python client to get historical weather data from IPFS and,

@@ -12,9 +12,9 @@ Parameters:
   DashSSLCert:
     Type: String
     Description: ARN of SSL certificate for Dashboard endpoint
-  DBSecretARN:
+  PKSecretARN:
     Type: String
-    Description: ARN of DB Secret
+    Description: ARN of PK Secret
   SubnetId:
     Type: "List<AWS::EC2::Subnet::Id>"
     Description: Select at least two subnets in your selected VPC.
@@ -145,7 +145,7 @@ Resources:
       ContainerDefinitions:
         - Name: chainlink-node
           Cpu: 512
-          Memory: 1024
+          Memory: 1024 # Should be 4
           Essential: true
           Image: smartcontract/chainlink:1.2.1
           EntryPoint:
@@ -278,7 +278,7 @@ Resources:
       ContainerDefinitions:
         - Name: ipfs-daemon
           Cpu: 512
-          Memory: 1024
+          Memory: 512
           User: 0
           Essential: true
           Image: 574269834288.dkr.ecr.us-east-1.amazonaws.com/ipfs-daemon
@@ -309,8 +309,9 @@ Resources:
           Essential: true
           Image: 574269834288.dkr.ecr.us-east-1.amazonaws.com/external-adapter
           Secrets:
-            - Name: MONGO_PROD_CONNECTION_STRING
-              ValueFrom: !Ref DBSecretARN
+            - Name: NODE_PRIVATE_KEY
+              ValueFrom: !Ref PKSecretARN
+              # ValueFrom: !Ref DBSecretARN
           # EnvironmentFiles:
           #   - Type: s3
           #     Value: "arn:aws:s3:::dapp-files/S3Links/mongo/.env"
@@ -734,7 +735,8 @@ Resources:
               - Effect: Allow
                 Action:
                   - "secretsmanager:GetSecretValue"
-                Resource: !Ref DBSecretARN
+                Resource: !Ref PKSecretARN  
+                # Resource: !Ref DBSecretARN
   EC2Role:
     Type: "AWS::IAM::Role"
     Properties:

@@ -1,27 +1,31 @@
-chainlink_node/scripts/send-secrets.sh
+# chainlink_node/scripts/send-secrets.sh
 
 chainlink_node/adapter/tests/payouts
 
-chainlink_node/chainlink/.env
-chainlink_node/chainlink/s3.env
-chainlink_node/chainlink/dclimate.env
-chainlink_node/chainlink/polygon-mainnet.json
-chainlink_node/chainlink/.api
-chainlink_node/chainlink/.password
-chainlink_node/chainlink/secrets*
-chainlink_node/chainlink/tls/server.*
+# chainlink_node/chainlink/.env
+# chainlink_node/chainlink/s3.env
+# chainlink_node/chainlink/dclimate.env
+# chainlink_node/chainlink/.api
+# chainlink_node/chainlink/.password
+# chainlink_node/chainlink/secrets*
+# chainlink_node/chainlink/tls/server.*
 
-smart_contracts/foundry
-smart_contracts/other
-smart_contracts/web3_deploy.py
-smart_contracts/brownie
-smart_contracts/hardhat/SROs
-smart_contracts/hardhat/SROs.zip
+# smart_contracts/foundry
+# smart_contracts/other
+# smart_contracts/web3_deploy.py
+# smart_contracts/brownie
+# smart_contracts/hardhat/SROs
+# smart_contracts/hardhat/SROs.zip
 
-smart_contracts/hardhat/hardhat.config.js
-smart_contracts/hardhat/cache/*
-smart_contracts/hardhat/artifacts
-smart_contracts/hardhat/node_modules/*
+# smart_contracts/hardhat/hardhat.config.js
+# smart_contracts/hardhat/cache/*
+# smart_contracts/hardhat/artifacts
+# smart_contracts/hardhat/node_modules/*
+
+chainlink_node/legacy
+dapp/legacy/smart_contracts
+
+*/old
 
 *.secret*
 *monitoring
@@ -34,3 +38,10 @@ __pycache__
 *old.readme.md
 nft
 *process-deploy-old.yml
+
+dapp/packages/hardhat/SROs/
+dapp/packages/hardhat/old/
+
+dapp/legacy/web_app/packages/react-app/public/
+dapp/yarn.lock
+dapp/packages/hardhat/.openzeppelin

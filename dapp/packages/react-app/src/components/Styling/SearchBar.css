@@ -1,0 +1,7 @@
+/**
+* Overide css classes from atnd 
+* for custom styling.
+*/
+.dashboardSearch .ant-input {
+  border-radius: 12px;
+}

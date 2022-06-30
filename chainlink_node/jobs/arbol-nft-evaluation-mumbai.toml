@@ -1,0 +1,27 @@
+type = "directrequest"
+schemaVersion = 1
+name = "arbol-nft-evaluation-mumbai"
+externalJobID = "a492af66-82fa-4dbf-ab8b-aa139d5bd72e"
+maxTaskDuration = "30s"
+contractAddress = "0x59FA4e3Fd486E5798C8F8d884f0F65A51A5dFF43"
+evmChainID = "80001"
+minIncomingConfirmations = 0
+observationSource = """
+    decode_log   [type=ethabidecodelog
+                  abi="OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)"
+                  data="$(jobRun.logData)"
+                  topics="$(jobRun.logTopics)"]
+    decode_cbor  [type=cborparse data="$(decode_log.data)"]
+    nft_adapter [type="bridge" name="arbol-nft-adapter" timeout="300s" requestData="{\\"data\\":{\\"endDate\\": $(decode_cbor.endDate), \\"jobType\\": \\"evaluation\\", \\"uri\\": $(decode_cbor.uri) }}"]
+    eval         [type=jsonparse path="result" data="$(nft_adapter)"]
+    encode_data  [type=ethabiencode 
+                  abi="(bytes32 _requestId, uint256 _tokenId, uint256 _payout)" 
+                  data="{ {\\"_requestId\\": $(decode_log.requestId), \\"_tokenId\\": $(decode_cbor.tokenId), \\"_payout\\": $(eval) }"]
+    encode_tx    [type=ethabiencode
+                  abi="fulfillOracleRequest2(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes calldata data)"
+                  data="{\\"requestId\\": $(decode_log.requestId), \\"payment\\": $(decode_log.payment), \\"callbackAddress\\": $(decode_log.callbackAddr), \\"callbackFunctionId\\": $(decode_log.callbackFunctionId), \\"expiration\\": $(decode_log.cancelExpiration), \\"data\\": $(encode_data)}"
+                 ]
+    submit_tx    [type=ethtx from="[\\"0x89Fc25786e96A65c0AC7a68A689B01Bb61cf14d8\\"]" evmChainID="80001" to="0x59FA4e3Fd486E5798C8F8d884f0F65A51A5dFF43" data="$(encode_tx)"]
+    
+    decode_log -> decode_cbor  -> nft_adapter -> eval -> encode_data -> encode_tx -> submit_tx
+"""

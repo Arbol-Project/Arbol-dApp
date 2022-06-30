@@ -1,0 +1,27 @@
+type = "directrequest"
+schemaVersion = 1
+name = "arbol-nft-evaluation-polygon"
+externalJobID = "940708c3-e44c-40f1-bd03-d34c1b3edcf6"
+maxTaskDuration = "30s"
+contractAddress = "0x76dfA9a36db355F101B241b66e2fA97f7Ca09C24"
+evmChainID = "137"
+minIncomingConfirmations = 0
+observationSource = """
+    decode_log   [type=ethabidecodelog
+                  abi="OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)"
+                  data="$(jobRun.logData)"
+                  topics="$(jobRun.logTopics)"]
+    decode_cbor  [type=cborparse data="$(decode_log.data)"]
+    nft_adapter [type="bridge" name="arbol-nft-adapter" timeout="300s" requestData="{\\"data\\":{\\"endDate\\": $(decode_cbor.endDate), \\"jobType\\": \\"evaluation\\", \\"uri\\": $(decode_cbor.uri) }}"]
+    eval         [type=jsonparse path="result" data="$(nft_adapter)"]
+    encode_data  [type=ethabiencode 
+                  abi="(bytes32 _requestId, uint256 _tokenId, uint256 _payout)" 
+                  data="{ {\\"_requestId\\": $(decode_log.requestId), \\"_tokenId\\": $(decode_cbor.tokenId), \\"_payout\\": $(eval) }"]
+    encode_tx    [type=ethabiencode
+                  abi="fulfillOracleRequest2(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes calldata data)"
+                  data="{\\"requestId\\": $(decode_log.requestId), \\"payment\\": $(decode_log.payment), \\"callbackAddress\\": $(decode_log.callbackAddr), \\"callbackFunctionId\\": $(decode_log.callbackFunctionId), \\"expiration\\": $(decode_log.cancelExpiration), \\"data\\": $(encode_data)}"
+                 ]
+    submit_tx    [type=ethtx from="[\\"0x5d7b14C4Bd4071631dF150B3B82909Ed1117B830\\"]" evmChainID="137" to="0x76dfA9a36db355F101B241b66e2fA97f7Ca09C24" data="$(encode_tx)"]
+    
+    decode_log -> decode_cbor  -> nft_adapter -> eval -> encode_data -> encode_tx -> submit_tx
+"""

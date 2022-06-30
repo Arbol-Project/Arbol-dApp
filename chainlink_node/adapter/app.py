@@ -26,7 +26,9 @@ def build_app():
 
     @app.route('/v1', methods=['POST'])
     def call_v1_adapter():
-        ''' Primary route for V1 requests to the adapter '''
+        ''' Primary route for V1 requests to the adapter 
+            [Soon to be deprecated]
+        '''
         data = request.get_json()
         if data == '':
             data = {}

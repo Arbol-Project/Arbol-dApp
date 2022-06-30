@@ -1,18 +1,18 @@
-type                        = "directrequest"
-schemaVersion               = 1
-name                        = "dclimate-api-request-mumbai"
-evmChainID                  = "80001"
-contractAddress             = "0x59FA4e3Fd486E5798C8F8d884f0F65A51A5dFF43"
-externalJobID               = "b886eeae-31f7-46ac-898c-5b568a9a5503"
-maxTaskDuration             = "30s"
-minIncomingConfirmations    = 0
-observationSource           = """
+type = "directrequest"
+schemaVersion = 1
+name = "dclimate-api-request-mumbai"
+externalJobID = "b886eeae-31f7-46ac-898c-5b568a9a5503"
+maxTaskDuration = "30s"
+contractAddress = "0x59FA4e3Fd486E5798C8F8d884f0F65A51A5dFF43"
+evmChainID = "80001"
+minIncomingConfirmations = 0
+observationSource = """
     decode_log   [type=ethabidecodelog
                   abi="OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)"
                   data="$(jobRun.logData)"
                   topics="$(jobRun.logTopics)"]
     decode_cbor  [type=cborparse data="$(decode_log.data)"]
-    api_adapter  [type="bridge" name="api-adapter" timeout="300s" requestData="{\\"data\\":{\\"request_url\\": $(decode_cbor.request_url), \\"request_ops\\": $(decode_cbor.request_ops), \\"request_params\\": $(decode_cbor.request_params)}}"]
+    api_adapter  [type="bridge" name="api-adapter" timeout="600s" requestData="{\\"data\\":{\\"request_url\\": $(decode_cbor.request_url), \\"request_ops\\": $(decode_cbor.request_ops), \\"request_params\\": $(decode_cbor.request_params)}}"]
     
     decode_log -> decode_cbor -> api_adapter
 

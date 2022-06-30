@@ -1,6 +1,7 @@
 from program_catalog.programs.rainfall_derivative import RainfallDerivative
 from program_catalog.programs.critical_snowfall_derivative import CriticalSnowfallDerivative
 from program_catalog.tools.crypto import Reencryption, decrypt
+from program_catalog.tools.loaders import parse_timestamp
 
 
 def get_parameters_and_program(request_data):
@@ -32,6 +33,11 @@ def get_parameters_and_program(request_data):
         program_name = data[first_pos-1]
         param_list = data[first_pos:]
         parameters = {param_list[i]: param_list[i+1] for i in range(0, len(param_list), 2)}
+        request_end_date = request_data.get('endDate', None)
+        if request_end_date is None:
+            return 'request end date is missing', None
+        
+        parameters['end'] = parse_timestamp(request_end_date)
         if 'GRP' in program_name or 'XSR' in program_name:
             program = RainfallDerivative
         else:

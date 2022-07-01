@@ -69,11 +69,7 @@ def decrypt(uri, key):
     encrypted_payload = ast.literal_eval(encrypted_data)
 
     section_length = len(encrypted_payload) // 3
-    client_section = encrypted_payload[:section_length]
-    provider_section = encrypted_payload[section_length:2*section_length]
-    node_section = encrypted_payload[-section_length:]
-    sections = [client_section, provider_section, node_section]
-    selected_encryption_payload = sections[0]
+    selected_encryption_payload = encrypted_payload[:section_length]
 
     nonce = base64.b64decode(selected_encryption_payload[0])
     ephemeral_public_key = base64.b64decode(selected_encryption_payload[1])

@@ -1,14 +1,14 @@
-# chainlink_node/scripts/send-secrets.sh
+# chainlink-node/scripts/send-secrets.sh
 
-chainlink_node/adapter/tests/payouts
+chainlink-node/adapter/tests/payouts
 
-# chainlink_node/chainlink/.env
-# chainlink_node/chainlink/s3.env
-# chainlink_node/chainlink/dclimate.env
-# chainlink_node/chainlink/.api
-# chainlink_node/chainlink/.password
-# chainlink_node/chainlink/secrets*
-# chainlink_node/chainlink/tls/server.*
+# chainlink-node/chainlink/.env
+# chainlink-node/chainlink/s3.env
+# chainlink-node/chainlink/dclimate.env
+# chainlink-node/chainlink/.api
+# chainlink-node/chainlink/.password
+# chainlink-node/chainlink/secrets*
+# chainlink-node/chainlink/tls/server.*
 
 # smart_contracts/foundry
 # smart_contracts/other

@@ -1,11 +1,11 @@
 {
-  "80001": {
-    "mumbai": {
-      "name": "mumbai",
-      "chainId": "80001",
+  "4": {
+    "rinkeby": {
+      "name": "rinkeby",
+      "chainId": "4",
       "contracts": {
         "WeatherRiskNFT": {
-          "address": "0x14dBFa8F0Dff2b9AD545215Eb0e69ae62914867A",
+          "address": "0x757ED96fa20ac29CaaA97Af21631eF7644afBc1d",
           "abi": [
             {
               "inputs": [],
@@ -325,6 +325,19 @@
             },
             {
               "inputs": [],
+              "name": "ArbolViewer",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
               "name": "DEFAULT_ADMIN_ROLE",
               "outputs": [
                 {
@@ -467,19 +480,51 @@
               "type": "function"
             },
             {
+              "inputs": [],
+              "name": "VIEWER_ROLE",
+              "outputs": [
+                {
+                  "internalType": "bytes32",
+                  "name": "",
+                  "type": "bytes32"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
               "inputs": [
                 {
-                  "internalType": "bytes",
-                  "name": "pubKey",
-                  "type": "bytes"
-                },
-                {
                   "internalType": "address",
-                  "name": "user",
+                  "name": "holder",
                   "type": "address"
                 }
               ],
-              "name": "adminSetPublicKey",
+              "name": "adminGetPubKey",
+              "outputs": [
+                {
+                  "internalType": "string",
+                  "name": "",
+                  "type": "string"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "string",
+                  "name": "pubKey",
+                  "type": "string"
+                },
+                {
+                  "internalType": "address",
+                  "name": "holder",
+                  "type": "address"
+                }
+              ],
+              "name": "adminSetPubKey",
               "outputs": [],
               "stateMutability": "nonpayable",
               "type": "function"
@@ -573,9 +618,9 @@
                   "type": "bytes32"
                 },
                 {
-                  "internalType": "bytes",
-                  "name": "_viewerKey",
-                  "type": "bytes"
+                  "internalType": "string",
+                  "name": "_uri",
+                  "type": "string"
                 }
               ],
               "name": "fulfillReencryption",
@@ -597,6 +642,19 @@
                   "internalType": "address",
                   "name": "",
                   "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "getPubKey",
+              "outputs": [
+                {
+                  "internalType": "string",
+                  "name": "",
+                  "type": "string"
                 }
               ],
               "stateMutability": "view",
@@ -712,34 +770,9 @@
                   "type": "string"
                 },
                 {
-                  "internalType": "bytes",
-                  "name": "viewerKey",
-                  "type": "bytes"
-                },
-                {
-                  "internalType": "bytes",
-                  "name": "nodeKey",
-                  "type": "bytes"
-                },
-                {
-                  "internalType": "bytes",
-                  "name": "dappKey",
-                  "type": "bytes"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "startDate",
-                  "type": "uint256"
-                },
-                {
                   "internalType": "uint256",
                   "name": "endDate",
                   "type": "uint256"
-                },
-                {
-                  "internalType": "string",
-                  "name": "programName",
-                  "type": "string"
                 }
               ],
               "name": "mint",
@@ -810,19 +843,6 @@
                 }
               ],
               "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "tokenId",
-                  "type": "uint256"
-                }
-              ],
-              "name": "refreshTokenLifecycleStage",
-              "outputs": [],
-              "stateMutability": "nonpayable",
               "type": "function"
             },
             {
@@ -959,12 +979,12 @@
             {
               "inputs": [
                 {
-                  "internalType": "bytes",
+                  "internalType": "string",
                   "name": "pubKey",
-                  "type": "bytes"
+                  "type": "string"
                 }
               ],
-              "name": "setPublicKey",
+              "name": "setPubKey",
               "outputs": [],
               "stateMutability": "nonpayable",
               "type": "function"
@@ -1028,25 +1048,6 @@
                   "type": "uint256"
                 }
               ],
-              "name": "tokenComputedPayout",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "tokenId",
-                  "type": "uint256"
-                }
-              ],
               "name": "tokenEndDate",
               "outputs": [
                 {
@@ -1059,38 +1060,13 @@
               "type": "function"
             },
             {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "tokenId",
-                  "type": "uint256"
-                }
-              ],
-              "name": "tokenLifecycleStage",
+              "inputs": [],
+              "name": "tokenIDs",
               "outputs": [
                 {
-                  "internalType": "uint256",
+                  "internalType": "uint256[]",
                   "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "tokenId",
-                  "type": "uint256"
-                }
-              ],
-              "name": "tokenNodeKey",
-              "outputs": [
-                {
-                  "internalType": "bytes",
-                  "name": "",
-                  "type": "bytes"
+                  "type": "uint256[]"
                 }
               ],
               "stateMutability": "view",
@@ -1128,44 +1104,6 @@
                   "type": "uint256"
                 }
               ],
-              "name": "tokenProgramName",
-              "outputs": [
-                {
-                  "internalType": "string",
-                  "name": "",
-                  "type": "string"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "tokenId",
-                  "type": "uint256"
-                }
-              ],
-              "name": "tokenStartDate",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "tokenId",
-                  "type": "uint256"
-                }
-              ],
               "name": "tokenURI",
               "outputs": [
                 {
@@ -1185,50 +1123,12 @@
                   "type": "uint256"
                 }
               ],
-              "name": "tokenViewerAddress",
+              "name": "tokenViewer",
               "outputs": [
                 {
                   "internalType": "address",
                   "name": "",
                   "type": "address"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "tokenId",
-                  "type": "uint256"
-                }
-              ],
-              "name": "tokenViewerKey",
-              "outputs": [
-                {
-                  "internalType": "bytes",
-                  "name": "",
-                  "type": "bytes"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "tokenId",
-                  "type": "uint256"
-                }
-              ],
-              "name": "tokendDappKey",
-              "outputs": [
-                {
-                  "internalType": "bytes",
-                  "name": "",
-                  "type": "bytes"
                 }
               ],
               "stateMutability": "view",
@@ -1306,25 +1206,6 @@
               "name": "upgradeToAndCall",
               "outputs": [],
               "stateMutability": "payable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "user",
-                  "type": "address"
-                }
-              ],
-              "name": "userPublicKey",
-              "outputs": [
-                {
-                  "internalType": "bytes",
-                  "name": "",
-                  "type": "bytes"
-                }
-              ],
-              "stateMutability": "view",
               "type": "function"
             }
           ]

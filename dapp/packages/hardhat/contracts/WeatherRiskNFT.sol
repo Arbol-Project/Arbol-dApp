@@ -3776,34 +3776,36 @@ contract WeatherRiskNFT is
     ChainlinkClient {
     using Chainlink for Chainlink.Request;
 
-    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE"); // Currently only Arbol
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE"); // Currently only Arbol
-    bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE"); // Currently only Arbol
-    bytes32 public constant EVALUATOR_ROLE = keccak256("EVALUATOR_ROLE"); // Currently only Arbol
-    bytes32 public constant VIEWER_ROLE = keccak256("VIEWER_ROLE"); // Any address to which a WRSK NFT has been minted or transferred
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");         // Currently only Arbol
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");         // Currently only Arbol
+    bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");     // Currently only Arbol
+    bytes32 public constant EVALUATOR_ROLE = keccak256("EVALUATOR_ROLE");   // Currently only Arbol
 
-    address public constant LINK_ADDRESS = 0x01BE23585060835E02B77ef475b0Cc51aA1e0709; // Link token address on Rinkeby testnet
-    address public constant OPERATOR_ADDRESS = 0xA3ee2ccC1D79023E2b02d411a0408A0340fea252; // Rinkeby testnet Operator.sol (whitelisted) address (Arbol)
-    bytes32 public constant EVALUALTION_JOB_ID = "cfad1455e873455d87debe576f737a2f"; // Arbol mwr (mutliword response) NFT evaluation job on Rinkeby testnet
-    bytes32 public constant REENCRYPTION_JOB_ID = "577cf56accaf4703858522e4e8efe796"; // Arbol mwr NFT re-encryption job on Rinkeby testnet
-    uint256 public constant ORACLE_PAYMENT = 0 * 10**18; // 0.00 LINK
-    uint256 public constant EVALUATION_BUFFER = 0; // additional period following coverage end date before evaluation can be initiated
+    address public constant LINK_ADDRESS = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB;      // Link token address on Mumbai testnet
+    address public constant OPERATOR_ADDRESS = 0x59FA4e3Fd486E5798C8F8d884f0F65A51A5dFF43;  // Mumbai testnet Operator.sol address (Arbol)
+    bytes32 public constant EVALUALTION_JOB_ID = "1a5f6c4827ac4b12a0f81863e18534fb";        // Arbol NFT evaluation job on Mumbai testnet
+    bytes32 public constant REENCRYPTION_JOB_ID = "f885b0d4704947948ad648d920b6eff3";       // Arbol NFT re-encryption job on Mumbai testnet
+    uint256 public constant ORACLE_PAYMENT = 0 * 10**18;                                    // 0.00 LINK
+    uint256 public constant EVALUATION_BUFFER = 0;                                          // additional period following coverage end date before evaluation can be initiated
 
-    // mapping(bytes32 => uint256) private _requestTokens;
-    // mapping(bytes32 => address) private _requestAddresses;
-    // Retrieved from the frontend to determine whether to re-encrypt the NFT URI
-    // e.g. frontend gets URI for held contract and checks that it is a viewer
-    // and if not gets public encryption key if necessary and calls re-encrypt 
-    // before decrypting in frontend
-    mapping(uint256 => address) internal _viewers;
-    mapping(address => string) internal _pubKeys;
-    mapping(uint256 => uint256) internal _endDates;
+    mapping(address => bytes) internal _pubKeys; // these should be compressed to save space
     mapping(bytes32 => uint256) internal _requestsIndex;
+
+    struct contractState {
+        address viewerAddress;  // address for which viewerKey is encrypted
+        bytes viewerKey;        // AES key for contract URI encrypted with public key of viewerAddress
+        bytes nodeKey;          // AES key for contract URI encrypted with public key of Chainlink Node
+        bytes dappKey;          // AES key for contract URI encrypted with public key of dApp Web Server
+        uint256 startDate;      // unix timestamp of contract start date
+        uint256 endDate;        // unix timestamp of contract end date
+        string programName;     // name of contract program
+        uint256 computedPayout; // computed payout result, only accurate once contract has been evaluated, initialized to 0
+        uint256 lifecycleStage; // contract lifescycle stages: 0=Live Contract, 1=In Progress, 2=Awaiting Evaluation, 3=Evaluated
+    }
+    mapping(uint256 => contractState) internal _contractStates;
 
     event ContractEvaluated(uint256 id, uint256 payout);
     event ContractReencrypted(uint256 id, address viewer);
-
-    address public ArbolViewer;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -3828,11 +3830,11 @@ contract WeatherRiskNFT is
         _grantRole(MINTER_ROLE, msg.sender);
         _grantRole(UPGRADER_ROLE, msg.sender);
         _grantRole(EVALUATOR_ROLE, msg.sender);
-        _grantRole(VIEWER_ROLE, msg.sender);
 
         setChainlinkToken(LINK_ADDRESS);
-        ArbolViewer = msg.sender;
     }
+
+    // Permissioned methods
 
     function pause() 
         external 
@@ -3850,29 +3852,36 @@ contract WeatherRiskNFT is
 
     /**
      * @notice can only be called by Minter
-     * @param uri string URI for NFT to be minted, should contain contract data encrypted 
-     * with the Metamask public encryption key of receiver (must also contain identical contract
-     * data encrypted for Arbol representative and Arbol's Chainlink node)
      * @param to address to which NFT is minted
      * @param tokenId uint256 decimal representation of contract's ID (base64)
+     * @param uri string URI of encrypted contract evaluation terms for NFT to be minted
+     * @param viewerKey bytes NFT URI AES key encrypted with public key of 'to' address
+     * @param nodeKey bytes NFT URI AES key encrypted with public key of Chainlink node address
+     * @param dappKey bytes NFT URI AES key encrypted with public key of dApp Web Server address
+     * @param startDate uint256 timestamp of contract start date
      * @param endDate uint256 timestamp of contract end date
+     * @param programName string program name of contract
      */
-    function mint(address to, uint256 tokenId, string memory uri, uint256 endDate) 
+    function mint(address to, uint256 tokenId, string memory uri, bytes memory viewerKey, bytes memory nodeKey, bytes memory dappKey, uint256 startDate, uint256 endDate, string memory programName) 
         external 
         onlyRole(MINTER_ROLE) 
     {
         _mint(to, tokenId);
         _setTokenURI(tokenId, uri);
-        _endDates[tokenId] = endDate;
 
-        _viewers[tokenId] = to;
-        if (!hasRole(VIEWER_ROLE, to)) {
-            _grantRole(VIEWER_ROLE, to);
+        uint256 stage;
+        if (endDate + EVALUATION_BUFFER < block.timestamp) {
+            stage = 0; // In Progress
+        } else {
+             stage = 1; // Awaiting Evaluation
         }
+        contractState memory tokenState = contractState(to, viewerKey, nodeKey, dappKey, startDate, endDate, programName, 0, stage);
+        _contractStates[tokenId] = tokenState;
     }
 
+    // Token state methods
+
     /**
-     * @dev Called from frontend on each view
      * @param tokenId uint256 token ID for URI to retrieve
      * @return string URI of specified contract
      */
@@ -3886,7 +3895,136 @@ contract WeatherRiskNFT is
     }
 
     /**
-     * @dev Called from frontend on each provider view
+     * @param tokenId uint256 token ID of contract
+     * @return address for which token viewerKey is currently encrypted
+     */
+    function tokenViewerAddress(uint256 tokenId) 
+        external
+        view
+        returns (address)
+    {
+        return _contractStates[tokenId].viewerAddress;
+    }
+
+    /**
+     * @param tokenId uint256 token ID of contract
+     * @return bytes AES key encrypted for token viewerAddress
+     */
+    function tokenViewerKey(uint256 tokenId) 
+        external
+        view
+        returns (bytes memory)
+    {
+        return _contractStates[tokenId].viewerKey;
+    }
+
+    /**
+     * @param tokenId uint256 token ID of contract
+     * @return bytes AES key encrypted for Chainlink node address
+     */
+    function tokenNodeKey(uint256 tokenId) 
+        external
+        view
+        returns (bytes memory)
+    {
+        return _contractStates[tokenId].viewerKey;
+    }
+
+    /**
+     * @dev Called from frontend on each client view
+     * @param tokenId uint256 token ID of contract
+     * @return bytes AES key encrypted for token viewerAddress
+     */
+    function tokendDappKey(uint256 tokenId) 
+        external
+        view
+        returns (bytes memory)
+    {
+        return _contractStates[tokenId].dappKey;
+    }
+
+    /**
+     * @param tokenId uint256 token ID of contract
+     * @return uint256 timestamp of contract start date
+     */
+    function tokenStartDate(uint256 tokenId) 
+        external
+        view
+        returns (uint256)
+    {
+        return _contractStates[tokenId].startDate;
+    }
+
+    /**
+     * @param tokenId uint256 token ID of contract
+     * @return uint256 timestamp of contract end date
+     */
+    function tokenEndDate(uint256 tokenId) 
+        external
+        view
+        returns (uint256)
+    {
+        return _contractStates[tokenId].endDate;
+    }
+
+    /**
+     * @param tokenId uint256 token ID of contract
+     * @return string program name of contract
+     */
+    function tokenProgramName(uint256 tokenId) 
+        external
+        view
+        returns (string memory)
+    {
+        return _contractStates[tokenId].programName;
+    }
+
+    /**
+     * @param tokenId uint256 token ID of contract
+     * @return uint256 computed contract payout value
+     */
+    function tokenComputedPayout(uint256 tokenId) 
+        external
+        view
+        returns (uint256)
+    {
+        return _contractStates[tokenId].computedPayout;
+    }
+
+    /**
+     * @param tokenId uint256 token ID of contract
+     * @return uint256 contract lifecycle stage (see mapping above)
+     */
+    function tokenLifecycleStage(uint256 tokenId) 
+        external
+        view
+        returns (uint256)
+    {
+        return _contractStates[tokenId].lifecycleStage;
+    }
+
+    /**
+     * Increments a token's lifecycle stage if possible
+     * @param tokenId uint256 token ID of contract
+     */
+    function refreshTokenLifecycleStage(uint256 tokenId) 
+        external
+    {
+        uint256 lifecycleStage = _contractStates[tokenId].lifecycleStage;
+        if (lifecycleStage == 0) {
+            uint256 startDate = _contractStates[tokenId].startDate;
+            if (startDate < block.timestamp) {
+                _contractStates[tokenId].lifecycleStage += 1;
+            }
+        } else if (lifecycleStage == 1) {
+            uint256 endDate = _contractStates[tokenId].endDate;
+            if (endDate > block.timestamp) {
+                _contractStates[tokenId].lifecycleStage += 1;
+            }
+        }   
+    }
+
+    /**
      * @return uint256[] list of all minted contract IDs
      */
     function enumerateTokenIDs()
@@ -3902,115 +4040,82 @@ contract WeatherRiskNFT is
         return IDs;
     }
 
+    // Public key methods
+
     /**
-     * @dev Called from frontend on each client view
-     * @return uint256[] list of contract IDs held by the msg sender
+     * @param user address for which to return the public key if known
+     * @return bytes public key for caller
      */
-    function tokenIDs()
+    function userPublicKey(address user) 
         external
         view
-        returns (uint256[] memory)
+        returns (bytes memory)
     {
-        uint256 balance = balanceOf(msg.sender);
-        uint256[] memory IDs = new uint256[](balance);
-        for (uint i = 0; i < balance; i++) {
-            IDs[i] = tokenOfOwnerByIndex(msg.sender, i);
-        }
-        return IDs;
+        return _pubKeys[user];
     }
 
     /**
-     * @dev Called from frontend on each view
-     * @notice can only be called by Viewer
-     * @param tokenId uint256 token ID of contract
-     * @return uint256 timestamp of contract end date
+     * @param pubKey bytes public key derived from signature of msg sender
      */
-    function tokenEndDate(uint256 tokenId) 
-        external
-        view
-        onlyRole(VIEWER_ROLE)
-        returns (uint256)
-    {
-        return _endDates[tokenId];
-    }
-
-    /**
-     * @dev Called from frontend on each client view
-     * @notice can only be called by Viewer
-     * @param tokenId uint256 token ID of contract
-     * @return address for which contract data is currently encrypted
-     */
-    function tokenViewer(uint256 tokenId) 
-        external
-        view
-        onlyRole(VIEWER_ROLE)
-        returns (address)
-    {
-        return _viewers[tokenId];
-    }
-
-    /**
-     * @dev Called from frontend on each client view if contract needs re-encryption
-     * @return string public encryption key for caller
-     */
-    function getPubKey() 
-        external
-        view
-        returns (string memory)
-    {
-        return _pubKeys[msg.sender];
-    }
-
-    /**
-     * @dev Called from frontend on first client view after getPubKey fails
-     * and Metamask public encryption key is requested and received (must happen before first
-     * re-encryption request)
-     * @param pubKey string Metamask public encryption key for the msg sender
-     */
-    function setPubKey(string memory pubKey) 
+    function setPublicKey(bytes memory pubKey) 
         external
     {
         _pubKeys[msg.sender] = pubKey;
     }
 
+    // Chainlink methods
+
     /**
-     * @dev Called from frontend on first view after transfers
-     * @notice can only be called by Viewer and requires that the caller
-     * be the holder of the token, that the token not already be encrypted
-     * for the caller, and that the caller's public key is known to the contract
+     * Issues a Chainlink request to re-encrypt the viewer's AES key after transfers
+     * with the new holder's public key
+     * @notice can only be called by the holder of the token and
+     * requires that the token not already be encrypted for the caller, 
+     * and that the caller's public key is known to the contract
      * @param tokenId uint256 token ID of contract to be re-encrypted
      */
     function requestReencryption(uint256 tokenId) 
         external 
-        onlyRole(VIEWER_ROLE)
     {
-        string memory pubKey = _pubKeys[msg.sender];
         require(ownerOf(tokenId) == msg.sender, "Cannot re-encrypt NFT that you do not own");
-        require(_viewers[tokenId] != msg.sender, "NFT is already encrypted for the current owner");
-        require(bytes(pubKey).length != 0, "Metamask public encryption key not found, must be uploaded first");
+
+        address viewerAddress = _contractStates[tokenId].viewerAddress;
+        require(viewerAddress != msg.sender, "NFT is already encrypted for the current owner");
+
+        bytes memory pubKey = _pubKeys[msg.sender];
+        require(bytes(pubKey).length != 0, "Public key not found, must be uploaded before re-encrypting");
+
+        bytes memory nodeKey = _contractStates[tokenId].nodeKey;
         Chainlink.Request memory req = buildChainlinkRequest(REENCRYPTION_JOB_ID, address(this), this.fulfillReencryption.selector);
-        req.add("uri", super.tokenURI(tokenId));
-        req.add("pubKey", pubKey);
+        req.addBytes("nodeKey", nodeKey);
+        req.addBytes("viewerAddressPublicKey", pubKey);
+
         bytes32 requestId = sendChainlinkRequestTo(OPERATOR_ADDRESS, req, ORACLE_PAYMENT);
         _requestsIndex[requestId] = tokenId;
     }
 
     /**
+     * Updates contract state data after successful re-encryption job
      * @param _requestId bytes32 request ID for associated evaluation job
-     * @param _uri string encrypted/compressed URI
+     * @param _viewerKey bytes URI AES key encrypted with the public key of the NFT holder
      */
-    function fulfillReencryption(bytes32 _requestId, string memory _uri)
+    function fulfillReencryption(bytes32 _requestId, bytes memory _viewerKey)
         external
         recordChainlinkFulfillment(_requestId)
     {
         uint256 _tokenId = _requestsIndex[_requestId];
-        address viewer = ownerOf(_tokenId);
-        _setTokenURI(_tokenId, _uri);
-        _viewers[_tokenId] = viewer;
-        emit ContractReencrypted(_tokenId, viewer);
+        address _viewerAddress = ownerOf(_tokenId);
+
+        contractState memory tokenState = _contractStates[_tokenId];
+        tokenState.viewerAddress = _viewerAddress;
+        tokenState.viewerKey = _viewerKey;
+        _contractStates[_tokenId] = tokenState;
+
+        emit ContractReencrypted(_tokenId, _viewerAddress);
     }
 
     /**
+     * Issues a Chainlink request to decrypt the contract terms
+     * and compute an evaluated payout result
      * @notice can only be called by Evaluator and requires that the current
      * block timestamp be sufficiently after the contract end date before evaluation
      * can be initiated
@@ -4020,12 +4125,16 @@ contract WeatherRiskNFT is
         external 
         onlyRole(EVALUATOR_ROLE)
     {
-        uint256 endDate = _endDates[tokenId] + EVALUATION_BUFFER;
-        require(endDate < block.timestamp, "unable to call until coverage period has ended");
+        contractState memory tokenState = _contractStates[tokenId];
+        require(tokenState.endDate + EVALUATION_BUFFER < block.timestamp, "unable to call until coverage period has ended");
+
         Chainlink.Request memory req = buildChainlinkRequest(EVALUALTION_JOB_ID, address(this), this.fulfillEvaluation.selector);
-        req.add("uri", super.tokenURI(tokenId));
-        req.addUint("endDate", endDate);
-        req.addUint("tokenId", tokenId);
+        req.addBytes("nodeKey", tokenState.nodeKey);      // encrypted decryption key
+        req.add("uri", super.tokenURI(tokenId));        // encrypted contract terms
+        req.addUint("startDate", tokenState.startDate);   // contract coverage period state date
+        req.addUint("endDate", tokenState.endDate);       // contract coverage period end date
+        req.add("programName", tokenState.programName);   // contract program name
+        
         bytes32 requestId = sendChainlinkRequestTo(OPERATOR_ADDRESS, req, ORACLE_PAYMENT);
         _requestsIndex[requestId] = tokenId;
     }
@@ -4039,34 +4148,21 @@ contract WeatherRiskNFT is
         recordChainlinkFulfillment(_requestId)
     {
         uint256 _tokenId = _requestsIndex[_requestId];
+
+        _contractStates[_tokenId].lifecycleStage = 3; // update lifecycle to Evaluated
+
         emit ContractEvaluated(_tokenId, _payout);
     }
 
     /**
-     * @dev Called between mints and deploys (must set ArbolViewer and client)
-     * @notice can only be called by Admin
-     * @param pubKey string Metamask public encryption key for the msg sender
-     * @param holder address associated with the specified public key
+     * @param pubKey bytes public key derived from signature of address user
+     * @param user address of public key pubKey
      */
-    function adminSetPubKey(string memory pubKey, address holder) 
+    function adminSetPublicKey(bytes memory pubKey, address user) 
         external
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
-        _pubKeys[holder] = pubKey;
-    }
-
-    /**
-     * @notice can only be called by Admin
-     * @param holder address for which to retrieve Metamask public encryption key
-     * @return string the public encryption key of the specified contract holder
-     */
-    function adminGetPubKey(address holder) 
-        external
-        view
-        onlyRole(DEFAULT_ADMIN_ROLE)
-        returns (string memory)
-    {
-        return _pubKeys[holder];
+        _pubKeys[user] = pubKey;
     }
 
     function _beforeTokenTransfer(address from, address to, uint256 tokenId)
@@ -4075,9 +4171,9 @@ contract WeatherRiskNFT is
         override(ERC721Upgradeable, ERC721EnumerableUpgradeable)
     {
         super._beforeTokenTransfer(from, to, tokenId);
-        if (!hasRole(VIEWER_ROLE, to)) {
-            _grantRole(VIEWER_ROLE, to);
-        }
+        // if (!hasRole(VIEWER_ROLE, to)) {
+        //     _grantRole(VIEWER_ROLE, to);
+        // }
     }
 
     function _authorizeUpgrade(address newImplementation)

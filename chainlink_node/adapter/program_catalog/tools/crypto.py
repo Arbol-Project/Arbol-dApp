@@ -53,7 +53,7 @@ def verify_mac(tag, key, mac_data):
     return True
 
 
-def compress_public_key(public_key):
+def compress_public_key(public_key: bytes):
     ''' Compresses public key if it is uncompressed
 
         Compressed public keys start with the byte 02 or 03 (sign of y coordinate) and are 
@@ -76,10 +76,10 @@ def compress_public_key(public_key):
     elif len(public_key) == 64:
         return PublicKey(bytes.fromhex('04') + public_key).format(compressed=True)
     else:
-        return 'invalid public key', 0
+        return 'cannot compress invalid public key', 0
 
 
-def decompress_public_key(public_key):
+def decompress_public_key(public_key: bytes):
     ''' Decompresses public key if it is compressed
 
         Compressed public keys start with the byte 02 or 03 (sign of y coordinate) and are 
@@ -104,10 +104,10 @@ def decompress_public_key(public_key):
     elif len(public_key) == 64:
         return bytes.fromhex('04') + public_key, 64
     else:
-        return 'invalid public key', 0
+        return 'cannot decompress invalid public key', 0
 
 
-def bytestringify_key_cipher(cipher):
+def bytestringify_key_cipher(cipher: dict):
     ''' Takes a mapping of encryption arguments to bytestrings
         and returns a single combined bytestring
 
@@ -126,7 +126,7 @@ def bytestringify_key_cipher(cipher):
     return cipher['iv'] + public_key + cipher['mac'] + cipher['ciphertext']
 
 
-def parse_key_cipher(cipher_bytes):
+def parse_key_cipher(cipher_bytes: bytes):
     ''' Parses iv, mac, ephemeral public key, and ciphertext from cipher bytestring 
         and returns mapping of their values
 
@@ -152,7 +152,7 @@ def parse_key_cipher(cipher_bytes):
         }
 
 
-def encrypt_access_key(access_key, public_key):
+def encrypt_access_key(access_key: bytes, public_key: bytes):
     ''' Encrypts the contract access key for the supplied public key
 
         A random 16 byte iv is generated alonside an ephemeral keypair whose private
@@ -199,7 +199,7 @@ def encrypt_access_key(access_key, public_key):
     return bytestringify_key_cipher(encryption)
 
 
-def decrypt_access_key(node_key, private_key=PRIVATE_KEY):
+def decrypt_access_key(node_key: bytes, private_key=PRIVATE_KEY):
     ''' Retrieves the contract access key from the node key cipher
 
         The node key is an encrypted payload containing the contract
@@ -244,7 +244,7 @@ def decrypt_access_key(node_key, private_key=PRIVATE_KEY):
 
 
 
-def reencrypt(node_key, public_key):
+def reencrypt(node_key: bytes, public_key: bytes):
     ''' Decrypts the encrypted node key and re-encrypts it 
         with the given public key and returns the encrypted string. 
 
@@ -260,7 +260,7 @@ def reencrypt(node_key, public_key):
     return encryption
 
 
-def decrypt(node_key, uri):
+def decrypt(node_key: bytes, uri: str):
     ''' Accepts 2 encrypted objects, the first of which should be itself an AES-GCM 
         encryption key encrypted with ECIES (using AES-CBC) with the public key of the 
         Chainlink node (so that it can be decrypted with the node's private key) and 

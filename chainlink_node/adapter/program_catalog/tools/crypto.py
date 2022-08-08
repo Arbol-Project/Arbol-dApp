@@ -324,5 +324,6 @@ class Reencryption:
             Parameters: params (dict), dictionary of required parameters
             Returns: string, the re-encrypted access key
         '''
-        reencryption = reencrypt(params["node_key"], params["public_key"])
-        return reencryption
+        reencrypted_bytes = reencrypt(params["node_key"], params["public_key"])
+        reencrypted_string = base64.b64encode(reencrypted_bytes)
+        return reencrypted_string

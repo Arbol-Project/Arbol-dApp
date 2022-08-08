@@ -75,5 +75,5 @@ class ArbolAdapter:
             'jobRunID': self.id,
             'data': self.request_data,
             'error': f'There was an error: {error}',
-            'statusCode': 200,
+            'statusCode': 500,
         }

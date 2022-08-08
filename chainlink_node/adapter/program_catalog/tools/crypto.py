@@ -244,30 +244,30 @@ def decrypt_access_key(node_key: bytes, private_key=PRIVATE_KEY):
 
 
 
-def reencrypt(node_key: bytes, public_key: bytes):
+def reencrypt(node_key: str, public_key: str):
     ''' Decrypts the encrypted node key and re-encrypts it 
         with the given public key and returns the encrypted string. 
 
-        Parameters: node_key (bytes), bytestring of access key encrypted for the Chainlink node
-        Parameters: public_key (bytes), bytestring of public key to be used for encryption
+        Parameters: node_key (str), base 64 encoded string of access key encrypted for the Chainlink node
+        Parameters: public_key (str), base 64 encoded string of public key to be used for encryption
         Returns: bytes, bytestring of re-encrypted contract access key
     '''
-    access_key = decrypt_access_key(node_key)
+    access_key = decrypt_access_key(base64.b64decode(node_key))
     if type(access_key) is not bytes:
         return {'error': access_key}
     
-    encryption = encrypt_access_key(access_key, public_key)
+    encryption = encrypt_access_key(access_key, base64.b64decode(public_key))
     return encryption
 
 
-def decrypt(node_key: bytes, uri: str):
+def decrypt(node_key: str, uri: str):
     ''' Accepts 2 encrypted objects, the first of which should be itself an AES-GCM 
         encryption key encrypted with ECIES (using AES-CBC) with the public key of the 
         Chainlink node (so that it can be decrypted with the node's private key) and 
         the other should be contract evaluation terms encrypted with AES-GCM (using the
         first encrypted argument)
 
-        Parameters: node_key (bytes), bytestring of access key encrypted for the Chainlink node
+        Parameters: node_key (str), base 64 encoded string of access key encrypted for the Chainlink node
         Parameters: uri (string), base 64 encoded NFT URI with serialized encryption 
                     uri contains the following ordered data
                     iv: first 32 bytes
@@ -276,7 +276,7 @@ def decrypt(node_key: bytes, uri: str):
         payload containing contract terms
         Returns: dict, the unencrypted contents of the NFT URI
     '''
-    access_key = decrypt_access_key(node_key)
+    access_key = decrypt_access_key(base64.b64decode(node_key))
     if type(access_key) is not bytes:
         return {'error': access_key}
 

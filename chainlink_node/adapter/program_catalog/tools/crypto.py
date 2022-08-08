@@ -104,7 +104,7 @@ def decompress_public_key(public_key: bytes):
     elif len(public_key) == 64:
         return bytes.fromhex('04') + public_key, 64
     else:
-        return 'cannot decompress invalid public key', 0
+        return f'cannot decompress invalid public key: length {len(public_key)}, hex {public_key.hex()}', 0
 
 
 def bytestringify_key_cipher(cipher: dict):

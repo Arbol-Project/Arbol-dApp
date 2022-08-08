@@ -225,6 +225,9 @@ def decrypt_access_key(node_key: bytes, private_key=PRIVATE_KEY):
         Parameters: private_key (bytes), bytestring of private key for decryption of node_key
         Returns: bytes, bytestring of access key for decrypting contract URI
     '''
+    if type(node_key) is not bytes:
+        decoded = base64.b64decode(node_key)
+        raise Exception(f'node_key bytes length {len(decoded)}, pubkey {decoded[16:81]}')
     cipher_args = parse_key_cipher(node_key)
     if 'error' in cipher_args:
         return cipher_args['error']
@@ -252,8 +255,6 @@ def reencrypt(node_key: bytes, public_key: bytes):
         Parameters: public_key (str), base 64 encoded string of public key to be used for encryption
         Returns: bytes, bytestring of re-encrypted contract access key
     '''
-    if type(node_key) is not bytes or type(public_key) is not bytes:
-        raise Exception(f'node_key {node_key} type: {type(node_key)} len: {len(node_key)}; public_key {public_key} type: {type(public_key)} len: {len(public_key)}; ')
     access_key = decrypt_access_key(node_key)
     if type(access_key) is not bytes:
         return {'error': access_key}

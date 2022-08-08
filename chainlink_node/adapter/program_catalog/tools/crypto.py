@@ -104,7 +104,7 @@ def decompress_public_key(public_key: bytes):
     elif len(public_key) == 64:
         return bytes.fromhex('04') + public_key, 64
     else:
-        return f'cannot decompress invalid public key: length {len(public_key)}, hex {public_key.hex()}', 0
+        return f'cannot decompress invalid public key', 0
 
 
 def bytestringify_key_cipher(cipher: dict):
@@ -244,7 +244,7 @@ def decrypt_access_key(node_key: bytes, private_key=PRIVATE_KEY):
 
 
 
-def reencrypt(node_key: str, public_key: str):
+def reencrypt(node_key: bytes, public_key: bytes):
     ''' Decrypts the encrypted node key and re-encrypts it 
         with the given public key and returns the encrypted string. 
 
@@ -252,11 +252,13 @@ def reencrypt(node_key: str, public_key: str):
         Parameters: public_key (str), base 64 encoded string of public key to be used for encryption
         Returns: bytes, bytestring of re-encrypted contract access key
     '''
-    access_key = decrypt_access_key(base64.b64decode(node_key))
+    if type(node_key) is not bytes or type(public_key) is not bytes:
+        raise Exception(f'node_key {node_key} type: {type(node_key)} len: {len(node_key)}; public_key {public_key} type: {type(public_key)} len: {len(public_key)}; ')
+    access_key = decrypt_access_key(node_key)
     if type(access_key) is not bytes:
         return {'error': access_key}
     
-    encryption = encrypt_access_key(access_key, base64.b64decode(public_key))
+    encryption = encrypt_access_key(access_key, public_key)
     return encryption
 
 
@@ -276,7 +278,7 @@ def decrypt(node_key: str, uri: str):
         payload containing contract terms
         Returns: dict, the unencrypted contents of the NFT URI
     '''
-    access_key = decrypt_access_key(base64.b64decode(node_key))
+    access_key = decrypt_access_key(node_key)
     if type(access_key) is not bytes:
         return {'error': access_key}
 

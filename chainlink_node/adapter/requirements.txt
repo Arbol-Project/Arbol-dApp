@@ -13,3 +13,4 @@ timezonefinder
 pymongo
 pynacl
 coincurve
+pycryptodome

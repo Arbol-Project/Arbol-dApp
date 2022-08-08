@@ -19,6 +19,7 @@ timezonefinder = "*"
 pymongo = "*"
 pynacl = "*"
 coincurve = "*"
+pycryptodome = "*"
 
 [dev-packages]
 

@@ -12,3 +12,4 @@ astropy
 timezonefinder
 pymongo
 pynacl
+coincurve

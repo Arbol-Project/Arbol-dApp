@@ -18,6 +18,7 @@ Flask = "*"
 pymongo = "*"
 multiaddr = "*"
 pynacl = "*"
+coincurve ="*"
 
 [dev-packages]
 

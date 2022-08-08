@@ -1,0 +1,26 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+ipfshttpclient = "==0.8.0a2"
+pandas = ">=1.1.4"
+pytest = ">=6.1.2"
+pytest-mock = "==3.6.1"
+numpy = "==1.21"
+flask = "==1.1.1"
+multiaddr = "*"
+requests = "*"
+geopy = "*"
+zeep = "*"
+astropy = "*"
+timezonefinder = "*"
+pymongo = "*"
+pynacl = "*"
+coincurve = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"

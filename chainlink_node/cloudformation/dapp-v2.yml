@@ -29,8 +29,9 @@ Parameters:
   InstanceType:
     Description: EC2 instance type
     Type: String
-    Default: c4.xlarge
+    Default: t3.xlarge
     AllowedValues:
+      - t3.xlarge
       - t2.micro
       - t2.small
       - t2.medium
@@ -144,8 +145,8 @@ Resources:
         - Arn
       ContainerDefinitions:
         - Name: chainlink-node
-          Cpu: 1024
-          Memory: 2048
+          Cpu: 2048
+          Memory: 4096
           Essential: true
           Image: smartcontract/chainlink:1.2.1
           EntryPoint:
@@ -183,8 +184,8 @@ Resources:
       Family: dapp-task-monitor
       ContainerDefinitions:
         - Name: node-exporter
-          Cpu: 256
-          Memory: 256
+          Cpu: 512
+          Memory: 512
           User: 0
           Essential: true
           Image: prom/node-exporter:latest
@@ -208,8 +209,8 @@ Resources:
           DependsOn:
             - Condition: START
               ContainerName: node-exporter
-          Cpu: 256
-          Memory: 256
+          Cpu: 512
+          Memory: 512
           User: 0
           Essential: true
           Image: prom/prometheus:latest
@@ -233,8 +234,8 @@ Resources:
           DependsOn:
             - Condition: START
               ContainerName: prometheus
-          Cpu: 512
-          Memory: 512
+          Cpu: 1024
+          Memory: 1024
           User: 0
           Essential: true
           Image: grafana/grafana:latest
@@ -277,8 +278,8 @@ Resources:
         - Arn
       ContainerDefinitions:
         - Name: ipfs-daemon
-          Cpu: 512
-          Memory: 512
+          Cpu: 1024
+          Memory: 2048
           User: 0
           Essential: true
           Image: 574269834288.dkr.ecr.us-east-1.amazonaws.com/ipfs-daemon
@@ -303,18 +304,14 @@ Resources:
           DependsOn: 
             - Condition: START
               ContainerName: ipfs-daemon
-          Cpu: 512
-          Memory: 1024
+          Cpu: 1024
+          Memory: 2048
           User: 0
           Essential: true
           Image: 574269834288.dkr.ecr.us-east-1.amazonaws.com/external-adapter
           Secrets:
             - Name: NODE_PRIVATE_KEY
               ValueFrom: !Ref PKSecretARN
-              # ValueFrom: !Ref DBSecretARN
-          # EnvironmentFiles:
-          #   - Type: s3
-          #     Value: "arn:aws:s3:::dapp-files/S3Links/mongo/.env"
           LogConfiguration:
             LogDriver: awslogs
             Options:

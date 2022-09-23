@@ -243,7 +243,6 @@ def decrypt_access_key(node_key: bytes, private_key=PRIVATE_KEY):
     return bytes.fromhex(access_key.decode('utf-8'))
 
 
-
 def reencrypt(node_key: bytes, public_key: bytes):
     ''' Decrypts the encrypted node key and re-encrypts it 
         with the given public key and returns the encrypted string. 

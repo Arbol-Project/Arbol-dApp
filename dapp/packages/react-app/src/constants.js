@@ -1,6 +1,6 @@
-// MY INFURA_ID, SWAP IN YOURS FROM https://infura.io/dashboard/ethereum
-export const INFURA_ID = process.env.REACT_APP_INFURA_ID;
-// export const ALCHEMY_KEY = process.env.REACT_APP_ALCHEMY_KEY;
+// MY INFURA_KEY, SWAP IN YOURS FROM https://infura.io/dashboard/ethereum
+export const INFURA_KEY = process.env.REACT_APP_INFURA_KEY;
+export const ALCHEMY_KEY = "";// = process.env.REACT_APP_ALCHEMY_KEY;
 
 // MY ETHERSCAN_ID, SWAP IN YOURS FROM https://etherscan.io/myapikey
 export const ETHERSCAN_KEY = process.env.REACT_APP_ETHERSCAN_KEY;
@@ -22,14 +22,14 @@ export const NETWORKS = {
     name: "mainnet",
     color: "#ff8b9e",
     chainId: 1,
-    rpcUrl: `https://mainnet.infura.io/v3/${INFURA_ID}`,
+    rpcUrl: `https://mainnet.infura.io/v3/${INFURA_KEY}`,
     blockExplorer: "https://etherscan.io/",
   },
   kovan: {
     name: "kovan",
     color: "#7003DD",
     chainId: 42,
-    rpcUrl: `https://kovan.infura.io/v3/${INFURA_ID}`,
+    rpcUrl: `https://kovan.infura.io/v3/${INFURA_KEY}`,
     blockExplorer: "https://kovan.etherscan.io/",
     faucet: "https://gitter.im/kovan-testnet/faucet", // https://faucet.kovan.network/
   },
@@ -37,7 +37,7 @@ export const NETWORKS = {
     name: "rinkeby",
     color: "#e0d068",
     chainId: 4,
-    rpcUrl: `https://rinkeby.infura.io/v3/${INFURA_ID}`,
+    rpcUrl: `https://rinkeby.infura.io/v3/${INFURA_KEY}`,
     // rpcUrl: `https://eth-rinkeby.alchemyapi.io/v2/${ALCHEMY_KEY}`,
     faucet: "https://faucet.rinkeby.io/",
     blockExplorer: "https://rinkeby.etherscan.io/",
@@ -48,7 +48,7 @@ export const NETWORKS = {
     chainId: 3,
     faucet: "https://faucet.ropsten.be/",
     blockExplorer: "https://ropsten.etherscan.io/",
-    rpcUrl: `https://ropsten.infura.io/v3/${INFURA_ID}`,
+    rpcUrl: `https://ropsten.infura.io/v3/${INFURA_KEY}`,
   },
   goerli: {
     name: "goerli",
@@ -56,7 +56,7 @@ export const NETWORKS = {
     chainId: 5,
     faucet: "https://goerli-faucet.slock.it/",
     blockExplorer: "https://goerli.etherscan.io/",
-    rpcUrl: `https://goerli.infura.io/v3/${INFURA_ID}`,
+    rpcUrl: `https://goerli.infura.io/v3/${INFURA_KEY}`,
   },
   xdai: {
     name: "xdai",
@@ -74,7 +74,8 @@ export const NETWORKS = {
     chainId: 137,
     price: 1,
     gasPrice: 1000000000,
-    rpcUrl: "https://polygon-rpc.com/",
+    // rpcUrl: "https://polygon-rpc.com/",
+    rpcUrl: ALCHEMY_KEY ? `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_KEY}` : `https://polygon-mainnet.infura.io/v3/${INFURA_KEY}`,
     blockExplorer: "https://polygonscan.com/",
   },
   mumbai: {
@@ -83,7 +84,8 @@ export const NETWORKS = {
     chainId: 80001,
     price: 1,
     gasPrice: 1000000000,
-    rpcUrl: "https://rpc-mumbai.maticvigil.com",
+    // rpcUrl: "https://rpc-mumbai.maticvigil.com",
+    rpcUrl: ALCHEMY_KEY ? `https://polygon-mumbai.g.alchemy.com/v2/${ALCHEMY_KEY}` : `https://polygon-mumbai.infura.io/v3/${INFURA_KEY}`,
     faucet: "https://faucet.polygon.technology/",
     blockExplorer: "https://mumbai.polygonscan.com/",
   },

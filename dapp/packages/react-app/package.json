@@ -1,6 +1,7 @@
 {
   "name": "@scaffold-eth/react-app",
   "version": "1.0.0",
+  "proxy": "http://localhost:3001",
   "homepage": ".",
   "browserslist": {
     "production": [

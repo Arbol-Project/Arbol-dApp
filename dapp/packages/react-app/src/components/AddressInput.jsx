@@ -39,19 +39,6 @@ const bigInt = require("big-integer");
                           or onChange={address => { setToAddress(address);}}
 **/
 
-function bigIntToBase64String(x) {
-  const tokenId = bigInt(x.toString());
-
-  let tokenIdHex = tokenId.toString(16);
-  if (tokenIdHex.length % 2 !== 0) {
-    // pad hex string if not even length
-    tokenIdHex = "0" + tokenIdHex;
-  }
-  const tokenIdBytes = Buffer.from(tokenIdHex, "hex");
-  const contractID = tokenIdBytes.toString("base64");
-  return contractID
-}
-
 
 export default function AddressInput({ 
   // loadDashboard, 
@@ -81,7 +68,8 @@ export default function AddressInput({
   // let ids = [];
   let contractID;
   for (let i=0; i<transferrableIDs.length; i++) {
-    contractID = bigIntToBase64String(transferrableIDs[i]);
+    // contractID = bigIntToBase64String(transferrableIDs[i]);
+    contractID = transferrableIDs[i];
     // console.log(contractID);
     ids[contractID] = <Option key={contractID}>{contractID.substring(0, contractID.length-3)}</Option>;
     // ids.push(<Option key={contractID}>{contractID.substring(0, contractID.length-3)}</Option>);

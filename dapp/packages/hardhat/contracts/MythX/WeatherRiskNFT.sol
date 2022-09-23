@@ -2380,47 +2380,6 @@ contract ERC721Upgradeable is Initializable, ContextUpgradeable, ERC165Upgradeab
     uint256[44] private __gap;
 }
 
-// File: @openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721BurnableUpgradeable.sol
-
-
-// OpenZeppelin Contracts v4.4.1 (token/ERC721/extensions/ERC721Burnable.sol)
-
-pragma solidity ^0.8.0;
-
-
-
-
-/**
- * @title ERC721 Burnable Token
- * @dev ERC721 Token that can be irreversibly burned (destroyed).
- */
-abstract contract ERC721BurnableUpgradeable is Initializable, ContextUpgradeable, ERC721Upgradeable {
-    function __ERC721Burnable_init() internal onlyInitializing {
-    }
-
-    function __ERC721Burnable_init_unchained() internal onlyInitializing {
-    }
-    /**
-     * @dev Burns `tokenId`. See {ERC721-_burn}.
-     *
-     * Requirements:
-     *
-     * - The caller must own `tokenId` or be an approved operator.
-     */
-    function burn(uint256 tokenId) public virtual {
-        //solhint-disable-next-line max-line-length
-        require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721Burnable: caller is not owner nor approved");
-        _burn(tokenId);
-    }
-
-    /**
-     * @dev This empty reserved space is put in place to allow future versions to add new
-     * variables without shifting down storage in the inheritance chain.
-     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
-     */
-    uint256[50] private __gap;
-}
-
 // File: @openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol
 
 
@@ -3476,6 +3435,7 @@ abstract contract ChainlinkClient is Initializable {
 
   /**
    * @notice Initializer to make ChainlinkClient upgradeable
+   * arbol-dapp
    */
   function __ChainlinkClient_init() internal onlyInitializing {
     s_requestCount = 1;
@@ -3761,48 +3721,72 @@ abstract contract ChainlinkClient is Initializable {
 
 // File: contracts/WeatherRisk.sol
 
-
 pragma solidity ^0.8.4;
-
-
-// import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 
 /// @custom:security-contact daniel.parangi@arbolmarket.com
 contract WeatherRiskNFT is 
     Initializable, ERC721Upgradeable, 
     ERC721EnumerableUpgradeable, ERC721URIStorageUpgradeable, 
     PausableUpgradeable, AccessControlUpgradeable, 
-    ERC721BurnableUpgradeable, UUPSUpgradeable,
-    ChainlinkClient {
+    UUPSUpgradeable, ChainlinkClient {
     using Chainlink for Chainlink.Request;
+    bytes32 private constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");     // Role to be granted (and subsequetly revoked) in event of required update
+    bytes32 private constant MINTER_ROLE = keccak256("MINTER_ROLE");         // Arbol Admin (+optionally Arbol Operator)
+    bytes32 private constant DEPUTY_ROLE = keccak256("DEPUTY_ROLE");         // Arbol Operator (+optionally Arbol Operator)
+    bytes32 private constant CLIENT_ROLE = keccak256("CLIENT_ROLE");         // Client (+optionally Arbol Operator)
+    address public constant PROVIDER_ADDRESS = 0xed0Db415764F60D5e02EFd5726E9aFb5B7257257;      // Provider (Mumbai)
+    address public constant STABLECOIN_ADDRESS = 0x764f9841418741bE24d5d2d4a1381413176f6dCb;    // Mumbai USDC0 test token address
+    address private constant LINK_ADDRESS = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB;         // Mumbai Link token address
+    uint256 private constant DECIMALS = 2;                                                      // Mumbai USDC0 decimals
+    uint256 private constant DISPUTE_PERIOD = 5 * 60;                        // test dispute period during which initially transferred payouts are held by smart contract before final settlement
+    // address public constant PROVIDER_ADDRESS = 0xbf417C41F3ab1e01BD6867fB540dA7b734EaeA95;   // Provider (Polygon)
+    // address public constant STABLECOIN_ADDRESS = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174; // Polygon USDC token address
+    // address private constant LINK_ADDRESS = 0xb0897686c545045aFc77CF20eC7A532E3120E0F1;      // Polygon Link token address
+    // uint256 private constant DECIMALS = 6;                                                   // Polygon USDC decimals        
+    // uint256 private constant DISPUTE_PERIOD = 2 * 24 * 60 * 60;              // dispute period during which initially transferred payouts are held by smart contract before final settlement
+    uint256 private constant EVALUATION_BUFFER = 14 * 24 * 60 * 60;          // additional period following coverage end date before evaluation can be initiated
+    uint256 private constant ORACLE_PAYMENT = 0 * 10 ** 18;                  // Chainlink node payment amount, set to 0 when using Arbol's own node 
+    uint256 private constant USD_CENTS_TO_USDC = 10 ** (DECIMALS - 2);       // conversion rate from cents to USDC
+    uint256 private constant UNLIMITED_PROXY = 10 ** 16;                     // stablecoin.totalSupply() ~= 1779055220076765 ~= 1.7 * 10 ** 15 (~1.7B $USD)
 
-    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE"); // Currently only Arbol
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE"); // Currently only Arbol
-    bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE"); // Currently only Arbol
-    bytes32 public constant EVALUATOR_ROLE = keccak256("EVALUATOR_ROLE"); // Currently only Arbol
-    bytes32 public constant VIEWER_ROLE = keccak256("VIEWER_ROLE"); // Any address to which a WRSK NFT has been minted or transferred
+    struct TokenState {             // token state values that are not writeable after initialization
+        address mintReceiver;       // address to receive the minted token
+        uint256 premium;            // premium amount, always in US cents, to transfer to mint receiver on contract acceptance
+        uint256 startDate;          // unix timestamp of contract start date
+        uint256 endDate;            // unix timestamp of contract end date
+        string programName;         // name of contract program
+        bytes nodeKey;              // AES key for contract URI encrypted with public key of Chainlink node
+        bytes dappKey;              // AES key for contract URI encrypted with public key of dApp web server
+    }
 
-    address public constant LINK_ADDRESS = 0x01BE23585060835E02B77ef475b0Cc51aA1e0709; // Link token address on Rinkeby testnet
-    address public constant OPERATOR_ADDRESS = 0xA3ee2ccC1D79023E2b02d411a0408A0340fea252; // Rinkeby testnet Operator.sol (whitelisted) address (Arbol)
-    bytes32 public constant EVALUALTION_JOB_ID = "cfad1455e873455d87debe576f737a2f"; // Arbol mwr (mutliword response) NFT evaluation job on Rinkeby testnet
-    bytes32 public constant REENCRYPTION_JOB_ID = "577cf56accaf4703858522e4e8efe796"; // Arbol mwr NFT re-encryption job on Rinkeby testnet
-    uint256 public constant ORACLE_PAYMENT = 0 * 10**18; // 0.00 LINK
-    uint256 public constant EVALUATION_BUFFER = 0; // additional period following coverage end date before evaluation can be initiated
+    struct TokenUpdate {            // token state values that are updated over the course of the token's life
+        bool settled;               // set to true when determined payout has been transferred and result cannot be disputed, initialized to false
+        bool disputed;              // set to true when evaluation is disputed within the dispute period and set to false when re-evaluated
+        bool needsReencryption;     // set to true when transferred and set to false when re-encrypted
+        uint256 evalTimestamp;      // timestamp of fulfillment of contract evaluation, initialized to 0
+        uint256 computedPayout;     // computed payout result, always in US cents, only accurate once contract has been evaluated, initialized to 0
+        bytes viewerKey;            // AES key for contract URI encrypted with public key of contract holder (if contract does not need re-encryption)
+    }
 
-    // mapping(bytes32 => uint256) private _requestTokens;
-    // mapping(bytes32 => address) private _requestAddresses;
-    // Retrieved from the frontend to determine whether to re-encrypt the NFT URI
-    // e.g. frontend gets URI for held contract and checks that it is a viewer
-    // and if not gets public encryption key if necessary and calls re-encrypt 
-    // before decrypting in frontend
-    mapping(uint256 => address) internal _viewers;
-    mapping(address => string) internal _pubKeys;
-    mapping(uint256 => uint256) internal _endDates;
+    struct ChainlinkConfig {
+        address operator;           // address of Chainlink operator contract watched by Chainlink node running the following evaluation and re-encryption jobs
+        bytes32 evaluationJob;      // Chainlink job id for Arbol NFT evaluation
+        bytes32 reencryptionJob;    // Chainlink job id for Arbol NFT re-encryption
+    }
 
-    event ContractEvaluated(uint256 id, uint256 payout);
-    event ContractReencrypted(uint256 id, address viewer);
+    struct EncryptionConfig {
+        address nodeAddress;        // address whose private key is known to Chainlink node
+        address dappAddress;        // address whose private key is known to dApp web server
+        bytes nodePublicKey;        // public key of node address
+        bytes dappPublicKey;        // public key of dapp address
+    }
 
-    address public ArbolViewer;
+    mapping(uint256 => TokenState) public tokenStates;
+    mapping(uint256 => TokenUpdate) public tokenUpdates;
+    mapping(bytes32 => uint256) private _requestsIndex;
+
+    ChainlinkConfig public chainlinkConfig;
+    EncryptionConfig public encryptionConfig;
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -3818,60 +3802,279 @@ contract WeatherRiskNFT is
         __ERC721URIStorage_init();
         __Pausable_init();
         __AccessControl_init();
-        __ERC721Burnable_init();
         __UUPSUpgradeable_init();
         __ChainlinkClient_init();
-
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _grantRole(PAUSER_ROLE, msg.sender);
-        _grantRole(MINTER_ROLE, msg.sender);
-        _grantRole(UPGRADER_ROLE, msg.sender);
-        _grantRole(EVALUATOR_ROLE, msg.sender);
-        _grantRole(VIEWER_ROLE, msg.sender);
-
         setChainlinkToken(LINK_ADDRESS);
-        ArbolViewer = msg.sender;
-    }
-
-    function pause() 
-        external 
-        onlyRole(PAUSER_ROLE) 
-    {
-        _pause();
-    }
-
-    function unpause() 
-        external 
-        onlyRole(PAUSER_ROLE) 
-    {
-        _unpause();
+        // set admin roles
+        _grantRole(DEFAULT_ADMIN_ROLE, PROVIDER_ADDRESS);
+        _grantRole(MINTER_ROLE, PROVIDER_ADDRESS);
+        _grantRole(DEPUTY_ROLE, msg.sender);
+        // initialize encryption and Chainlink configurations 
+        chainlinkConfig = ChainlinkConfig(0x59FA4e3Fd486E5798C8F8d884f0F65A51A5dFF43, "1a5f6c4827ac4b12a0f81863e18534fb", "f885b0d4704947948ad648d920b6eff3");          // Mumbai
+        // chainlinkConfig = ChainlinkConfig(0x76dfA9a36db355F101B241b66e2fA97f7Ca09C24, "940708c3e44c40f1bd03d34c1b3edcf6", "49b9cb632adc4047be16a00b3edad9b8");       // Polygon
+        encryptionConfig = EncryptionConfig(0x4506F70e253DEccCC1a419954606cB3D1E6a9a70, 0xAe76Be2fbCca75B039e42DEDDE12dd305f9FCdCe, hex"03cc7d57c51fe62090ddc345e0358cc820e9359e7e0f9b4cfb1df84a498c46e7f8", hex"026d93aec02db1f0cc8c69da667ba935c6618b6137bfecf9bdee2b044a44751a74");
     }
 
     /**
-     * @notice can only be called by Minter
-     * @param uri string URI for NFT to be minted, should contain contract data encrypted 
-     * with the Metamask public encryption key of receiver (must also contain identical contract
-     * data encrypted for Arbol representative and Arbol's Chainlink node)
-     * @param to address to which NFT is minted
-     * @param tokenId uint256 decimal representation of contract's ID (base64)
-     * @param endDate uint256 timestamp of contract end date
+     * Initializes a tokenized contract to be minted to a specified address
+     * and grants that address the Client role in order to view the contract
+     * in the dApp frontend
+     * @notice can only be called by a Minter, and requires that 'tokenId' is not 
+     * the id of an already minted token
+     * @param tokenId uint256 token id to approve for minting
+     * @param tokenState TokenState struct (externally supplied as array) to approve
      */
-    function mint(address to, uint256 tokenId, string memory uri, uint256 endDate) 
-        external 
-        onlyRole(MINTER_ROLE) 
+    function preMint(uint256 tokenId, TokenState calldata tokenState)
+        external
+        onlyRole(MINTER_ROLE)
     {
-        _mint(to, tokenId);
-        _setTokenURI(tokenId, uri);
-        _endDates[tokenId] = endDate;
+        require(!_exists(tokenId), "TE1"); // Token Existence error location 1
+        _grantRole(CLIENT_ROLE, tokenState.mintReceiver);
+        tokenStates[tokenId] = tokenState;
+    }
 
-        _viewers[tokenId] = to;
-        if (!hasRole(VIEWER_ROLE, to)) {
-            _grantRole(VIEWER_ROLE, to);
+    /**
+     * Mints an Arbol contract as an NFT, sends to client wallet, and authorizes 
+     * transfer of contract premium from funding wallet to client wallet
+     * @notice can only be called by the intended Client or a Deputy, and requires that
+     * @dev does not enforce allowance checks for limits/payouts on mint receiever
+     * as this should be done in the dApp frontend before minting
+     * @param tokenId uint256 decimal representation of contract's ID (base64)
+     * @param uri string URI of encrypted contract evaluation terms for NFT to be minted
+     * @param viewerKey bytes AES key encrypted for 'to' address
+     */
+    function mint(uint256 tokenId, string calldata uri, bytes calldata viewerKey) 
+        external 
+        whenNotPaused
+    {
+        // check that token was pre approved
+        require(tokenStates[tokenId].startDate > 0, "TA1"); // Token Approval error location 1
+        // check that the caller is a Deputy or the risk address
+        address mintReceiver = tokenStates[tokenId].mintReceiver;
+        require(hasRole(DEPUTY_ROLE, msg.sender) || msg.sender == mintReceiver, "UC1"); // Unintended Caller error location 1  //  
+        // mint and set uri
+        _mint(mintReceiver, tokenId);
+        _setTokenURI(tokenId, uri);
+        // set token updates entry
+        tokenUpdates[tokenId] =  TokenUpdate(false, false, false, 0, 0, viewerKey);
+        // convert from cents to USDC with correct decimals before transferring premium to receiver
+        LinkTokenInterface stablecoin = LinkTokenInterface(STABLECOIN_ADDRESS);
+        require(stablecoin.transferFrom(PROVIDER_ADDRESS, mintReceiver, tokenStates[tokenId].premium * USD_CENTS_TO_USDC), "IA1"); // Insufficient Allowance error location 1
+    }
+
+    // Evaluation methods
+
+    /**
+     * Issues a Chainlink request to decrypt the contract terms
+     * and compute an evaluated payout result
+     * @notice requires that the current block timestamp be sufficiently after the contract end date 
+     * before evaluation can be initiated, and re-evaluating a contract requires that the contract 
+     * result be in dispute
+     * @param tokenId uint256 token ID of contract to be evaluated
+     */
+    function requestEvaluation(uint256 tokenId) 
+        external 
+    {
+        // check that coverage period has elapsed (including evaluation buffer)
+        uint256 endDate = tokenStates[tokenId].endDate;
+        require(endDate + EVALUATION_BUFFER < block.timestamp, "TT1"); // Timing Threshold error location 1
+        // check that either the contract has not yet been evaluated or it has but it is disputed
+        require(tokenUpdates[tokenId].evalTimestamp == 0 || tokenUpdates[tokenId].disputed, "IS1"); // Invalid State error location 1
+        // build, send, and log Chainlink evaluation request
+        Chainlink.Request memory req = buildChainlinkRequest(chainlinkConfig.evaluationJob, address(this), this.fulfillEvaluation.selector);
+        req.addBytes("nodeKey", tokenStates[tokenId].nodeKey);      // encrypted decryption key
+        req.add("uri", super.tokenURI(tokenId));                    // encrypted contract terms
+        req.addUint("startDate", tokenStates[tokenId].startDate);   // contract coverage period start date
+        req.addUint("endDate", endDate);                              // contract coverage period end date
+        req.add("programName", tokenStates[tokenId].programName);   // contract program name
+        bytes32 requestId = sendChainlinkRequestTo(chainlinkConfig.operator, req, ORACLE_PAYMENT);
+        _requestsIndex[requestId] = tokenId;
+    }
+
+    /**
+     * Callback function for Chainlink evaluation request, updates the contract's
+     * state with the current evaluation timestamp and the returned payout
+     * @notice only changes state if the contract has not been evaluated before or
+     * if the contract is currently being disputed
+     * @param _requestId bytes32 request ID for associated evaluation job
+     * @param _payout uint256 payout evaluation result (in cents)
+     */
+    function fulfillEvaluation(bytes32 _requestId, uint256 _payout)
+        external
+        recordChainlinkFulfillment(_requestId)
+    {   
+        // set token if evaluated first time or update if disputed
+        uint256 tokenId = _requestsIndex[_requestId];
+        // TokenUpdate storage tokenUpdate = tokenUpdates[_tokenId];
+        bool disputed = tokenUpdates[tokenId].disputed;
+        if (tokenUpdates[tokenId].evalTimestamp == 0 || disputed) {
+            tokenUpdates[tokenId].evalTimestamp = block.timestamp;
+            tokenUpdates[tokenId].computedPayout = _payout;
+            if (disputed) {
+                tokenUpdates[tokenId].disputed = false;
+            }
         }
     }
 
     /**
-     * @dev Called from frontend on each view
+     * Allows an authorized caller to dispute a recent payout evaluation
+     * @notice can only be called by a Deputy or the token owner, and requires that the 
+     * contract has been evaluated, that it is not currently in dispute, that the 
+     * dispute period has not elapsed, and that the contract is not yet setttled
+     * @param tokenId uint256 id of token for which to dispute the evaluation results
+     */
+    function disputeEvaluation(uint256 tokenId)
+        external
+    {
+        // check that caller owns token or is deputized
+        require(hasRole(DEPUTY_ROLE, msg.sender) || msg.sender == ownerOf(tokenId), "UC2"); // Unintended Caller error location 2
+        // check that token has been evaluated at least once
+        uint256 evalTimestamp = tokenUpdates[tokenId].evalTimestamp;
+        require(evalTimestamp > 0, "IS2"); // Invalid State error location 2
+        // check that token is not settled
+        require(!tokenUpdates[tokenId].settled, "IS3"); // Invalid State error location 3
+        // check that token is not disputed
+        require(!tokenUpdates[tokenId].disputed, "IS4"); // Invalid State error location 4
+        // check that dispute period has not elapsed
+        require(evalTimestamp + DISPUTE_PERIOD > block.timestamp, "TT2"); // Timing Threshold error location 2
+        // set dispute flag
+        tokenUpdates[tokenId].disputed = true;
+    }
+
+    /**
+     * Completes the settlement of a specified contract by updating the contract
+     * state and transferring the final payout amount to the provider address
+     * @notice can only be called by a Deputy or the token owner, and requires that the
+     * contract has been evaluated, that it is not currently in dispute, that the 
+     * dispute period has fully elapsed, and that the contract is not yet setttled,
+     * additionally if the token owner at the time of settlement has not approved a 
+     * sufficient allowance to cover the payout then the original mint receiver becomes 
+     * responsible for settling the payout figure
+     * @dev does not enforce allowance checks for payouts on token owner 
+     * as this should be done in the dApp frontend before settling
+     * @param tokenId uint256 id of token for which to settle payout
+     */
+    function settleContract(uint256 tokenId)
+        external
+        whenNotPaused
+    {
+        require(hasRole(DEPUTY_ROLE, msg.sender) || msg.sender == ownerOf(tokenId), "UC3"); // Unintended Caller error location 3
+        // check that token has been evaluated at least once
+        uint256 evalTimestamp = tokenUpdates[tokenId].evalTimestamp;
+        require(evalTimestamp > 0, "IS5"); // Invalid State error location 5
+        // check that the token is not settled
+        require(!tokenUpdates[tokenId].settled, "IS6"); // Invalid State error location 6
+        // check that the token is not disputed
+        require(!tokenUpdates[tokenId].disputed, "IS7"); // Invalid State error location 7
+        // check that the dispute period has elapsed
+        require(evalTimestamp + DISPUTE_PERIOD < block.timestamp, "TT3"); // Timing Threshold erorr location 3
+        // update states
+        tokenUpdates[tokenId].settled = true;
+        // send final payout back to provider for fiat distribution
+        LinkTokenInterface stablecoin = LinkTokenInterface(STABLECOIN_ADDRESS);
+        // convert from cents to USDC with correct decimals before transferring premium to receiver
+        address payer = ownerOf(tokenId);
+        uint256 payout = tokenUpdates[tokenId].computedPayout;
+        if (stablecoin.allowance(address(this), payer) < payout) {
+            payer = tokenStates[tokenId].mintReceiver;
+        }
+        require(stablecoin.transferFrom(payer, PROVIDER_ADDRESS, payout * USD_CENTS_TO_USDC), "IA2"); // Insufficient Allowance error location 2
+    }
+
+    // Update methods
+
+    /**
+     * Issues a Chainlink request to re-encrypt the viewer's AES key
+     * with the new holder's public key after transfers
+     * @notice can only be called by the token owner, and requires that the
+     * token not already be encrypted for the caller
+     * @param tokenId uint256 token ID of contract to be re-encrypted
+     * @param publicKey bytes viewer public key
+     */
+    function requestReencryption(uint256 tokenId, bytes calldata publicKey) 
+        external 
+    {
+        // check that caller is owner of token
+        require(ownerOf(tokenId) == msg.sender, "UC4"); // Unintended Caller error location 4
+        // check that the contract currently needs re-encryption
+        require(tokenUpdates[tokenId].needsReencryption, "IS8"); // Invalid State error location 8
+        // build, send, and log Chainlink re-encryption request
+        Chainlink.Request memory req = buildChainlinkRequest(chainlinkConfig.reencryptionJob, address(this), this.fulfillReencryption.selector);
+        req.addBytes("nodeKey", tokenStates[tokenId].nodeKey);
+        req.addBytes("viewerAddressPublicKey", publicKey);
+        bytes32 requestId = sendChainlinkRequestTo(chainlinkConfig.operator, req, ORACLE_PAYMENT);
+        _requestsIndex[requestId] = tokenId;
+    }
+
+    /**
+     * Callback function for Chainlink evaluation request, updates contract state data 
+     * after successful re-encryption job
+     * @param _requestId bytes32 request ID for associated evaluation job
+     * @param _key bytes URI AES key encrypted with the public key of the NFT holder
+     */
+    function fulfillReencryption(bytes32 _requestId, bytes memory _key)
+        external
+        recordChainlinkFulfillment(_requestId)
+    {
+        uint256 tokenId = _requestsIndex[_requestId];
+        if (tokenUpdates[tokenId].needsReencryption) {
+            // set encryption results
+            tokenUpdates[tokenId].needsReencryption = false;
+            tokenUpdates[tokenId].viewerKey = _key;
+        }
+    }
+
+    // Additional permissioned methods
+
+    /**
+     * Method for resetting chainlink config in the event of a required operator change
+     * @notice can only be called by an Upgrader
+     * @param _chainlinkConfig ChainlinkConfig struct to set
+     */
+    function setChainlinkConfig(ChainlinkConfig calldata _chainlinkConfig)
+        external
+        onlyRole(UPGRADER_ROLE)
+        whenPaused
+    {
+        chainlinkConfig = _chainlinkConfig;
+    }
+
+    /**
+     * Method for resetting encryption config in the event of key rotations
+     * @notice can only be called by an Upgrader
+     * @param _encryptionConfig EncryptionConfig struct to set
+     */
+    function setEncryptionConfig(EncryptionConfig calldata _encryptionConfig)
+        external
+        onlyRole(UPGRADER_ROLE)
+        whenPaused
+    {
+        encryptionConfig = _encryptionConfig;
+    }
+
+    /**
+     * @notice can only be called by a Deputy
+     */
+    function pause() 
+        external 
+        onlyRole(DEPUTY_ROLE) 
+    {
+        _pause();
+    }
+
+    /**
+     * @notice can only be called by a Deputy
+     */
+    function unpause() 
+        external 
+        onlyRole(DEPUTY_ROLE) 
+    {
+        _unpause();
+    }
+
+    // The following functions are overrides required by Solidity.
+
+    /**
      * @param tokenId uint256 token ID for URI to retrieve
      * @return string URI of specified contract
      */
@@ -3884,207 +4087,36 @@ contract WeatherRiskNFT is
         return super.tokenURI(tokenId);
     }
 
-    /**
-     * @dev Called from frontend on each provider view
-     * @return uint256[] list of all minted contract IDs
-     */
-    function enumerateTokenIDs()
-        external
-        view
-        returns (uint256[] memory)
-    {
-        uint256 supply = totalSupply();
-        uint256[] memory IDs = new uint256[](supply);
-        for (uint i = 0; i < supply; i++) {
-            IDs[i] = tokenByIndex(i);
-        }
-        return IDs;
-    }
-
-    /**
-     * @dev Called from frontend on each client view
-     * @return uint256[] list of contract IDs held by the msg sender
-     */
-    function tokenIDs()
-        external
-        view
-        returns (uint256[] memory)
-    {
-        uint256 balance = balanceOf(msg.sender);
-        uint256[] memory IDs = new uint256[](balance);
-        for (uint i = 0; i < balance; i++) {
-            IDs[i] = tokenOfOwnerByIndex(msg.sender, i);
-        }
-        return IDs;
-    }
-
-    /**
-     * @dev Called from frontend on each view
-     * @notice can only be called by Viewer
-     * @param tokenId uint256 token ID of contract
-     * @return uint256 timestamp of contract end date
-     */
-    function tokenEndDate(uint256 tokenId) 
-        external
-        view
-        onlyRole(VIEWER_ROLE)
-        returns (uint256)
-    {
-        return _endDates[tokenId];
-    }
-
-    /**
-     * @dev Called from frontend on each client view
-     * @notice can only be called by Viewer
-     * @param tokenId uint256 token ID of contract
-     * @return address for which contract data is currently encrypted
-     */
-    function tokenViewer(uint256 tokenId) 
-        external
-        view
-        onlyRole(VIEWER_ROLE)
-        returns (address)
-    {
-        return _viewers[tokenId];
-    }
-
-    /**
-     * @dev Called from frontend on each client view if contract needs re-encryption
-     * @return string public encryption key for caller
-     */
-    function getPubKey() 
-        external
-        view
-        returns (string memory)
-    {
-        return _pubKeys[msg.sender];
-    }
-
-    /**
-     * @dev Called from frontend on first client view after getPubKey fails
-     * and Metamask public encryption key is requested and received (must happen before first
-     * re-encryption request)
-     * @param pubKey string Metamask public encryption key for the msg sender
-     */
-    function setPubKey(string memory pubKey) 
-        external
-    {
-        _pubKeys[msg.sender] = pubKey;
-    }
-
-    /**
-     * @dev Called from frontend on first view after transfers
-     * @notice can only be called by Viewer and requires that the caller
-     * be the holder of the token, that the token not already be encrypted
-     * for the caller, and that the caller's public key is known to the contract
-     * @param tokenId uint256 token ID of contract to be re-encrypted
-     */
-    function requestReencryption(uint256 tokenId) 
-        external 
-        onlyRole(VIEWER_ROLE)
-    {
-        string memory pubKey = _pubKeys[msg.sender];
-        require(ownerOf(tokenId) == msg.sender, "Cannot re-encrypt NFT that you do not own");
-        require(_viewers[tokenId] != msg.sender, "NFT is already encrypted for the current owner");
-        require(bytes(pubKey).length != 0, "Metamask public encryption key not found, must be uploaded first");
-        Chainlink.Request memory req = buildChainlinkRequest(REENCRYPTION_JOB_ID, address(this), this.fulfillReencryption.selector);
-        req.add("uri", super.tokenURI(tokenId));
-        req.add("pubKey", pubKey);
-        req.addUint("tokenId", tokenId);
-        sendChainlinkRequestTo(OPERATOR_ADDRESS, req, ORACLE_PAYMENT);
-    }
-
-    /**
-     * @param _requestId bytes32 request ID for associated evaluation job
-     * @param _tokenId uint256 token ID of re-encrypted contract
-     * @param _uri string encrypted/compressed URI
-     */
-    function fulfillReencryption(bytes32 _requestId, uint256 _tokenId, string memory _uri)
-        external
-        recordChainlinkFulfillment(_requestId)
-    {
-        address viewer = ownerOf(_tokenId);
-        _setTokenURI(_tokenId, _uri);
-        _viewers[_tokenId] = viewer;
-        emit ContractReencrypted(_tokenId, viewer);
-    }
-
-    /**
-     * @notice can only be called by Evaluator and requires that the current
-     * block timestamp be sufficiently after the contract end date before evaluation
-     * can be initiated
-     * @param tokenId uint256 token ID of contract to be evaluated
-     */
-    function requestEvaluation(uint256 tokenId) 
-        external 
-        onlyRole(EVALUATOR_ROLE)
-    {
-        uint256 endDate = _endDates[tokenId] + EVALUATION_BUFFER;
-        require(endDate < block.timestamp, "unable to call until coverage period has ended");
-        Chainlink.Request memory req = buildChainlinkRequest(EVALUALTION_JOB_ID, address(this), this.fulfillEvaluation.selector);
-        req.add("uri", super.tokenURI(tokenId));
-        req.addUint("endDate", endDate);
-        req.addUint("tokenId", tokenId);
-        sendChainlinkRequestTo(OPERATOR_ADDRESS, req, ORACLE_PAYMENT);
-    }
-
-    /**
-     * @param _requestId bytes32 request ID for associated evaluation job
-     * @param _tokenId uint256 token ID of re-encrypted contract
-     * @param _payout uint256 payout evaluation result
-     */
-    function fulfillEvaluation(bytes32 _requestId, uint256 _tokenId, uint256 _payout)
-        external
-        recordChainlinkFulfillment(_requestId)
-    {
-        emit ContractEvaluated(_tokenId, _payout);
-    }
-
-    /**
-     * @dev Called between mints and deploys (must set ArbolViewer and client)
-     * @notice can only be called by Admin
-     * @param pubKey string Metamask public encryption key for the msg sender
-     * @param holder address associated with the specified public key
-     */
-    function adminSetPubKey(string memory pubKey, address holder) 
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
-        _pubKeys[holder] = pubKey;
-    }
-
-    /**
-     * @notice can only be called by Admin
-     * @param holder address for which to retrieve Metamask public encryption key
-     * @return string the public encryption key of the specified contract holder
-     */
-    function adminGetPubKey(address holder) 
-        external
-        view
-        onlyRole(DEFAULT_ADMIN_ROLE)
-        returns (string memory)
-    {
-        return _pubKeys[holder];
-    }
-
     function _beforeTokenTransfer(address from, address to, uint256 tokenId)
         internal
         whenNotPaused
         override(ERC721Upgradeable, ERC721EnumerableUpgradeable)
     {
         super._beforeTokenTransfer(from, to, tokenId);
-        if (!hasRole(VIEWER_ROLE, to)) {
-            _grantRole(VIEWER_ROLE, to);
-        }
     }
 
+    /**
+     * @notice grants Client role to transfer receiver and updates
+     * need for reencryption
+     */
+    function _afterTokenTransfer(address from, address to, uint256 tokenId)
+        internal
+        whenNotPaused
+        override(ERC721Upgradeable)
+    {
+        super._afterTokenTransfer(from, to, tokenId);
+        _grantRole(CLIENT_ROLE, to);
+        tokenUpdates[tokenId].needsReencryption = true;
+    }
+
+    /**
+     * @notice can only be called by an Upgrader
+     */
     function _authorizeUpgrade(address newImplementation)
         internal
         onlyRole(UPGRADER_ROLE)
         override
     {}
-
-    // The following functions are overrides required by Solidity.
 
     function _burn(uint256 tokenId)
         internal
@@ -4101,46 +4133,4 @@ contract WeatherRiskNFT is
     {
         return super.supportsInterface(interfaceId);
     }
-}
-
-
-
-pragma solidity ^0.8.4;
-
-contract WeatherRiskNFTv2 is WeatherRiskNFT {
-    using Chainlink for Chainlink.Request;
-    ///@dev for testing NFT migration on upgrade
-
-    uint256 public reencryptTokenId;
-    string public reencryptResult;
-
-    function requestReencryption2(uint256 tokenId) 
-        external 
-        onlyRole(VIEWER_ROLE)
-    {
-        string memory pubKey = _pubKeys[msg.sender];
-        require(ownerOf(tokenId) == msg.sender, "Cannot re-encrypt NFT that you do not own");
-        require(_viewers[tokenId] != msg.sender, "NFT is already encrypted for the current owner");
-        require(bytes(pubKey).length != 0, "Metamask public encryption key not found, must be uploaded first");
-        Chainlink.Request memory req = buildChainlinkRequest(REENCRYPTION_JOB_ID, address(this), this.fulfillReencryption2.selector);
-        req.add("uri", super.tokenURI(tokenId));
-        req.add("pubKey", pubKey);
-        req.addUint("tokenId", tokenId);
-        sendChainlinkRequestTo(OPERATOR_ADDRESS, req, ORACLE_PAYMENT);
-    }
-
-    function fulfillReencryption2(bytes32 _requestId, uint256 _tokenId, string memory _uri)
-        external
-        recordChainlinkFulfillment(_requestId)
-    {
-        reencryptTokenId = _tokenId;
-        reencryptResult = _uri;
-        // address viewer = ownerOf(_tokenId);
-        _setTokenURI(_tokenId, _uri);
-        // _viewers[_tokenId] = viewer;
-        // emit ContractReencrypted(_tokenId, viewer);
-    }
-    // function _tester() public pure returns (bool) {
-    //     return true;
-    // }
 }

@@ -54,7 +54,7 @@ export default function Account({
   address,
   userSigner,
   localProvider,
-  mainnetProvider,
+  // mainnetProvider,
   pubKey,
   // price,
   minimized,
@@ -63,6 +63,7 @@ export default function Account({
   logoutOfWeb3Modal,
   blockExplorer,
   isContract,
+  // loadDashboards,
 }) {
   // console.log(transferrableIDs);
   // const { currentTheme } = useThemeSwitcher();
@@ -79,7 +80,7 @@ export default function Account({
           size="medium"
           onClick={logoutOfWeb3Modal}
         >
-          logout
+          Logout
         </Button>,
       );
     } else {
@@ -121,7 +122,7 @@ export default function Account({
             address={address}
             provider={localProvider}
             signer={userSigner}
-            ensProvider={mainnetProvider}
+            // ensProvider={mainnetProvider}
             pubKey={pubKey}
             // price={price}
             color={currentTheme === "light" ? "#1890ff" : "#2caad9"}
@@ -162,7 +163,7 @@ export default function Account({
             address={address}
             provider={localProvider}
             // signer={userSigner}
-            ensProvider={mainnetProvider}
+            // ensProvider={mainnetProvider}
             signer={userSigner}
             pubKey={pubKey}
             // injectedProvider={injectedProvider}

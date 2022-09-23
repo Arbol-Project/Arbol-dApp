@@ -12,11 +12,11 @@ observationSource = """
                   data="$(jobRun.logData)"
                   topics="$(jobRun.logTopics)"]
     decode_cbor  [type=cborparse data="$(decode_log.data)"]
-    nft_adapter [type="bridge" name="arbol-nft-adapter" timeout="300s" requestData="{\\"data\\":{\\"endDate\\": $(decode_cbor.endDate), \\"jobType\\": \\"evaluation\\", \\"uri\\": $(decode_cbor.uri) }}"]
+    nft_adapter [type="bridge" name="arbol-nft-adapter" timeout="300s" requestData="{\\"data\\":{\\"jobType\\": \\"evaluation\\", \\"nodeKey\\": $(decode_cbor.nodeKey), \\"uri\\": $(decode_cbor.uri), \\"startDate\\": $(decode_cbor.startDate), \\"endDate\\": $(decode_cbor.endDate), \\"programName\\": $(decode_cbor.programName) }}"]
     eval         [type=jsonparse path="result" data="$(nft_adapter)"]
     encode_data  [type=ethabiencode 
-                  abi="(bytes32 _requestId, uint256 _tokenId, uint256 _payout)" 
-                  data="{ {\\"_requestId\\": $(decode_log.requestId), \\"_tokenId\\": $(decode_cbor.tokenId), \\"_payout\\": $(eval) }"]
+                  abi="(bytes32 _requestId, uint256 _payout)" 
+                  data="{\\"_requestId\\": $(decode_log.requestId), \\"_payout\\": $(eval) }"]
     encode_tx    [type=ethabiencode
                   abi="fulfillOracleRequest2(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes calldata data)"
                   data="{\\"requestId\\": $(decode_log.requestId), \\"payment\\": $(decode_log.payment), \\"callbackAddress\\": $(decode_log.callbackAddr), \\"callbackFunctionId\\": $(decode_log.callbackFunctionId), \\"expiration\\": $(decode_log.cancelExpiration), \\"data\\": $(encode_data)}"

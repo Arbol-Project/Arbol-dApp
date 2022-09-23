@@ -366,3 +366,101 @@ contract RainfallOption is ChainlinkClient, ConfirmedOwner {
         return oraclePayment * jobs.length;
     }
 }
+
+
+    // /**
+    //  * @param tokenId uint256 token ID of contract
+    //  * @return address for which token viewerKey is currently encrypted
+    //  */
+    // function tokenViewerAddress(uint256 tokenId) 
+    //     external
+    //     view
+    //     returns (address)
+    // {
+    //     return _contractStates[tokenId].viewerAddress;
+    // }
+
+    // /**
+    //  * @param tokenId uint256 token ID of contract
+    //  * @return bytes AES key encrypted for token viewerAddress
+    //  */
+    // function tokenViewerKey(uint256 tokenId) 
+    //     external
+    //     view
+    //     returns (bytes memory)
+    // {
+    //     return _contractStates[tokenId].viewerKey;
+    // }
+
+    // /**
+    //  * @param tokenId uint256 token ID of contract
+    //  * @return bytes AES key encrypted for Chainlink node address
+    //  */
+    // function tokenNodeKey(uint256 tokenId) 
+    //     external
+    //     view
+    //     returns (bytes memory)
+    // {
+    //     return _contractStates[tokenId].viewerKey;
+    // }
+
+    // /**
+    //  * @dev Called from frontend on each client view
+    //  * @param tokenId uint256 token ID of contract
+    //  * @return bytes AES key encrypted for token viewerAddress
+    //  */
+    // function tokenDappKey(uint256 tokenId) 
+    //     external
+    //     view
+    //     returns (bytes memory)
+    // {
+    //     return _contractStates[tokenId].dappKey;
+    // }
+
+    // /**
+    //  * @param tokenId uint256 token ID of contract
+    //  * @return uint256 timestamp of contract start date
+    //  */
+    // function tokenStartDate(uint256 tokenId) 
+    //     external
+    //     view
+    //     returns (uint256)
+    // {
+    //     return _contractStates[tokenId].startDate;
+    // }
+
+    // /**
+    //  * @param tokenId uint256 token ID of contract
+    //  * @return uint256 timestamp of contract end date
+    //  */
+    // function tokenEndDate(uint256 tokenId) 
+    //     external
+    //     view
+    //     returns (uint256)
+    // {
+    //     return _contractStates[tokenId].endDate;
+    // }
+
+    // /**
+    //  * @param tokenId uint256 token ID of contract
+    //  * @return string program name of contract
+    //  */
+    // function tokenProgramName(uint256 tokenId) 
+    //     external
+    //     view
+    //     returns (string memory)
+    // {
+    //     return _contractStates[tokenId].programName;
+    // }
+
+    // // /**
+    // //  * @param tokenId uint256 token ID of contract
+    // //  * @return uint256 computed contract payout value
+    // //  */
+    // // function tokenComputedPayout(uint256 tokenId) 
+    // //     external
+    // //     view
+    // //     returns (uint256)
+    // // {
+    // //     return _contractStates[tokenId].computedPayout;
+    // // }

@@ -15,8 +15,8 @@ observationSource = """
     nft_adapter [type="bridge" name="arbol-nft-adapter" timeout="30s" requestData="{\\"data\\":{\\"jobType\\": \\"reencryption\\", \\"nodeKey\\": $(decode_cbor.nodeKey), \\"viewerAddressPublicKey\\": $(decode_cbor.viewerAddressPublicKey) }}"]
     reencrypt    [type=jsonparse path="result" data="$(nft_adapter)"]
     encode_data  [type=ethabiencode 
-                  abi="(bytes32 _requestId, string _uri)" 
-                  data="{ \\"_requestId\\": $(decode_log.requestId),  \\"_uri\\": $(reencrypt) }"]
+                  abi="(bytes32 _requestId, bytes _key)" 
+                  data="{ \\"_requestId\\": $(decode_log.requestId),  \\"_key\\": $(reencrypt) }"]
     encode_tx    [type=ethabiencode
                   abi="fulfillOracleRequest2(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes calldata data)"
                   data="{\\"requestId\\": $(decode_log.requestId), \\"payment\\": $(decode_log.payment), \\"callbackAddress\\": $(decode_log.callbackAddr), \\"callbackFunctionId\\": $(decode_log.callbackFunctionId), \\"expiration\\": $(decode_log.cancelExpiration), \\"data\\": $(encode_data)}"

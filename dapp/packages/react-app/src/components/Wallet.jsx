@@ -194,7 +194,7 @@ export default function Wallet(props) {
     const pubKey = props.pubKey;
     display = (
       <div>
-        <b>Metamask Public Encryption Key:</b>
+        <b>Public Key:</b>
 
         <div>
           <Text copyable>{pubKey}</Text>
@@ -418,7 +418,9 @@ export default function Wallet(props) {
         visible={open}
         title={
           <div>
-            {selectedAddress ? <Address address={selectedAddress} ensProvider={props.ensProvider} /> : <Spin />}
+            {selectedAddress ? <Address address={selectedAddress} 
+            // ensProvider={props.ensProvider} 
+            /> : <Spin />}
             <div style={{ float: "right", paddingRight: 25 }}>
               <Balance 
                 address={selectedAddress} 

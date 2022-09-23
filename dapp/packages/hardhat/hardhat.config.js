@@ -76,84 +76,89 @@ module.exports = {
     // },
     rinkeby: {
       // url: `https://rinkeby.infura.io/v3/${process.env.INFURA_ID}`, // <---- YOUR INFURA ID! (or it won't work)
-      url: `https://eth-rinkeby.alchemyapi.io/v2/${process.env.ALCHEMY_KEY}`,
+      url: `https://eth-rinkeby.alchemyapi.io/v2/${process.env.HARDHAT_ALCHEMY_KEY}`,
       //    url: "https://speedy-nodes-nyc.moralis.io/XXXXXXXXXXXXXXXXXXXXXXX/eth/rinkeby", // <---- YOUR MORALIS ID! (not limited to infura)
-      accounts: [process.env.PRIVATE_KEY],
+      accounts: [process.env.HARDHAT_PRIVATE_KEY],
     },
     kovan: {
       // url: `https://kovan.infura.io/v3/${process.env.INFURA_ID}`, // <---- YOUR INFURA ID! (or it won't work)
-      url: `https://eth-kovan.alchemyapi.io/v2/${process.env.ALCHEMY_KEY}`,
+      url: `https://eth-kovan.alchemyapi.io/v2/${process.env.HARDHAT_ALCHEMY_KEY}`,
       //    url: "https://speedy-nodes-nyc.moralis.io/XXXXXXXXXXXXXXXXXXXXXXX/eth/kovan", // <---- YOUR MORALIS ID! (not limited to infura)
-      accounts: [process.env.PRIVATE_KEY],
+      accounts: [process.env.HARDHAT_PRIVATE_KEY],
     },
     mainnet: {
       // url: `https://mainnet.infura.io/v3/${process.env.INFURA_ID}`, // <---- YOUR INFURA ID! (or it won't work)
-      url: `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_KEY}`,
+      url: `https://eth-mainnet.alchemyapi.io/v2/${process.env.HARDHAT_ALCHEMY_KEY}`,
       //      url: "https://speedy-nodes-nyc.moralis.io/XXXXXXXXXXXXXXXXXXXXXXXXX/eth/mainnet", // <---- YOUR MORALIS ID! (not limited to infura)
       // gasPrice: mainnetGwei * 1000000000,
-      accounts: [process.env.PRIVATE_KEY],
+      accounts: [process.env.HARDHAT_PRIVATE_KEY],
     },
     ropsten: {
       // url: `https://ropsten.infura.io/v3/${process.env.INFURA_ID}`, // <---- YOUR INFURA ID! (or it won't work)
-      url: `https://eth-ropsten.alchemyapi.io/v2/${process.env.ALCHEMY_KEY}`,
+      url: `https://eth-ropsten.alchemyapi.io/v2/${process.env.HARDHAT_ALCHEMY_KEY}`,
       //      url: "https://speedy-nodes-nyc.moralis.io/XXXXXXXXXXXXXXXXXXXXXXXXX/eth/ropsten",// <---- YOUR MORALIS ID! (not limited to infura)
-      accounts: [process.env.PRIVATE_KEY],
+      accounts: [process.env.HARDHAT_PRIVATE_KEY],
     },
     goerli: {
       // url: `https://goerli.infura.io/v3/${process.env.INFURA_ID}`, // <---- YOUR INFURA ID! (or it won't work)
-      url: `https://eth-goerli.alchemyapi.io/v2/${process.env.ALCHEMY_KEY}`,
+      url: `https://eth-goerli.alchemyapi.io/v2/${process.env.HARDHAT_ALCHEMY_KEY}`,
       //      url: "https://speedy-nodes-nyc.moralis.io/XXXXXXXXXXXXXXXXXXXXXXXXX/eth/goerli", // <---- YOUR MORALIS ID! (not limited to infura)
-      accounts: [process.env.PRIVATE_KEY],
+      accounts: [process.env.HARDHAT_PRIVATE_KEY],
     },
     xdai: {
       url: "https://rpc.xdaichain.com/",
       gasPrice: 1000000000,
-      accounts: [process.env.PRIVATE_KEY],
+      accounts: [process.env.HARDHAT_PRIVATE_KEY],
     },
     fantom: {
       url: "https://rpcapi.fantom.network",
       gasPrice: 1000000000,
-      accounts: [process.env.PRIVATE_KEY],
+      accounts: [process.env.HARDHAT_PRIVATE_KEY],
     },
     testnetFantom: {
       url: "https://rpc.testnet.fantom.network",
       gasPrice: 1000000000,
-      accounts: [process.env.PRIVATE_KEY],
+      accounts: [process.env.HARDHAT_PRIVATE_KEY],
     },
     polygon: {
       url: "https://polygon-rpc.com",
       // url: "https://speedy-nodes-nyc.moralis.io/XXXXXXXXXXXXXXXXXXXx/polygon/mainnet", // <---- YOUR MORALIS ID! (not limited to infura)
       // gasPrice: 3200000000,
-      accounts: [process.env.PRIVATE_KEY],
+      accounts: [process.env.HARDHAT_PRIVATE_KEY],
     },
     mumbai: {
-      url: "https://matic-mumbai.chainstacklabs.com",
+      // url: "https://rpc-mumbai.matic.today",
+      // url: "https://rpc-mumbai.maticvigil.com",
+      // url: "https://matic-mumbai.chainstacklabs.com",
+      url: `https://polygon-mumbai.g.alchemy.com/v2/${process.env.HARDHAT_ALCHEMY_KEY}`,
+      // url: `https://polygon-mumbai.infura.io/v3/${process.env.INFURA_KEY}`,
       // url: "https://speedy-nodes-nyc.moralis.io/XXXXXXXXXXXXXXXXXXXXXXX/polygon/mumbai", // <---- YOUR MORALIS ID! (not limited to infura)
-      // gasPrice: 3200000000,
-      accounts: [process.env.PRIVATE_KEY],
+      // gasPrice: "auto",
+      accounts: [process.env.HARDHAT_PRIVATE_KEY],
+      // chainId: 80001,
     },
     matic: {
       url: "https://rpc-mainnet.maticvigil.com/",
       // gasPrice: 1000000000,
-      accounts: [process.env.PRIVATE_KEY],
+      accounts: [process.env.HARDHAT_PRIVATE_KEY],
     },
     optimism: {
       url: "https://mainnet.optimism.io",
-      accounts: [process.env.PRIVATE_KEY],
+      accounts: [process.env.HARDHAT_PRIVATE_KEY],
       companionNetworks: {
         l1: "mainnet",
       },
     },
     kovanOptimism: {
       url: "https://kovan.optimism.io",
-      accounts: [process.env.PRIVATE_KEY],
+      accounts: [process.env.HARDHAT_PRIVATE_KEY],
       companionNetworks: {
         l1: "kovan",
       },
     },
     localOptimism: {
       url: "http://localhost:8545",
-      accounts: [process.env.PRIVATE_KEY],
+      accounts: [process.env.HARDHAT_PRIVATE_KEY],
       companionNetworks: {
         l1: "localOptimismL1",
       },
@@ -161,7 +166,7 @@ module.exports = {
     localOptimismL1: {
       url: "http://localhost:9545",
       gasPrice: 0,
-      accounts: [process.env.PRIVATE_KEY],
+      accounts: [process.env.HARDHAT_PRIVATE_KEY],
       companionNetworks: {
         l2: "localOptimism",
       },
@@ -170,51 +175,51 @@ module.exports = {
       url: "http://localhost:9650/ext/bc/C/rpc",
       gasPrice: 225000000000,
       chainId: 43112,
-      accounts: [process.env.PRIVATE_KEY],
+      accounts: [process.env.HARDHAT_PRIVATE_KEY],
     },
     fujiAvalanche: {
       url: "https://api.avax-test.network/ext/bc/C/rpc",
       gasPrice: 225000000000,
       chainId: 43113,
-      accounts: [process.env.PRIVATE_KEY],
+      accounts: [process.env.HARDHAT_PRIVATE_KEY],
     },
     mainnetAvalanche: {
       url: "https://api.avax.network/ext/bc/C/rpc",
       gasPrice: 225000000000,
       chainId: 43114,
-      accounts: [process.env.PRIVATE_KEY],
+      accounts: [process.env.HARDHAT_PRIVATE_KEY],
     },
     testnetHarmony: {
       url: "https://api.s0.b.hmny.io",
       gasPrice: 1000000000,
       chainId: 1666700000,
-      accounts: [process.env.PRIVATE_KEY],
+      accounts: [process.env.HARDHAT_PRIVATE_KEY],
     },
     mainnetHarmony: {
       url: "https://api.harmony.one",
       gasPrice: 1000000000,
       chainId: 1666600000,
-      accounts: [process.env.PRIVATE_KEY],
+      accounts: [process.env.HARDHAT_PRIVATE_KEY],
     },
     moonbeam: {
       url: 'https://rpc.api.moonbeam.network',
       chainId: 1284,
-      accounts: [process.env.PRIVATE_KEY],
+      accounts: [process.env.HARDHAT_PRIVATE_KEY],
     },
     moonriver: {
       url: 'https://rpc.api.moonriver.moonbeam.network',
       chainId: 1285,
-      accounts: [process.env.PRIVATE_KEY],
+      accounts: [process.env.HARDHAT_PRIVATE_KEY],
     },
     moonbaseAlpha: {
       url: 'https://rpc.api.moonbase.moonbeam.network',
       chainId: 1287,
-      accounts: [process.env.PRIVATE_KEY],
+      accounts: [process.env.HARDHAT_PRIVATE_KEY],
     },
     moonbeamDevNode: {
       url: 'http://127.0.0.1:9933',
       chainId: 1281,
-      accounts: [process.env.PRIVATE_KEY],
+      accounts: [process.env.HARDHAT_PRIVATE_KEY],
     }
   },
   solidity: {
@@ -242,7 +247,7 @@ module.exports = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 200,
+            runs: 500,
           },
         },
       },

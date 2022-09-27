@@ -47,7 +47,7 @@ class RainfallDerivative:
         '''
         loader = GridcellLoader(params['locations'],
                                 params['dataset'],
-                                imperial_units=params.get('imperial_units', False)
+                                imperial_units=True         # force imperial units = true
                                 )
         avg_history = loader.load()
         payout = cls._generate_payouts(data=avg_history,

@@ -5,7 +5,7 @@
       "chainId": "80001",
       "contracts": {
         "WeatherRiskNFT": {
-          "address": "0x54c1EDB27eca941f22B55029cf143Fd9aacAa29A",
+          "address": "0x7EDCBe99A9f81f9E175290b4869B088BBf5Ca3e6",
           "abi": [
             {
               "inputs": [],

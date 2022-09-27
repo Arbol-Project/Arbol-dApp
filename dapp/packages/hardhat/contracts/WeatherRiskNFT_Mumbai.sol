@@ -17,12 +17,12 @@ contract WeatherRiskNFT is
     PausableUpgradeable, AccessControlUpgradeable, 
     UUPSUpgradeable, ChainlinkClient {
     using Chainlink for Chainlink.Request;
-    bytes32 private constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");     // Role to be granted (and subsequetly revoked) in event of required update
-    bytes32 private constant MINTER_ROLE = keccak256("MINTER_ROLE");         // Arbol Admin (+optionally Arbol Operator)
-    bytes32 private constant DEPUTY_ROLE = keccak256("DEPUTY_ROLE");         // Arbol Operator (+optionally Arbol Operator)
-    bytes32 private constant CLIENT_ROLE = keccak256("CLIENT_ROLE");         // Client (+optionally Arbol Operator)
+    bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");     // Role to be granted (and subsequetly revoked) in event of required update
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");         // Arbol Admin (+optionally Arbol Operator)
+    bytes32 public constant DEPUTY_ROLE = keccak256("DEPUTY_ROLE");         // Arbol Operator (+optionally Arbol Operator)
+    bytes32 public constant CLIENT_ROLE = keccak256("CLIENT_ROLE");         // Client (+optionally Arbol Operator)
     address public constant PROVIDER_ADDRESS = 0xed0Db415764F60D5e02EFd5726E9aFb5B7257257;      // Provider (Mumbai)
-    address public constant STABLECOIN_ADDRESS = 0x764f9841418741bE24d5d2d4a1381413176f6dCb;    // Mumbai USDC0 test token address
+    address public constant STABLECOIN_ADDRESS = 0xA44861f2102A75D93e5C63A9D4440076a6A953A9;    // Mumbai USDC0 test token address
     address private constant LINK_ADDRESS = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB;         // Mumbai Link token address
     uint256 private constant DECIMALS = 2;                                                      // Mumbai USDC0 decimals
     uint256 private constant DISPUTE_PERIOD = 5 * 60;                        // test dispute period during which initially transferred payouts are held by smart contract before final settlement
@@ -72,7 +72,7 @@ contract WeatherRiskNFT is
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
-        _disableInitializers();
+        // _disableInitializers();
     }
 
     function initialize() 
@@ -85,14 +85,14 @@ contract WeatherRiskNFT is
         __Pausable_init();
         __AccessControl_init();
         __UUPSUpgradeable_init();
-        __ChainlinkClient_init();
+        // __ChainlinkClient_init();
         setChainlinkToken(LINK_ADDRESS);
         // set admin roles
         _grantRole(DEFAULT_ADMIN_ROLE, PROVIDER_ADDRESS);
         _grantRole(MINTER_ROLE, PROVIDER_ADDRESS);
         _grantRole(DEPUTY_ROLE, msg.sender);
         // initialize encryption and Chainlink configurations 
-        chainlinkConfig = ChainlinkConfig(0x59FA4e3Fd486E5798C8F8d884f0F65A51A5dFF43, "1a5f6c4827ac4b12a0f81863e18534fb", "f885b0d4704947948ad648d920b6eff3");          // Mumbai
+        chainlinkConfig = ChainlinkConfig(0x59FA4e3Fd486E5798C8F8d884f0F65A51A5dFF43, "641ce208ade94e03a70a5673147cf9d9", "f885b0d4704947948ad648d920b6eff3");          // Mumbai
         encryptionConfig = EncryptionConfig(0x4506F70e253DEccCC1a419954606cB3D1E6a9a70, 0xAe76Be2fbCca75B039e42DEDDE12dd305f9FCdCe, hex"03cc7d57c51fe62090ddc345e0358cc820e9359e7e0f9b4cfb1df84a498c46e7f8", hex"026d93aec02db1f0cc8c69da667ba935c6618b6137bfecf9bdee2b044a44751a74");
     }
 

@@ -145,7 +145,7 @@ Resources:
         - Arn
       ContainerDefinitions:
         - Name: chainlink-node
-          Cpu: 2048
+          Cpu: 1024
           Memory: 4096
           Essential: true
           Image: smartcontract/chainlink:1.2.1
@@ -184,7 +184,7 @@ Resources:
       Family: dapp-task-monitor
       ContainerDefinitions:
         - Name: node-exporter
-          Cpu: 512
+          Cpu: 256
           Memory: 512
           User: 0
           Essential: true
@@ -209,7 +209,7 @@ Resources:
           DependsOn:
             - Condition: START
               ContainerName: node-exporter
-          Cpu: 512
+          Cpu: 256
           Memory: 512
           User: 0
           Essential: true
@@ -234,7 +234,7 @@ Resources:
           DependsOn:
             - Condition: START
               ContainerName: prometheus
-          Cpu: 1024
+          Cpu: 512
           Memory: 1024
           User: 0
           Essential: true

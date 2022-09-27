@@ -3,7 +3,7 @@
 const { ethers, upgrades } = require("hardhat");
 const delay = ms => new Promise(res => setTimeout(res, ms));
 const CONTRACT = "WeatherRiskNFT";
-const FQN = "contracts/"+CONTRACT+".sol:"+CONTRACT;
+const FQN = "contracts/MythX/"+CONTRACT+".sol:"+CONTRACT;
 
 module.exports = async ({ deployments }) => {
   const { save } = deployments;

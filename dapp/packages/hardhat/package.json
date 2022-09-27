@@ -34,7 +34,6 @@
     "fork": "hardhat node --no-deploy --network hardhat --fork https://mainnet.infura.io/v3/460f40a260564ac4a4f4b3fffb032dad",
     "compile": "hardhat compile",
     "deploy": "hardhat deploy --export-all ../react-app/src/contracts/hardhat_contracts.json",
-    "postdeploy": "hardhat run scripts/publish.js",
     "watch": "node scripts/watch.js",
     "accounts": "hardhat accounts",
     "balance": "hardhat balance",
@@ -44,6 +43,7 @@
     "verify": "hardhat verify",
     "mint": "hardhat run scripts/mint.js",
     "test": "hardhat run scripts/test.js",
-    "upgrade-contract": "hardhat run scripts/upgrade.js --verbose"
+    "upgrade-contract": "hardhat run scripts/upgrade.js --verbose",
+    "update-configs": "hardhat run scripts/update.js --verbose"
   }
 }

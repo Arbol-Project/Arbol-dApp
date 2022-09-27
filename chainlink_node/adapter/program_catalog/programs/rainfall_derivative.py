@@ -76,22 +76,39 @@ class RainfallDerivative:
                         tick (str), tick value for payout or None if exhaust is not None
             Returns: int, generated payout times 10^8 (in order to report back to chain)
         '''
+        print(f'data: {data}')
+        print(f'start: {start}')
+        print(f'end: {end}')
+
         strike = float(strike)
         limit = float(limit)
+
+        print(f'strike: {strike}')
+        print(f'limit: {limit}')
 
         index_value = data.loc[start:end].sum()
         opt_type = opt_type.lower()
         direction = 1 if opt_type == 'call' else -1
 
+        print(f'index_value: {index_value}')
+        print(f'opt_type: {opt_type}')
+        print(f'direction: {direction}')
+
+        print(f'exhaust: {exhaust}')
+        print(f'tick: {tick}')
         if tick is not None:
             tick = float(tick)
         else:
             exhaust = float(exhaust)
             tick = abs(limit / (strike - exhaust))
+        print(f'exhaust: {exhaust}')
+        print(f'tick: {tick}')
 
         payout = (index_value - strike) * tick * direction
+        print(f'payout: {payout}')
         if payout < 0:
             payout = 0
         if payout > limit:
             payout = limit
+        print(f'result: {int(float(round(payout, 2)) * cls._OUTPUT_MULTIPLIER)}')
         return int(float(round(payout, 2)) * cls._OUTPUT_MULTIPLIER)

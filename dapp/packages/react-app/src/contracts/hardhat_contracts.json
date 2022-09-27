@@ -5,7 +5,7 @@
       "chainId": "80001",
       "contracts": {
         "WeatherRiskNFT": {
-          "address": "0x14dBFa8F0Dff2b9AD545215Eb0e69ae62914867A",
+          "address": "0x08D49A2F515898bF3a2301cF5c6fc6be0AcF3B9F",
           "abi": [
             {
               "inputs": [],
@@ -131,44 +131,6 @@
                 }
               ],
               "name": "ChainlinkRequested",
-              "type": "event"
-            },
-            {
-              "anonymous": false,
-              "inputs": [
-                {
-                  "indexed": false,
-                  "internalType": "uint256",
-                  "name": "id",
-                  "type": "uint256"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "uint256",
-                  "name": "payout",
-                  "type": "uint256"
-                }
-              ],
-              "name": "ContractEvaluated",
-              "type": "event"
-            },
-            {
-              "anonymous": false,
-              "inputs": [
-                {
-                  "indexed": false,
-                  "internalType": "uint256",
-                  "name": "id",
-                  "type": "uint256"
-                },
-                {
-                  "indexed": false,
-                  "internalType": "address",
-                  "name": "viewer",
-                  "type": "address"
-                }
-              ],
-              "name": "ContractReencrypted",
               "type": "event"
             },
             {
@@ -325,6 +287,19 @@
             },
             {
               "inputs": [],
+              "name": "CLIENT_ROLE",
+              "outputs": [
+                {
+                  "internalType": "bytes32",
+                  "name": "",
+                  "type": "bytes32"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
               "name": "DEFAULT_ADMIN_ROLE",
               "outputs": [
                 {
@@ -338,51 +313,12 @@
             },
             {
               "inputs": [],
-              "name": "EVALUALTION_JOB_ID",
+              "name": "DEPUTY_ROLE",
               "outputs": [
                 {
                   "internalType": "bytes32",
                   "name": "",
                   "type": "bytes32"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "EVALUATION_BUFFER",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "EVALUATOR_ROLE",
-              "outputs": [
-                {
-                  "internalType": "bytes32",
-                  "name": "",
-                  "type": "bytes32"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "LINK_ADDRESS",
-              "outputs": [
-                {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
                 }
               ],
               "stateMutability": "view",
@@ -403,7 +339,7 @@
             },
             {
               "inputs": [],
-              "name": "OPERATOR_ADDRESS",
+              "name": "PROVIDER_ADDRESS",
               "outputs": [
                 {
                   "internalType": "address",
@@ -416,38 +352,12 @@
             },
             {
               "inputs": [],
-              "name": "ORACLE_PAYMENT",
+              "name": "STABLECOIN_ADDRESS",
               "outputs": [
                 {
-                  "internalType": "uint256",
+                  "internalType": "address",
                   "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "PAUSER_ROLE",
-              "outputs": [
-                {
-                  "internalType": "bytes32",
-                  "name": "",
-                  "type": "bytes32"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [],
-              "name": "REENCRYPTION_JOB_ID",
-              "outputs": [
-                {
-                  "internalType": "bytes32",
-                  "name": "",
-                  "type": "bytes32"
+                  "type": "address"
                 }
               ],
               "stateMutability": "view",
@@ -464,24 +374,6 @@
                 }
               ],
               "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "bytes",
-                  "name": "pubKey",
-                  "type": "bytes"
-                },
-                {
-                  "internalType": "address",
-                  "name": "user",
-                  "type": "address"
-                }
-              ],
-              "name": "adminSetPublicKey",
-              "outputs": [],
-              "stateMutability": "nonpayable",
               "type": "function"
             },
             {
@@ -522,6 +414,29 @@
               "type": "function"
             },
             {
+              "inputs": [],
+              "name": "chainlinkConfig",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "operator",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "evaluationJob",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "reencryptionJob",
+                  "type": "bytes32"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
               "inputs": [
                 {
                   "internalType": "uint256",
@@ -529,19 +444,34 @@
                   "type": "uint256"
                 }
               ],
-              "name": "burn",
+              "name": "disputeEvaluation",
               "outputs": [],
               "stateMutability": "nonpayable",
               "type": "function"
             },
             {
               "inputs": [],
-              "name": "enumerateTokenIDs",
+              "name": "encryptionConfig",
               "outputs": [
                 {
-                  "internalType": "uint256[]",
-                  "name": "",
-                  "type": "uint256[]"
+                  "internalType": "address",
+                  "name": "nodeAddress",
+                  "type": "address"
+                },
+                {
+                  "internalType": "address",
+                  "name": "dappAddress",
+                  "type": "address"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "nodePublicKey",
+                  "type": "bytes"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "dappPublicKey",
+                  "type": "bytes"
                 }
               ],
               "stateMutability": "view",
@@ -574,7 +504,7 @@
                 },
                 {
                   "internalType": "bytes",
-                  "name": "_viewerKey",
+                  "name": "_key",
                   "type": "bytes"
                 }
               ],
@@ -697,11 +627,6 @@
             {
               "inputs": [
                 {
-                  "internalType": "address",
-                  "name": "to",
-                  "type": "address"
-                },
-                {
                   "internalType": "uint256",
                   "name": "tokenId",
                   "type": "uint256"
@@ -715,31 +640,6 @@
                   "internalType": "bytes",
                   "name": "viewerKey",
                   "type": "bytes"
-                },
-                {
-                  "internalType": "bytes",
-                  "name": "nodeKey",
-                  "type": "bytes"
-                },
-                {
-                  "internalType": "bytes",
-                  "name": "dappKey",
-                  "type": "bytes"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "startDate",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "uint256",
-                  "name": "endDate",
-                  "type": "uint256"
-                },
-                {
-                  "internalType": "string",
-                  "name": "programName",
-                  "type": "string"
                 }
               ],
               "name": "mint",
@@ -800,6 +700,61 @@
               "type": "function"
             },
             {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "tokenId",
+                  "type": "uint256"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "address",
+                      "name": "mintReceiver",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "premium",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "startDate",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "endDate",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "programName",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "nodeKey",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "dappKey",
+                      "type": "bytes"
+                    }
+                  ],
+                  "internalType": "struct WeatherRiskNFT.TokenState",
+                  "name": "tokenState",
+                  "type": "tuple"
+                }
+              ],
+              "name": "preMint",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
               "inputs": [],
               "name": "proxiableUUID",
               "outputs": [
@@ -810,19 +765,6 @@
                 }
               ],
               "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "tokenId",
-                  "type": "uint256"
-                }
-              ],
-              "name": "refreshTokenLifecycleStage",
-              "outputs": [],
-              "stateMutability": "nonpayable",
               "type": "function"
             },
             {
@@ -862,6 +804,11 @@
                   "internalType": "uint256",
                   "name": "tokenId",
                   "type": "uint256"
+                },
+                {
+                  "internalType": "bytes",
+                  "name": "publicKey",
+                  "type": "bytes"
                 }
               ],
               "name": "requestReencryption",
@@ -959,12 +906,77 @@
             {
               "inputs": [
                 {
-                  "internalType": "bytes",
-                  "name": "pubKey",
-                  "type": "bytes"
+                  "components": [
+                    {
+                      "internalType": "address",
+                      "name": "operator",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "evaluationJob",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "reencryptionJob",
+                      "type": "bytes32"
+                    }
+                  ],
+                  "internalType": "struct WeatherRiskNFT.ChainlinkConfig",
+                  "name": "_chainlinkConfig",
+                  "type": "tuple"
                 }
               ],
-              "name": "setPublicKey",
+              "name": "setChainlinkConfig",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "components": [
+                    {
+                      "internalType": "address",
+                      "name": "nodeAddress",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "address",
+                      "name": "dappAddress",
+                      "type": "address"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "nodePublicKey",
+                      "type": "bytes"
+                    },
+                    {
+                      "internalType": "bytes",
+                      "name": "dappPublicKey",
+                      "type": "bytes"
+                    }
+                  ],
+                  "internalType": "struct WeatherRiskNFT.EncryptionConfig",
+                  "name": "_encryptionConfig",
+                  "type": "tuple"
+                }
+              ],
+              "name": "setEncryptionConfig",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "uint256",
+                  "name": "tokenId",
+                  "type": "uint256"
+                }
+              ],
+              "name": "settleContract",
               "outputs": [],
               "stateMutability": "nonpayable",
               "type": "function"
@@ -1023,82 +1035,6 @@
             {
               "inputs": [
                 {
-                  "internalType": "uint256",
-                  "name": "tokenId",
-                  "type": "uint256"
-                }
-              ],
-              "name": "tokenComputedPayout",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "tokenId",
-                  "type": "uint256"
-                }
-              ],
-              "name": "tokenEndDate",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "tokenId",
-                  "type": "uint256"
-                }
-              ],
-              "name": "tokenLifecycleStage",
-              "outputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "uint256",
-                  "name": "tokenId",
-                  "type": "uint256"
-                }
-              ],
-              "name": "tokenNodeKey",
-              "outputs": [
-                {
-                  "internalType": "bytes",
-                  "name": "",
-                  "type": "bytes"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
                   "internalType": "address",
                   "name": "owner",
                   "type": "address"
@@ -1124,35 +1060,46 @@
               "inputs": [
                 {
                   "internalType": "uint256",
-                  "name": "tokenId",
+                  "name": "",
                   "type": "uint256"
                 }
               ],
-              "name": "tokenProgramName",
+              "name": "tokenStates",
               "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "mintReceiver",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "premium",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "startDate",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "endDate",
+                  "type": "uint256"
+                },
                 {
                   "internalType": "string",
-                  "name": "",
+                  "name": "programName",
                   "type": "string"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
+                },
                 {
-                  "internalType": "uint256",
-                  "name": "tokenId",
-                  "type": "uint256"
-                }
-              ],
-              "name": "tokenStartDate",
-              "outputs": [
+                  "internalType": "bytes",
+                  "name": "nodeKey",
+                  "type": "bytes"
+                },
                 {
-                  "internalType": "uint256",
-                  "name": "",
-                  "type": "uint256"
+                  "internalType": "bytes",
+                  "name": "dappKey",
+                  "type": "bytes"
                 }
               ],
               "stateMutability": "view",
@@ -1181,53 +1128,40 @@
               "inputs": [
                 {
                   "internalType": "uint256",
-                  "name": "tokenId",
+                  "name": "",
                   "type": "uint256"
                 }
               ],
-              "name": "tokenViewerAddress",
+              "name": "tokenUpdates",
               "outputs": [
                 {
-                  "internalType": "address",
-                  "name": "",
-                  "type": "address"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
+                  "internalType": "bool",
+                  "name": "settled",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "disputed",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "needsReencryption",
+                  "type": "bool"
+                },
                 {
                   "internalType": "uint256",
-                  "name": "tokenId",
+                  "name": "evalTimestamp",
                   "type": "uint256"
-                }
-              ],
-              "name": "tokenViewerKey",
-              "outputs": [
-                {
-                  "internalType": "bytes",
-                  "name": "",
-                  "type": "bytes"
-                }
-              ],
-              "stateMutability": "view",
-              "type": "function"
-            },
-            {
-              "inputs": [
+                },
                 {
                   "internalType": "uint256",
-                  "name": "tokenId",
+                  "name": "computedPayout",
                   "type": "uint256"
-                }
-              ],
-              "name": "tokendDappKey",
-              "outputs": [
+                },
                 {
                   "internalType": "bytes",
-                  "name": "",
+                  "name": "viewerKey",
                   "type": "bytes"
                 }
               ],
@@ -1306,25 +1240,6 @@
               "name": "upgradeToAndCall",
               "outputs": [],
               "stateMutability": "payable",
-              "type": "function"
-            },
-            {
-              "inputs": [
-                {
-                  "internalType": "address",
-                  "name": "user",
-                  "type": "address"
-                }
-              ],
-              "name": "userPublicKey",
-              "outputs": [
-                {
-                  "internalType": "bytes",
-                  "name": "",
-                  "type": "bytes"
-                }
-              ],
-              "stateMutability": "view",
               "type": "function"
             }
           ]

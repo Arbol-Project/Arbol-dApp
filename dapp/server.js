@@ -1,6 +1,7 @@
 const cors = require("cors");
 const express = require("express");
-const Session = require("express-session");
+const Session = require("cookie-session");
+const Cookies = require('cookies');
 
 const path = require("path");
 const port = process.env.PORT || 3001;
@@ -28,8 +29,8 @@ const network = "mumbai";
 const chainId = 80001;
 
 const deployedContract = deployedContracts[chainId][network].contracts["WeatherRiskNFT"];
-const provider = new ethers.providers.JsonRpcProvider(`https://polygon-${network === "matic" || network === "polygon" ? "mainnet" : network}.g.alchemy.com/v2/${process.env.HARDHAT_ALCHEMY_KEY}`, chainId);
-const minter = new ethers.Wallet(process.env.HARDHAT_PRIVATE_KEY, provider);
+const provider = new ethers.providers.JsonRpcProvider(`https://polygon-${network === "matic" || network === "polygon" ? "mainnet" : network}.g.alchemy.com/v2/${process.env.DAPP_ALCHEMY_KEY}`, chainId);
+const minter = new ethers.Wallet(process.env.DAPP_SIGNING_KEY, provider);
 const WeatherRiskNFT = new ethers.Contract(deployedContract.address, deployedContract.abi, minter);
 
 const delay = ms => new Promise(res => setTimeout(res, ms));
@@ -138,64 +139,66 @@ const Contract = mongoose.model("Contract", contractSchema);
 
 const app = express();
 app.use(express.json());
+app.use(express.static(buildPath));
 app.use(cors({
   origin: "http://localhost:3000",
+  // origin: "https://www.arbol-dapp.xyz",
   credentials: true,
 }))
-// SIWE code copied from docs.login.xyz
+// SIWE code from docs.login.xyz
 app.use(Session({
   name: "siwe-quickstart",
   secret: "siwe-quickstart-secret",
-  resave: true,
-  saveUninitialized: true,
   cookie: { secure: false, sameSite: true }
 }));
 
-app.use(express.static(buildPath));
-
 
 app.get("/nonce", async function (req, res) {
-  req.session.nonce = generateNonce();
+  const cookies = new Cookies(req, res, { secret: "siwe-quickstart-secret" });
+  cookies.set("secure", false);
+  cookies.set("sameSite", true);
+  const nonce = generateNonce();
+  cookies.set("nonce", nonce);
   res.setHeader("Content-Type", "text/plain");
-  res.status(200).send(req.session.nonce);
+  res.status(200).send(nonce);
 });
 
 
 app.post("/verify", async function (req, res) {
+  const cookies = new Cookies(req, res, { secret: "siwe-quickstart-secret" });
   try {
     if (!req.body.message) {
       res.status(422).json({ message: "Expected prepareMessage object as body" });
       return;
     }
-
     let message = new SiweMessage(req.body.message);
     const fields = await message.validate(req.body.signature);
-    if (fields.nonce !== req.session.nonce) {
+    if (fields.nonce !== cookies.get("nonce")) {
       console.log(req.session);
       res.status(422).json({
           message: `Invalid nonce.`,
       });
       return;
     }
-    req.session.siwe = fields;
-    req.session.cookie.expires = new Date(fields.expirationTime);
-    req.session.save(() => res.status(200).end());
+    cookies.set("siwe", fields);
+    cookies.set("expires", new Date(fields.expirationTime));
     console.log("User is authenticated");
+    res.status(200).end()
   } catch (e) {
-    req.session.siwe = null;
-    req.session.nonce = null;
+    cookies.set("siwe", null);
+    cookies.set("nonce", null);
     console.error(e);
     switch (e) {
       case ErrorTypes.EXPIRED_MESSAGE: {
-        req.session.save(() => res.status(440).json({ message: e.message }));
+        res.status(440).json({ message: e.message });
         break;
       }
       case ErrorTypes.INVALID_SIGNATURE: {
-        req.session.save(() => res.status(422).json({ message: e.message }));
+        res.status(422).json({ message: e.message });
         break;
       }
       default: {
-        req.session.save(() => res.status(500).json({ message: e.message }));
+        res.status(500).json({ message: e.message });
         break;
       }
     }
@@ -204,7 +207,8 @@ app.post("/verify", async function (req, res) {
 
 
 app.post("/mongo", async (req, res) => {
-  if (!req.session.siwe) {
+  const cookies = new Cookies(req, res, { secret: "siwe-quickstart-secret" });
+  if (!cookies.get("siwe")) {
     res.status(401).json({ message: "You have to first sign in" });
     return;
   }
@@ -238,21 +242,14 @@ app.post("/mongo", async (req, res) => {
       const tokenId = bigInt(hexId, 16).toString(10);
 
       if (mints.includes(tokenId.toString())) {
-        // console.log(`token ${tokenId} (contract ${contract._id}) already minted`);
         continue; // skip contract if already minted
       }
 
       const initialState = await WeatherRiskNFT.tokenStates(tokenId);
       const approved = initialState.startDate.gt(0);
       if (!approved && !req.body.isAdmin) {
-        // console.log(`token ${tokenId} (contract ${contract._id}) not approved`);
         continue; // skip contract if not approved (if client is not the admin)
       }
-      
-      // pass through if 
-      //        admin: not minted
-      //        client: not minted and approved
-      //        deputy: not minted and approved
 
       const serializedRiskObject = contract.serializedRiskObject.__config__;
       const payouts = serializedRiskObject.payouts.__config__;
@@ -311,7 +308,6 @@ app.post("/mongo", async (req, res) => {
         contracts[contractID] = terms;
       }
     }
-    console.log(`Format selector ${JSON.stringify(selector)}`);
     console.log(`Returned contracts ${Object.keys(contracts).length}`);
     // also return deputy address
     contracts["deputyAddress"] = minter.address;
@@ -324,7 +320,8 @@ app.post("/mongo", async (req, res) => {
 
 
 app.post("/decrypt", async (req, res) => {
-  if (!req.session.siwe) {
+  const cookies = new Cookies(req, res, { secret: "siwe-quickstart-secret" });
+  if (!cookies.get("siwe")) {
     res.status(401).json({ message: "You have to first sign in" });
     return;
   }
@@ -334,10 +331,8 @@ app.post("/decrypt", async (req, res) => {
     let decryptions = {};
     for (let i=0; i<req.body.jobs.length; i++) {
       const job = req.body.jobs[i];
-      // console.log(job["dappKey"].slice(2))
-      // console.log(job["dappKey"])
       const keyEncryption = EthCrypto.cipher.parse(job["dappKey"].slice(2)); // slice "0x" from beginning of stirng before parsing
-      const keyPlaintext = await EthCrypto.decryptWithPrivateKey(process.env.DAPP_PRIVATE_KEY, keyEncryption);
+      const keyPlaintext = await EthCrypto.decryptWithPrivateKey(process.env.DAPP_SIGNING_KEY, keyEncryption);
       const aesKey = Buffer.from(keyPlaintext, "hex");
     
       const uri = Buffer.from(job["uri"], "base64");
@@ -359,7 +354,8 @@ app.post("/decrypt", async (req, res) => {
 
 
 app.post("/risk", async (req, res) => {
-  if (!req.session.siwe) {
+  const cookies = new Cookies(req, res, { secret: "siwe-quickstart-secret" });
+  if (!cookies.get("siwe")) {
     res.status(401).json({ message: "You have to first sign in" });
     return;
   }
@@ -385,12 +381,12 @@ app.post("/risk", async (req, res) => {
       const result = await axios.post(url, req.body, {headers: headers});
       console.log("ready: ", result.data.ready);
       ready = result.data.ready;
-      data = result.data;
       if (!ready) { 
         console.log(`waiting ${waitTime / 1000} seconds`);
         await delay(waitTime);
         console.log("retrying");
       }
+      data = result.data;
     }
     console.log("data: ", data);
     res.send(data);
@@ -401,6 +397,11 @@ app.post("/risk", async (req, res) => {
 });
 
 app.post("/approve", async (req, res) => {
+  const cookies = new Cookies(req, res, { secret: "siwe-quickstart-secret" });
+  if (!cookies.get("siwe")) {
+    res.status(401).json({ message: "You have to first sign in" });
+    return;
+  }
   try {
     // generate one-time AES access key and encrypt with public keys of node, dapp server, and token receiver
     let aesKey = randomBytes(32);
@@ -447,6 +448,11 @@ app.post("/approve", async (req, res) => {
 });
 
 app.post("/mint", async (req, res) => {
+  const cookies = new Cookies(req, res, { secret: "siwe-quickstart-secret" });
+  if (!cookies.get("siwe")) {
+    res.status(401).json({ message: "You have to first sign in" });
+    return;
+  }
   try {
     console.log("Preparing to mint contract as NFT");
     const programName = req.body.contract.programName;
@@ -471,7 +477,7 @@ app.post("/mint", async (req, res) => {
     // retrieve encrypted AES key for viewer encryption
     const tokenState = await WeatherRiskNFT.tokenStates(req.body.contract.id);
     const keyEncryption = EthCrypto.cipher.parse(tokenState.dappKey.slice(2)); // slice "0x" from beginning of stirng before parsing
-    const keyPlaintext = await EthCrypto.decryptWithPrivateKey(process.env.DAPP_PRIVATE_KEY, keyEncryption);
+    const keyPlaintext = await EthCrypto.decryptWithPrivateKey(process.env.DAPP_SIGNING_KEY, keyEncryption);
     const aesKey = Buffer.from(keyPlaintext, "hex");
 
     const viewerCipher = await EthCrypto.encryptWithPublicKey(req.body.publicKey, aesKey.toString("hex"));
@@ -501,6 +507,11 @@ app.post("/mint", async (req, res) => {
 });
 
 app.post("/evaluate", async (req, res) => {
+  const cookies = new Cookies(req, res, { secret: "siwe-quickstart-secret" });
+  if (!cookies.get("siwe")) {
+    res.status(401).json({ message: "You have to first sign in" });
+    return;
+  }
   try {
     console.log("Evaluating contract");
     let tx = await WeatherRiskNFT.requestEvaluation(req.body.tokenId);
@@ -514,6 +525,11 @@ app.post("/evaluate", async (req, res) => {
 });
 
 app.post("/dispute", async (req, res) => {
+  const cookies = new Cookies(req, res, { secret: "siwe-quickstart-secret" });
+  if (!cookies.get("siwe")) {
+    res.status(401).json({ message: "You have to first sign in" });
+    return;
+  }
   try {
     console.log("Disputing evaluation");
     let tx = await WeatherRiskNFT.disputeEvaluation(req.body.tokenId);
@@ -527,6 +543,11 @@ app.post("/dispute", async (req, res) => {
 });
 
 app.post("/settle", async (req, res) => {
+  const cookies = new Cookies(req, res, { secret: "siwe-quickstart-secret" });
+  if (!cookies.get("siwe")) {
+    res.status(401).json({ message: "You have to first sign in" });
+    return;
+  }
   try {
     console.log("Settling contract");
     let tx = await WeatherRiskNFT.settleContract(req.body.tokenId);

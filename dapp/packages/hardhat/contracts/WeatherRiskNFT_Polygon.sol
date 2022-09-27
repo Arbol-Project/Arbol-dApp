@@ -17,10 +17,10 @@ contract WeatherRiskNFT is
     PausableUpgradeable, AccessControlUpgradeable, 
     UUPSUpgradeable, ChainlinkClient {
     using Chainlink for Chainlink.Request;
-    bytes32 private constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");     // Role to be granted (and subsequetly revoked) in event of required update
-    bytes32 private constant MINTER_ROLE = keccak256("MINTER_ROLE");         // Arbol Admin (+optionally Arbol Operator)
-    bytes32 private constant DEPUTY_ROLE = keccak256("DEPUTY_ROLE");         // Arbol Operator (+optionally Arbol Operator)
-    bytes32 private constant CLIENT_ROLE = keccak256("CLIENT_ROLE");         // Client (+optionally Arbol Operator)
+    bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");     // Role to be granted (and subsequetly revoked) in event of required update
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");         // Arbol Admin (+optionally Arbol Operator)
+    bytes32 public constant DEPUTY_ROLE = keccak256("DEPUTY_ROLE");         // Arbol Operator (+optionally Arbol Operator)
+    bytes32 public constant CLIENT_ROLE = keccak256("CLIENT_ROLE");         // Client (+optionally Arbol Operator)
     address public constant PROVIDER_ADDRESS = 0xbf417C41F3ab1e01BD6867fB540dA7b734EaeA95;   // Provider (Polygon)
     address public constant STABLECOIN_ADDRESS = 0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174; // Polygon USDC token address
     address private constant LINK_ADDRESS = 0xb0897686c545045aFc77CF20eC7A532E3120E0F1;      // Polygon Link token address
@@ -72,7 +72,7 @@ contract WeatherRiskNFT is
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
-        _disableInitializers();
+        // _disableInitializers();
     }
 
     function initialize() 
@@ -85,7 +85,7 @@ contract WeatherRiskNFT is
         __Pausable_init();
         __AccessControl_init();
         __UUPSUpgradeable_init();
-        __ChainlinkClient_init();
+        // __ChainlinkClient_init();
         setChainlinkToken(LINK_ADDRESS);
         // set admin roles
         _grantRole(DEFAULT_ADMIN_ROLE, PROVIDER_ADDRESS);

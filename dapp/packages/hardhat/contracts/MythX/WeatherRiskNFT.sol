@@ -4,7 +4,7 @@
 
 // OpenZeppelin Contracts v4.4.1 (utils/Counters.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.17;
 
 /**
  * @title Counters
@@ -50,7 +50,7 @@ library CountersUpgradeable {
 
 // OpenZeppelin Contracts v4.4.1 (utils/StorageSlot.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.17;
 
 /**
  * @dev Library for reading and writing primitive types to specific storage slots.
@@ -137,7 +137,7 @@ library StorageSlotUpgradeable {
 
 // OpenZeppelin Contracts v4.4.1 (proxy/beacon/IBeacon.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.17;
 
 /**
  * @dev This is the interface that {BeaconProxy} expects of its beacon.
@@ -156,7 +156,7 @@ interface IBeaconUpgradeable {
 
 // OpenZeppelin Contracts (last updated v4.5.0) (interfaces/draft-IERC1822.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.17;
 
 /**
  * @dev ERC1822: Universal Upgradeable Proxy Standard (UUPS) documents a method for upgradeability through a simplified
@@ -179,7 +179,7 @@ interface IERC1822ProxiableUpgradeable {
 
 // OpenZeppelin Contracts v4.4.1 (access/IAccessControl.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.17;
 
 /**
  * @dev External interface of AccessControl declared to support ERC165 detection.
@@ -270,7 +270,7 @@ interface IAccessControlUpgradeable {
 
 // OpenZeppelin Contracts v4.4.1 (utils/Strings.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.17;
 
 /**
  * @dev String operations.
@@ -340,7 +340,7 @@ library StringsUpgradeable {
 
 // OpenZeppelin Contracts (last updated v4.5.0) (utils/Address.sol)
 
-pragma solidity ^0.8.1;
+pragma solidity 0.8.17;
 
 /**
  * @dev Collection of functions related to the address type
@@ -538,7 +538,7 @@ library AddressUpgradeable {
 
 // OpenZeppelin Contracts (last updated v4.5.0) (utils/Address.sol)
 
-pragma solidity ^0.8.1;
+pragma solidity 0.8.17;
 
 /**
  * @dev Collection of functions related to the address type
@@ -763,7 +763,7 @@ library Address {
 
 // OpenZeppelin Contracts (last updated v4.6.0) (proxy/utils/Initializable.sol)
 
-pragma solidity ^0.8.2;
+pragma solidity 0.8.17;
 
 
 /**
@@ -914,7 +914,7 @@ abstract contract Initializable {
 
 // OpenZeppelin Contracts (last updated v4.5.0) (proxy/ERC1967/ERC1967Upgrade.sol)
 
-pragma solidity ^0.8.2;
+pragma solidity 0.8.17;
 
 
 /**
@@ -1124,7 +1124,7 @@ abstract contract ERC1967UpgradeUpgradeable is Initializable {
 
 // OpenZeppelin Contracts (last updated v4.5.0) (proxy/utils/UUPSUpgradeable.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.17;
 
 
 
@@ -1234,7 +1234,7 @@ abstract contract UUPSUpgradeable is Initializable, IERC1822ProxiableUpgradeable
 
 // OpenZeppelin Contracts v4.4.1 (utils/Context.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.17;
 
 
 /**
@@ -1274,7 +1274,7 @@ abstract contract ContextUpgradeable is Initializable {
 
 // OpenZeppelin Contracts v4.4.1 (security/Pausable.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.17;
 
 
 
@@ -1379,7 +1379,7 @@ abstract contract PausableUpgradeable is Initializable, ContextUpgradeable {
 
 // OpenZeppelin Contracts v4.4.1 (token/ERC721/IERC721Receiver.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.17;
 
 /**
  * @title ERC721 token receiver interface
@@ -1409,7 +1409,7 @@ interface IERC721ReceiverUpgradeable {
 
 // OpenZeppelin Contracts v4.4.1 (utils/introspection/IERC165.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.17;
 
 /**
  * @dev Interface of the ERC165 standard, as defined in the
@@ -1437,7 +1437,7 @@ interface IERC165Upgradeable {
 
 // OpenZeppelin Contracts v4.4.1 (utils/introspection/ERC165.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.17;
 
 
 
@@ -1481,7 +1481,7 @@ abstract contract ERC165Upgradeable is Initializable, IERC165Upgradeable {
 
 // OpenZeppelin Contracts (last updated v4.5.0) (access/AccessControl.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.17;
 
 
 
@@ -1719,7 +1719,7 @@ abstract contract AccessControlUpgradeable is Initializable, ContextUpgradeable,
 
 // OpenZeppelin Contracts v4.4.1 (token/ERC721/IERC721.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.17;
 
 
 /**
@@ -1864,7 +1864,7 @@ interface IERC721Upgradeable is IERC165Upgradeable {
 
 // OpenZeppelin Contracts (last updated v4.5.0) (token/ERC721/extensions/IERC721Enumerable.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.17;
 
 
 /**
@@ -1895,7 +1895,7 @@ interface IERC721EnumerableUpgradeable is IERC721Upgradeable {
 
 // OpenZeppelin Contracts v4.4.1 (token/ERC721/extensions/IERC721Metadata.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.17;
 
 
 /**
@@ -1924,7 +1924,7 @@ interface IERC721MetadataUpgradeable is IERC721Upgradeable {
 
 // OpenZeppelin Contracts (last updated v4.5.0) (token/ERC721/ERC721.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.17;
 
 
 
@@ -2385,7 +2385,7 @@ contract ERC721Upgradeable is Initializable, ContextUpgradeable, ERC165Upgradeab
 
 // OpenZeppelin Contracts v4.4.1 (token/ERC721/extensions/ERC721URIStorage.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.17;
 
 
 
@@ -2467,7 +2467,7 @@ abstract contract ERC721URIStorageUpgradeable is Initializable, ERC721Upgradeabl
 
 // OpenZeppelin Contracts v4.4.1 (token/ERC721/extensions/ERC721Enumerable.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.17;
 
 
 
@@ -2645,7 +2645,7 @@ abstract contract ERC721EnumerableUpgradeable is Initializable, ERC721Upgradeabl
 // File: @chainlink/contracts/src/v0.8/vendor/ENSResolver.sol
 
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.17;
 
 abstract contract ENSResolver_Chainlink {
   function addr(bytes32 node) public view virtual returns (address);
@@ -2654,7 +2654,7 @@ abstract contract ENSResolver_Chainlink {
 // File: @chainlink/contracts/src/v0.8/interfaces/PointerInterface.sol
 
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.17;
 
 interface PointerInterface {
   function getAddress() external view returns (address);
@@ -2663,7 +2663,7 @@ interface PointerInterface {
 // File: @chainlink/contracts/src/v0.8/interfaces/OracleInterface.sol
 
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.17;
 
 interface OracleInterface {
   function fulfillOracleRequest(
@@ -2685,7 +2685,7 @@ interface OracleInterface {
 // File: @chainlink/contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol
 
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.17;
 
 interface ChainlinkRequestInterface {
   function oracleRequest(
@@ -2710,7 +2710,7 @@ interface ChainlinkRequestInterface {
 // File: @chainlink/contracts/src/v0.8/interfaces/OperatorInterface.sol
 
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.17;
 
 
 
@@ -2752,7 +2752,7 @@ interface OperatorInterface is OracleInterface, ChainlinkRequestInterface {
 // File: @chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol
 
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.17;
 
 interface LinkTokenInterface {
   function allowance(address owner, address spender) external view returns (uint256 remaining);
@@ -2791,7 +2791,7 @@ interface LinkTokenInterface {
 // File: @chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol
 
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.17;
 
 interface ENSInterface {
   // Logged when the owner of a node assigns a new owner to a subnode.
@@ -2828,7 +2828,7 @@ interface ENSInterface {
 // File: @chainlink/contracts/src/v0.8/vendor/BufferChainlink.sol
 
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.17;
 
 /**
  * @dev A library for working with mutable byte buffers in Solidity.
@@ -3168,7 +3168,7 @@ library BufferChainlink {
 // File: @chainlink/contracts/src/v0.8/vendor/CBORChainlink.sol
 
 
-pragma solidity >=0.4.19;
+pragma solidity 0.8.17;
 
 
 library CBORChainlink {
@@ -3264,9 +3264,7 @@ library CBORChainlink {
 // File: @chainlink/contracts/src/v0.8/Chainlink.sol
 
 
-pragma solidity ^0.8.0;
-
-
+pragma solidity 0.8.17;
 
 /**
  * @title Library for common Chainlink functions
@@ -3402,7 +3400,7 @@ library Chainlink {
 // File: @chainlink/contracts/src/v0.8/ChainlinkClient.sol
 
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.17;
 
 
 /**
@@ -3721,7 +3719,7 @@ abstract contract ChainlinkClient is Initializable {
 
 // File: contracts/WeatherRisk.sol
 
-pragma solidity ^0.8.4;
+pragma solidity 0.8.17;
 
 /// @custom:security-contact daniel.parangi@arbolmarket.com
 contract WeatherRiskNFT is 
@@ -3730,12 +3728,12 @@ contract WeatherRiskNFT is
     PausableUpgradeable, AccessControlUpgradeable, 
     UUPSUpgradeable, ChainlinkClient {
     using Chainlink for Chainlink.Request;
-    bytes32 private constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");     // Role to be granted (and subsequetly revoked) in event of required update
-    bytes32 private constant MINTER_ROLE = keccak256("MINTER_ROLE");         // Arbol Admin (+optionally Arbol Operator)
-    bytes32 private constant DEPUTY_ROLE = keccak256("DEPUTY_ROLE");         // Arbol Operator (+optionally Arbol Operator)
-    bytes32 private constant CLIENT_ROLE = keccak256("CLIENT_ROLE");         // Client (+optionally Arbol Operator)
+    bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");     // Role to be granted (and subsequetly revoked) in event of required update
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");         // Arbol Admin (+optionally Arbol Operator)
+    bytes32 public constant DEPUTY_ROLE = keccak256("DEPUTY_ROLE");         // Arbol Operator (+optionally Arbol Operator)
+    bytes32 public constant CLIENT_ROLE = keccak256("CLIENT_ROLE");         // Client (+optionally Arbol Operator)
     address public constant PROVIDER_ADDRESS = 0xed0Db415764F60D5e02EFd5726E9aFb5B7257257;      // Provider (Mumbai)
-    address public constant STABLECOIN_ADDRESS = 0x764f9841418741bE24d5d2d4a1381413176f6dCb;    // Mumbai USDC0 test token address
+    address public constant STABLECOIN_ADDRESS = 0xA44861f2102A75D93e5C63A9D4440076a6A953A9;    // Mumbai USDC0 test token address (redux)
     address private constant LINK_ADDRESS = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB;         // Mumbai Link token address
     uint256 private constant DECIMALS = 2;                                                      // Mumbai USDC0 decimals
     uint256 private constant DISPUTE_PERIOD = 5 * 60;                        // test dispute period during which initially transferred payouts are held by smart contract before final settlement
@@ -3810,7 +3808,7 @@ contract WeatherRiskNFT is
         _grantRole(MINTER_ROLE, PROVIDER_ADDRESS);
         _grantRole(DEPUTY_ROLE, msg.sender);
         // initialize encryption and Chainlink configurations 
-        chainlinkConfig = ChainlinkConfig(0x59FA4e3Fd486E5798C8F8d884f0F65A51A5dFF43, "1a5f6c4827ac4b12a0f81863e18534fb", "f885b0d4704947948ad648d920b6eff3");          // Mumbai
+        chainlinkConfig = ChainlinkConfig(0x59FA4e3Fd486E5798C8F8d884f0F65A51A5dFF43, "641ce208ade94e03a70a5673147cf9d9", "f885b0d4704947948ad648d920b6eff3");          // Mumbai
         // chainlinkConfig = ChainlinkConfig(0x76dfA9a36db355F101B241b66e2fA97f7Ca09C24, "940708c3e44c40f1bd03d34c1b3edcf6", "49b9cb632adc4047be16a00b3edad9b8");       // Polygon
         encryptionConfig = EncryptionConfig(0x4506F70e253DEccCC1a419954606cB3D1E6a9a70, 0xAe76Be2fbCca75B039e42DEDDE12dd305f9FCdCe, hex"03cc7d57c51fe62090ddc345e0358cc820e9359e7e0f9b4cfb1df84a498c46e7f8", hex"026d93aec02db1f0cc8c69da667ba935c6618b6137bfecf9bdee2b044a44751a74");
     }

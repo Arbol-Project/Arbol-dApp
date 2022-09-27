@@ -48,7 +48,12 @@ const bigInt = require("big-integer");
 const { Option } = Select;
 
 // const initialNetwork = NETWORKS.polygon; // polygon
+// const defaultClient = "0x31d04A8811f12CCA552406bc0101AD6d1Fba7192";
+// const decimals = 6;
 const initialNetwork = NETWORKS.mumbai;     // mumbai
+const defaultClient = "0x930503bD1A8Eb523C23A9dECBD9e7CA371169d0F";
+const decimals = 2;
+
 const contractName = "WeatherRiskNFT";
 const payoutToken = "USDC";
 
@@ -59,9 +64,6 @@ const clientRole = ethers.utils.keccak256(Buffer.from("CLIENT_ROLE"));
 const deputyRole = ethers.utils.keccak256(Buffer.from("DEPUTY_ROLE"));
 const minterRole = ethers.utils.keccak256(Buffer.from("MINTER_ROLE"));
 const adminRole = "0x" + "0".repeat(64);
-// const defaultClient = "0x31d04A8811f12CCA552406bc0101AD6d1Fba7192";
-const defaultClient = "0x930503bD1A8Eb523C23A9dECBD9e7CA371169d0F";
-const decimals = 6;
 const solMaxInt = BigNumber.from(2).pow(256).sub(1);
 const unlimitedProxy = BigNumber.from(10).pow(16);
 const contractListTypes = {
@@ -318,7 +320,7 @@ function App(props) {
       domain: window.location.host,
       address,
       statement,
-      uri: window.location.host,
+      uri: window.location.origin,
       version: 1,
       chainId: initialNetwork.chainId,
       nonce: res.data,
@@ -337,7 +339,7 @@ function App(props) {
   async function signInWithEthereum() {
     console.log("Authenticating");
     const message = await createSiweMessage(
-      `Sign in to Arbol dApp on ${initialNetwork.name.slice(0, 1).toUpperCase().concat("", initialNetwork.name.slice(1))}.`
+      "Sign in with Ethereum to the app." // `Sign in to Arbol dApp on ${initialNetwork.name.slice(0, 1).toUpperCase().concat("", initialNetwork.name.slice(1))}.`
     );
     try {
       const signature = await userSigner.signMessage(message);
@@ -571,10 +573,11 @@ function App(props) {
     let data = { filterField, filterValue, ...item };
     const reports = await axios.post("/risk", {premium: item.premium, ids: item.ids});
     if (!reports 
-        || !reports.data 
+        || !reports.data
         || !reports.data.result 
         || (Array.isArray(reports.data.errors) && reports.data.errors.length > 0)) {
       console.log("Error generating report");
+      console.log(reports);
       setRiskError(true);
     } else {
       setRiskError(false);
@@ -735,8 +738,11 @@ function App(props) {
     if (!(currentPage === "risk" && selectedReport !== contractID)) {
       setLiveComputedPayout(newComputedPayout);
     }
-    console.log(`Computed payout for ${contractID} updated to ${newComputedPayout}`);
-    setComputedPayoutsUpdate([contractID, newComputedPayout]);
+    const previousComputedPayout = computedPayouts[contractID];
+    if (!newComputedPayout.eq(previousComputedPayout)) {
+      console.log(`Computed payout for ${contractID} updated to ${newComputedPayout} from ${previousComputedPayout}`);
+      setComputedPayoutsUpdate([contractID, newComputedPayout]);
+    }
   }
 
   const [liveEvaluationStatus, setLiveEvaluationStatus] = useState("");
@@ -749,8 +755,11 @@ function App(props) {
     if (!(currentPage === "risk" && selectedReport !== contractID)) {
       setLiveEvaluationStatus(lifecycleStage);
     }
-    console.log(`Lifecycle stage for ${contractID} updated to ${lifecycleStage}`);
-    setLifecycleStagesUpdate([contractID, lifecycleStage]);
+    const previousLifecycleStage = lifecycleStages[contractID];
+    if (lifecycleStage !== previousLifecycleStage) {
+      console.log(`Lifecycle stage for ${contractID} updated to ${lifecycleStage} from ${previousLifecycleStage}`);
+      setLifecycleStagesUpdate([contractID, lifecycleStage]);
+    }
   }
 
   const [primaryButtonLoading, setPrimaryButtonLoading] = useState(false);
@@ -765,6 +774,7 @@ function App(props) {
 
   useEffect(() => {
     if (selectedReport) {
+      setRiskError(false);
       if (!selectedReport.includes("contract")) {
         setLiveEvaluationStatus(lifecycleStages[selectedReport]);
         setLiveComputedPayout(computedPayouts[selectedReport]);
@@ -845,7 +855,7 @@ function App(props) {
         console.log(`Initializing contract ${contractID}`);
         tx = await contractWriteInterface.preMint(contract.id, formattedState);
         await tx.wait();
-        const allowanceUSDC = await settlementInterface.allowance(deployedContract.address, address);
+        const allowanceUSDC = await settlementInterface.allowance(address, deployedContract.address);
         const premiumUSDC = BigNumber.from(formattedState[1]).mul(BigNumber.from(10).pow(decimals - 2));
 
         console.log(`Approving premium transfer amount ${formattedState[1] / 100}`);
@@ -902,7 +912,7 @@ function App(props) {
         }
       }
       console.log(`Approving total premium transfer amount ${totalPremium}`);
-      const allowanceUSDC = await settlementInterface.allowance(deployedContract.address, address);
+      const allowanceUSDC = await settlementInterface.allowance(address, deployedContract.address);
       const premiumUSDC = BigNumber.from(parseInt(totalPremium * 100)).mul(BigNumber.from(10).pow(decimals - 2));
       tx = await settlementInterface.approve(deployedContract.address, allowanceUSDC.add(premiumUSDC));
       await tx.wait();
@@ -1120,7 +1130,7 @@ function App(props) {
         updateContractComputedPayout(finishedEvaluateID);
         updateContractLifecyclStage(finishedEvaluateID);
         cleanupContractEvaluation(finishedEvaluateID);
-      }, 60 * 1000);
+      }, 120 * 1000); //  delay fulfillment check for 2 minutes
       setFinishedEvaluateID("");
     };
   }, [finishedEvaluateID]);
@@ -1151,9 +1161,6 @@ function App(props) {
       setCancelledEvaluateID(selectedReport);
     }
   }
-
-  // TODO: restart node and fix memory requirements for IPFS (and possibly node)
-  // TODO: deploy to web app and push to github
 
   async function evaluatePortfolio() {
     try {
@@ -1393,6 +1400,7 @@ function App(props) {
 
   // inputs
 
+  const [pageNumber, setPageNumber] = useState(1);
   const [userInput, setUserInput] = useState("");
   const [modalInput, setModalInput] = useState("");
   const [counterparty, setCounterparty] = useState(defaultClient);
@@ -2089,7 +2097,6 @@ function App(props) {
                                                 style={{ 
                                                   marginTop: 10, 
                                                   marginBottom: 5, 
-                                                  // color: "#909090", 
                                                 }}/>
                                             </Row>
                                           </div>
@@ -3305,7 +3312,7 @@ function App(props) {
                                           boxShadow: "none", 
                                           backgroundColor: "#FAFAFA", 
                                           borderRadius: 12,
-                                          border: currentPage === "database" ? 0 : "",
+                                          borderColor: currentPage === "database" ? "#FAFAFA" : "#6F8A90",
                                           height: "100%",
                                           marginRight: 4,
                                         }}>
@@ -3331,8 +3338,7 @@ function App(props) {
                                           boxShadow: "none", 
                                           backgroundColor: "#FAFAFA", 
                                           borderRadius: 12,
-                                          border: currentPage === "marketplace" ? 0 : "",
-                                          // borderColor: currentPage === "marketplace" ? "#FAFAFA" : "6F8A90",
+                                          borderColor: currentPage === "marketplace" ? "#FAFAFA" : "#6F8A90",
                                           height: "100%",
                                           marginLeft: 4,
                                           marginRight: 4,
@@ -3358,8 +3364,8 @@ function App(props) {
                                         style={{
                                           boxShadow: "none", 
                                           backgroundColor: "#FAFAFA", 
-                                          borderRadius: 12,                                      
-                                          border: currentPage === "dashboard" ? 0 : "",
+                                          borderRadius: 12,
+                                          borderColor: currentPage === "dashboard" ? "#FAFAFA" : "#6F8A90",
                                           height: "100%",
                                           marginLeft: 4,
                                           }}>
@@ -3388,7 +3394,7 @@ function App(props) {
                                           boxShadow: "none", 
                                           backgroundColor: "#FAFAFA", 
                                           borderRadius: 12,
-                                          border: currentPage === "marketplace" ? 0 : "",
+                                          borderColor: currentPage === "marketplace" ? "#FAFAFA" : "#6F8A90",
                                           height: "100%"
                                         }}>
                                         <span
@@ -3425,7 +3431,7 @@ function App(props) {
                                           boxShadow: "none", 
                                           backgroundColor: "#FAFAFA", 
                                           borderRadius: 12,                                      
-                                          border: currentPage === "dashboard" ? 0 : "",
+                                          borderColor: currentPage === "dashboard" ? "#FAFAFA" : "#6F8A90",
                                           height: "100%"
                                           }}>
                                         <span
@@ -3690,7 +3696,10 @@ function App(props) {
                                       paddingBottom: 20
                                     },
                                     size: "small",
+                                    defaultCurrent: pageNumber,
+                                    current: pageNumber,
                                     onChange: (page => {
+                                      setPageNumber(page);
                                       console.log(page);
                                       }
                                     ),
@@ -3927,7 +3936,9 @@ function App(props) {
                                       paddingBottom: 20
                                     },
                                     size: "small",
+                                    current: pageNumber,
                                     onChange: (page => {
+                                      setPageNumber(page);
                                       console.log(page);
                                       }
                                     ),
@@ -4164,7 +4175,9 @@ function App(props) {
                                       paddingBottom: 20
                                     },
                                     size: "small",
+                                    current: pageNumber,
                                     onChange: (page => {
+                                      setPageNumber(page);
                                       console.log(page);
                                       }
                                     ),

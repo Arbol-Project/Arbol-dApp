@@ -332,7 +332,7 @@ app.post("/decrypt", async (req, res) => {
     for (let i=0; i<req.body.jobs.length; i++) {
       const job = req.body.jobs[i];
       const keyEncryption = EthCrypto.cipher.parse(job["dappKey"].slice(2)); // slice "0x" from beginning of stirng before parsing
-      const keyPlaintext = await EthCrypto.decryptWithPrivateKey(process.env.DAPP_SIGNING_KEY, keyEncryption);
+      const keyPlaintext = await EthCrypto.decryptWithPrivateKey(process.env.DAPP_ENCRYPTION_KEY, keyEncryption);
       const aesKey = Buffer.from(keyPlaintext, "hex");
     
       const uri = Buffer.from(job["uri"], "base64");
@@ -477,7 +477,7 @@ app.post("/mint", async (req, res) => {
     // retrieve encrypted AES key for viewer encryption
     const tokenState = await WeatherRiskNFT.tokenStates(req.body.contract.id);
     const keyEncryption = EthCrypto.cipher.parse(tokenState.dappKey.slice(2)); // slice "0x" from beginning of stirng before parsing
-    const keyPlaintext = await EthCrypto.decryptWithPrivateKey(process.env.DAPP_SIGNING_KEY, keyEncryption);
+    const keyPlaintext = await EthCrypto.decryptWithPrivateKey(process.env.DAPP_ENCRYPTION_KEY, keyEncryption);
     const aesKey = Buffer.from(keyPlaintext, "hex");
 
     const viewerCipher = await EthCrypto.encryptWithPublicKey(req.body.publicKey, aesKey.toString("hex"));

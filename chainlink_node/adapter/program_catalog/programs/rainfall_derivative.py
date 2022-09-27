@@ -76,39 +76,39 @@ class RainfallDerivative:
                         tick (str), tick value for payout or None if exhaust is not None
             Returns: int, generated payout times 10^8 (in order to report back to chain)
         '''
-        print(f'data: {data}')
-        print(f'start: {start}')
-        print(f'end: {end}')
+        print(f'data: {data}', flush=True)
+        print(f'start: {start}', flush=True)
+        print(f'end: {end}', flush=True)
 
         strike = float(strike)
         limit = float(limit)
 
-        print(f'strike: {strike}')
-        print(f'limit: {limit}')
+        print(f'strike: {strike}', flush=True)
+        print(f'limit: {limit}', flush=True)
 
         index_value = data.loc[start:end].sum()
         opt_type = opt_type.lower()
         direction = 1 if opt_type == 'call' else -1
 
-        print(f'index_value: {index_value}')
-        print(f'opt_type: {opt_type}')
-        print(f'direction: {direction}')
+        print(f'index_value: {index_value}', flush=True)
+        print(f'opt_type: {opt_type}', flush=True)
+        print(f'direction: {direction}', flush=True)
 
-        print(f'exhaust: {exhaust}')
-        print(f'tick: {tick}')
+        print(f'exhaust: {exhaust}', flush=True)
+        print(f'tick: {tick}', flush=True)
         if tick is not None:
             tick = float(tick)
         else:
             exhaust = float(exhaust)
             tick = abs(limit / (strike - exhaust))
-        print(f'exhaust: {exhaust}')
-        print(f'tick: {tick}')
+        print(f'exhaust: {exhaust}', flush=True)
+        print(f'tick: {tick}', flush=True)
 
         payout = (index_value - strike) * tick * direction
-        print(f'payout: {payout}')
+        print(f'payout: {payout}', flush=True)
         if payout < 0:
             payout = 0
         if payout > limit:
             payout = limit
-        print(f'result: {int(float(round(payout, 2)) * cls._OUTPUT_MULTIPLIER)}')
+        print(f'result: {int(float(round(payout, 2)) * cls._OUTPUT_MULTIPLIER)}', flush=True)
         return int(float(round(payout, 2)) * cls._OUTPUT_MULTIPLIER)

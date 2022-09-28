@@ -99,12 +99,14 @@ def decompress_public_key(public_key: bytes):
         state has been determined
     '''
     print('decompress_public_key', flush=True)
-    print(f'public_key {public_key}', flush=True)
     if (public_key[0] == 2 or public_key[0] == 3) and len(public_key) >= 33:
+        print(f'public_key {public_key[:33]}', flush=True)
         return PublicKey(public_key[:33]).format(compressed=False), 33
     elif public_key[0] == 4 and len(public_key) == 65:
+        print(f'public_key {public_key}', flush=True)
         return public_key, 65
     elif len(public_key) == 64:
+        print(f'public_key {bytes.fromhex("04") + public_key}', flush=True)
         return bytes.fromhex('04') + public_key, 64
     else:
         return f'cannot decompress invalid public key', 0
@@ -184,6 +186,7 @@ def encrypt_access_key(access_key: bytes, public_key: bytes):
     ephemeral_public_key = ephemeral_private_key.public_key.format(compressed=False)
 
     decompressed, _ = decompress_public_key(public_key)
+    print(f'decompressed {decompressed}', flush=True)
     if type(decompressed) is not bytes:
         return {'error': decompressed}
     public_key = PublicKey(decompressed)

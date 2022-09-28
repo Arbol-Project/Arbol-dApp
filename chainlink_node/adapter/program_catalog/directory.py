@@ -21,7 +21,7 @@ def get_parameters_and_program(request_data):
     if job_type is None:
         return 'job type (reencryption, evaluation) missing', None
     elif job_type == "reencryption":
-
+        print(f'reencryption job node key {node_key}', flush=True)
         # reencryption job requires public key of new viewer
         public_key = request_data.get('viewerAddressPublicKey', None)
         if public_key is None:
@@ -32,11 +32,11 @@ def get_parameters_and_program(request_data):
         }
         program = Reencryption
     else:
-
         # evaluation job requires program name, start date, end date, and remaining encrypted terms (URI)
         request_uri = request_data.get('uri', None)
         if request_uri is None:
             return 'token URI missing', None
+        print(f'evaluation job uri {request_uri}', flush=True)
         request_start_date = request_data.get('startDate', None)
         if request_start_date is None:
             return 'request start date is missing', None
@@ -58,6 +58,7 @@ def get_parameters_and_program(request_data):
         parameters['end'] = parse_timestamp(request_end_date)
         if 'GRP' in program_name or 'XSR' in program_name:
             program = RainfallDerivative
+            parameters['imperial_units'] = True # force imperial units for GRP and XSR
         else:
             program = CriticalSnowfallDerivative
     return parameters, program
@@ -75,9 +76,11 @@ def parse_and_validate(request_data):
                     then program is None
     '''
     try:
+        print(f'parsing parameters {request_data}', flush=True)
         parameters, program = get_parameters_and_program(request_data)
         if program is None:
             return parameters, None
+        print(f'validating parameters {parameters}', flush=True)
         valid, request_error = program.validate_request(parameters)
         if not valid:
             return request_error, None

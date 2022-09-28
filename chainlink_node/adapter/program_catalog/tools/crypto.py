@@ -48,9 +48,7 @@ def verify_mac(tag, key, mac_data):
         Returns: bool, the result of the comparison
     '''
     mac = hmac.new(key, msg=mac_data, digestmod=hashlib.sha256).hexdigest()
-    if not mac == tag.hex():
-        return False
-    return True
+    return mac == tag.hex()
 
 
 def compress_public_key(public_key: bytes):
@@ -261,7 +259,7 @@ def reencrypt(node_key: bytes, public_key: bytes):
 
 
 def decrypt(node_key: str, uri: str):
-    ''' Accepts 2 encrypted objects, the first of which should be itself an AES-GCM 
+    ''' Accepts 2 encrypted objects, the first of which should be an AES-GCM 
         encryption key encrypted with ECIES (using AES-CBC) with the public key of the 
         Chainlink node (so that it can be decrypted with the node's private key) and 
         the other should be contract evaluation terms encrypted with AES-GCM (using the

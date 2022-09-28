@@ -56,7 +56,6 @@ class GridcellLoader(DClimateLoader):
                         kwargs (dict), additional request parameters
         '''
         super().__init__(dataset_name, imperial_units=imperial_units, **kwargs)
-        print(f'imperial_units: {imperial_units}', flush=True)
         if (type(locations) == str):
             self._locations = ast.literal_eval(locations)
         else:
@@ -85,8 +84,6 @@ class GridcellLoader(DClimateLoader):
                         lon (float), longitude of location
             Returns: Pandas Series, historical weather data for the given location
         '''
-        print(f'Loading series for {lat}, {lon}', flush=True)
-        print(f'Request params: {self._request_params}', flush=True)
         data = client.get_gridcell_history(lat, lon, self._dataset_name, **self._request_params)
         series = data['data']
         if series.empty:

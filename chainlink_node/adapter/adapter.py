@@ -29,11 +29,14 @@ class ArbolAdapter:
             information is logged to the output
         '''
         try:
+            print(f'validating data {self.request_data}', flush=True)
             if self.request_data is None or self.request_data == {}:
                 self.request_error = 'request data empty'
+                print('data empty', flush=True)
                 return False
             self.parameters, self.program = parse_and_validate(self.request_data)
             if self.program is None:
+                print('program empty', flush=True)
                 self.request_error = self.parameters
                 return False
             else:
@@ -47,6 +50,7 @@ class ArbolAdapter:
             contract should payout and if so then for how much
         '''
         try:
+            print('executing request', flush=True)
             result = self.program.serve_request(self.parameters)
             self.result_success(result)
         except Exception as e:

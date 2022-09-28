@@ -26,6 +26,7 @@ def get_shared_key(public_key, private_key):
         Returns: bytes, the derived shared key
                  bytes, the derived MAC key
     '''
+    print('get_shared_key', flush=True)
     shared_point = public_key.multiply(private_key.secret)
     x = shared_point.format(compressed=True)[1:]
     m = hashlib.sha512()
@@ -47,6 +48,7 @@ def verify_mac(tag, key, mac_data):
                     ciphertext: remaining bytes
         Returns: bool, the result of the comparison
     '''
+    print('verify_mac', flush=True)
     mac = hmac.new(key, msg=mac_data, digestmod=hashlib.sha256).hexdigest()
     return mac == tag.hex()
 
@@ -67,6 +69,7 @@ def compress_public_key(public_key: bytes):
         Parameters: public_key (bytes), bytestring of public key
         Returns: bytes, the compressed public key
     '''
+    print('compress_public_key', flush=True)
     if (public_key[0] == 2 or public_key[0] == 3) and len(public_key) >= 33:
         return public_key[:33]
     elif public_key[0] == 4 and len(public_key) == 65:
@@ -95,6 +98,7 @@ def decompress_public_key(public_key: bytes):
         Returns: int, the length of the initially supplied public key after its compression
         state has been determined
     '''
+    print('decompress_public_key', flush=True)
     if (public_key[0] == 2 or public_key[0] == 3) and len(public_key) >= 33:
         return PublicKey(public_key[:33]).format(compressed=False), 33
     elif public_key[0] == 4 and len(public_key) == 65:
@@ -105,23 +109,23 @@ def decompress_public_key(public_key: bytes):
         return f'cannot decompress invalid public key', 0
 
 
-def bytestringify_key_cipher(cipher: dict):
-    ''' Takes a mapping of encryption arguments to bytestrings
-        and returns a single combined bytestring
+# def bytestringify_key_cipher(cipher: dict):
+#     ''' Takes a mapping of encryption arguments to bytestrings
+#         and returns a single combined bytestring
 
-        Compresses the ephemeral public key in the process
+#         Compresses the ephemeral public key in the process
 
-        Parameters: cipher (dict), encryption object to bytestringify
-                        cipher contains the following key/value pairs
-                        iv: 16 bytes
-                        ephemPublicKey: 33 bytes if compressed, 65 if decompressed
-                        mac: 32 bytes
-                        ciphertext: remaining bytes
-        Returns: bytes, combined bytestring of 
-        iv + ephemeral public key (compressed) + mac + ciphertext
-    '''
-    public_key = compress_public_key(cipher['ephemPublicKey'])
-    return cipher['iv'] + public_key + cipher['mac'] + cipher['ciphertext']
+#         Parameters: cipher (dict), encryption object to bytestringify
+#                         cipher contains the following key/value pairs
+#                         iv: 16 bytes
+#                         ephemPublicKey: 33 bytes if compressed, 65 if decompressed
+#                         mac: 32 bytes
+#                         ciphertext: remaining bytes
+#         Returns: bytes, combined bytestring of 
+#         iv + ephemeral public key (compressed) + mac + ciphertext
+#     '''
+#     public_key = compress_public_key(cipher['ephemPublicKey'])
+#     return cipher['iv'] + public_key + cipher['mac'] + cipher['ciphertext']
 
 
 def parse_key_cipher(cipher_bytes: bytes):
@@ -138,6 +142,7 @@ def parse_key_cipher(cipher_bytes: bytes):
                         ciphertext: remaining bytes
         Returns: dict, mapping of encryption components to their bytes representations
     '''
+    print('parse_key_cipher', flush=True)
     public_key, initial_length = decompress_public_key(cipher_bytes[16:81])
     if type(public_key) is not bytes:
         return {'error': public_key}
@@ -171,6 +176,7 @@ def encrypt_access_key(access_key: bytes, public_key: bytes):
         Parameters: public_key (bytes), bytestring of public key to use in encryption
         Returns: bytes, combined bytestring of iv + ephemeral_public_key (compressed) + mac + ciphertext
     '''
+    print('encrypt_access_key', flush=True)
     iv = os.urandom(16)
 
     ephemeral_private_key = PrivateKey(get_valid_secret())
@@ -188,13 +194,14 @@ def encrypt_access_key(access_key: bytes, public_key: bytes):
 
     data_to_mac = iv + ephemeral_public_key + ciphertext
     mac = hmac.new(mac_key, msg=data_to_mac, digestmod=hashlib.sha256)
-    encryption = {
-        'iv': iv,
-        'ephemPublicKey': compress_public_key(ephemeral_public_key),
-        'ciphertext': ciphertext,
-        'mac': bytes.fromhex(mac.hexdigest()),
-    }
-    return bytestringify_key_cipher(encryption)
+    # encryption = {
+    #     'iv': iv,
+    #     'ephemPublicKey': compress_public_key(ephemeral_public_key),
+    #     'ciphertext': ciphertext,
+    #     'mac': bytes.fromhex(mac.hexdigest()),
+    # }
+    # return bytestringify_key_cipher(encryption)
+    return iv + compress_public_key(ephemeral_public_key) + ciphertext + bytes.fromhex(mac.hexdigest())
 
 
 def decrypt_access_key(node_key: bytes, private_key=PRIVATE_KEY):
@@ -223,6 +230,7 @@ def decrypt_access_key(node_key: bytes, private_key=PRIVATE_KEY):
         Parameters: private_key (bytes), bytestring of private key for decryption of node_key
         Returns: bytes, bytestring of access key for decrypting contract URI
     '''
+    print('decrypt_access_key', flush=True)
     cipher_args = parse_key_cipher(node_key)
     if 'error' in cipher_args:
         return cipher_args['error']
@@ -249,6 +257,7 @@ def reencrypt(node_key: bytes, public_key: bytes):
         Parameters: public_key (str), base 64 encoded string of public key to be used for encryption
         Returns: bytes, bytestring of re-encrypted contract access key
     '''
+    print('reencrypt', flush=True)
     node_key_bytes = base64.b64decode(node_key)
     access_key = decrypt_access_key(node_key_bytes)
     if type(access_key) is not bytes:
@@ -274,6 +283,7 @@ def decrypt(node_key: str, uri: str):
         payload containing contract terms
         Returns: dict, the unencrypted contents of the NFT URI
     '''
+    print('decrypt', flush=True)
     node_key_bytes = base64.b64decode(node_key)
     access_key = decrypt_access_key(node_key_bytes)
     if type(access_key) is not bytes:

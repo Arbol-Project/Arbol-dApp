@@ -99,6 +99,7 @@ def decompress_public_key(public_key: bytes):
         state has been determined
     '''
     print('decompress_public_key', flush=True)
+    print(f'public_key {public_key}', flush=True)
     if (public_key[0] == 2 or public_key[0] == 3) and len(public_key) >= 33:
         return PublicKey(public_key[:33]).format(compressed=False), 33
     elif public_key[0] == 4 and len(public_key) == 65:

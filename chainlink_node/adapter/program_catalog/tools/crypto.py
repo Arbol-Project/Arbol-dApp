@@ -99,6 +99,7 @@ def decompress_public_key(public_key: bytes):
         state has been determined
     '''
     print('decompress_public_key', flush=True)
+    print(f'public_key {public_key}', flush=True)
     if (public_key[0] == 2 or public_key[0] == 3) and len(public_key) >= 33:
         print(f'public_key {public_key[:33]}', flush=True)
         return PublicKey(public_key[:33]).format(compressed=False), 33
@@ -109,6 +110,7 @@ def decompress_public_key(public_key: bytes):
         print(f'public_key {bytes.fromhex("04") + public_key}', flush=True)
         return bytes.fromhex('04') + public_key, 64
     else:
+        print('failed', flush=True)
         return f'cannot decompress invalid public key', 0
 
 
@@ -147,6 +149,8 @@ def parse_key_cipher(cipher_bytes: bytes):
     '''
     print('parse_key_cipher', flush=True)
     public_key, initial_length = decompress_public_key(cipher_bytes[16:81])
+    print(f'public_key {public_key}', flush=True)
+    print(f'initial_length {initial_length}', flush=True)
     if type(public_key) is not bytes:
         return {'error': public_key}
     else:

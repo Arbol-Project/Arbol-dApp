@@ -239,6 +239,10 @@ def decrypt_access_key(node_key: bytes, private_key=PRIVATE_KEY):
     if 'error' in cipher_args:
         return cipher_args['error']
 
+    print(f'cipher_args {cipher_args}', flush=True)
+    print(f'ephemPublicKey type {type(cipher_args["ephemPublicKey"])}', flush=True)
+    print(f'private_key type {type(private_key)}', flush=True)
+
     ephemeral_public_key = PublicKey(cipher_args['ephemPublicKey'])
     private_key = PrivateKey(private_key)
 

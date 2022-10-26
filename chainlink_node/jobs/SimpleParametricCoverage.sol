@@ -25,7 +25,7 @@ contract SimpleV4Parametric is ChainlinkClient {
      * 
      * Example parameters for single point query
      */
-    string[] spatial_parameters = ["point_params", "(13.34126091, 103.39190674)"];
+    string[] spatial_parameters = ["point_params", "13.34126091", "103.39190674"];
     /**
      * Temporal Parameters
      * time_range : [start_time: str, end_time: str] # datetimes in ISO Format structured as list with two elements
